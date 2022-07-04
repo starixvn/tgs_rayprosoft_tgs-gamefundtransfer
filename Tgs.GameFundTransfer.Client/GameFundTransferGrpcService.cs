@@ -2,11 +2,11 @@
 
 namespace Tgs.GameFundTransfer.Client
 {
-    internal class GameTransferGrpcService : IGameTransferGrpcService
+    internal class GameFundTransferGrpcService : IGameFundTransferGrpcService
     {
         private readonly GameFundTransferService.GameFundTransferServiceClient _client;
 
-        public GameTransferGrpcService(GameFundTransferService.GameFundTransferServiceClient client)
+        public GameFundTransferGrpcService(GameFundTransferService.GameFundTransferServiceClient client)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
         }

@@ -2,7 +2,7 @@
 
 namespace Tgs.GameFundTransfer.Client
 {
-    public interface IGameTransferGrpcService
+    public interface IGameFundTransferGrpcService
     {
         ValueTask<bool> FundIn(GameFundTransferFundRequest request, CancellationToken cancellationToken = default);
 

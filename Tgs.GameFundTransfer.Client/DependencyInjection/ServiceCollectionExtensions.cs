@@ -6,16 +6,16 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddGameTransferClient(
+        public static IServiceCollection AddGameFundTransferClient(
             this IServiceCollection services,
-            Action<GameTransferClientOptions, IServiceProvider> configure)
+            Action<GameFundTransferClientOptions, IServiceProvider> configure)
             => services
-            .AddOptions<GameTransferClientOptions>()
+            .AddOptions<GameFundTransferClientOptions>()
             .Configure(configure)
             .Services
             .AddGrpcClient<GameFundTransferService.GameFundTransferServiceClient>((sp, configureClient) =>
             {
-                var options = sp.GetRequiredService<IOptions<GameTransferClientOptions>>().Value;
+                var options = sp.GetRequiredService<IOptions<GameFundTransferClientOptions>>().Value;
                 configureClient.Address = options.BaseUrl;
             })
             .ConfigureChannel((sp, configureChannel) =>
@@ -33,6 +33,6 @@ namespace Microsoft.Extensions.DependencyInjection
             .Services
             .AddSingleton<DiagnosticsInterceptorOptions>()
             .AddSingleton<LoggingInterceptor>()
-            .AddTransient<IGameTransferGrpcService, GameTransferGrpcService>();
+            .AddTransient<IGameFundTransferGrpcService, GameFundTransferGrpcService>();
     }
 }
