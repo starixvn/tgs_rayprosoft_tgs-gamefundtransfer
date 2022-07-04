@@ -2,14 +2,14 @@
 {
     public interface IFundTransferTransactionRepository
     {
-        ValueTask<Guid> AddFundInAsync(Guid gameProviderId, Guid WalletId, string playerCode, string gameProviderCode, decimal amount, string description);
+        ValueTask<Guid> AddFundInAsync(Guid gameProviderId, string gameProviderCode, string playerCode, Guid walletId, decimal amount, CancellationToken cancellationToken = default);
 
-        ValueTask<Guid> AddFundOutAsync(Guid gameProviderId, Guid WalletId, string playerCode, string gameProviderCode, decimal amount, string description);
+        ValueTask<Guid> AddFundOutAsync(Guid gameProviderId, string gameProviderCode, string playerCode, Guid walletId, decimal amount, CancellationToken cancellationToken = default);
 
-        ValueTask UpdateByFailureOnGameProviderAsync(Guid gameProviderFundTransferTransactionId, Guid? transactionsId, string gameProviderTransactionId, decimal postBalance, string description);
+        ValueTask UpdateByFailureOnGameProviderAsync(Guid gameProviderFundTransferTransactionId, CancellationToken cancellationToken = default);
 
-        ValueTask UpdateByFailureOnMainWalletAsync(Guid gameProviderFundTransferTransactionId, Guid? transactionsId, string gameProviderTransactionId, decimal postBalance, string description);
+        ValueTask UpdateByFailureOnMainWalletAsync(Guid gameProviderFundTransferTransactionId, string gameProviderTransactionId, CancellationToken cancellationToken = default);
 
-        ValueTask UpdateBySuccessAsync(Guid gameProviderFundTransferTransactionId, Guid? transactionsId, string gameProviderTransactionId, decimal postBalance, string description);
+        ValueTask UpdateBySuccessAsync(Guid gameProviderFundTransferTransactionId, Guid? transactionsId, string gameProviderTransactionId, decimal postBalance, CancellationToken cancellationToken = default);
     }
 }

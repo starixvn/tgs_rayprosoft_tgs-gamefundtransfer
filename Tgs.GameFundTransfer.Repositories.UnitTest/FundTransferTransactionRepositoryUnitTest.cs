@@ -11,13 +11,11 @@ namespace Tgs.GameFundTransfer.Repositories.UnitTest
         {
             var fakeRepository = Substitute.For<IFundTransferTransactionRepository>();
             _ = await fakeRepository.AddFundInAsync(
-                Arg.Any<Guid>(),
-                Arg.Any<Guid>(),
-                Arg.Any<string>(),
-                Arg.Any<string>(),
-                Arg.Any<decimal>(),
-                Arg.Any<string>()
-                ).ConfigureAwait(false);
+                gameProviderId: Arg.Any<Guid>(),
+                gameProviderCode: Arg.Any<string>(),
+                playerCode: Arg.Any<string>(),
+                walletId: Arg.Any<Guid>(),
+                amount: Arg.Any<decimal>()).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -25,13 +23,11 @@ namespace Tgs.GameFundTransfer.Repositories.UnitTest
         {
             var fakeRepository = Substitute.For<IFundTransferTransactionRepository>();
             _ = await fakeRepository.AddFundOutAsync(
-                Arg.Any<Guid>(),
-                Arg.Any<Guid>(),
-                Arg.Any<string>(),
-                Arg.Any<string>(),
-                Arg.Any<decimal>(),
-                Arg.Any<string>()
-                ).ConfigureAwait(false);
+                gameProviderId: Arg.Any<Guid>(),
+                gameProviderCode: Arg.Any<string>(),
+                playerCode: Arg.Any<string>(),
+                walletId: Arg.Any<Guid>(),
+                amount: Arg.Any<decimal>()).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -39,12 +35,7 @@ namespace Tgs.GameFundTransfer.Repositories.UnitTest
         {
             var fakeRepository = Substitute.For<IFundTransferTransactionRepository>();
             await fakeRepository.UpdateByFailureOnGameProviderAsync(
-               Arg.Any<Guid>(),
-               Arg.Any<Guid>(),
-               Arg.Any<string>(),
-               Arg.Any<decimal>(),
-               Arg.Any<string>()
-               ).ConfigureAwait(false);
+                gameProviderFundTransferTransactionId: Arg.Any<Guid>()).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -52,12 +43,8 @@ namespace Tgs.GameFundTransfer.Repositories.UnitTest
         {
             var fakeRepository = Substitute.For<IFundTransferTransactionRepository>();
             await fakeRepository.UpdateByFailureOnMainWalletAsync(
-               Arg.Any<Guid>(),
-               Arg.Any<Guid>(),
-               Arg.Any<string>(),
-               Arg.Any<decimal>(),
-               Arg.Any<string>()
-               ).ConfigureAwait(false);
+               gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
+               gameProviderTransactionId: Arg.Any<string>()).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -68,9 +55,7 @@ namespace Tgs.GameFundTransfer.Repositories.UnitTest
                Arg.Any<Guid>(),
                Arg.Any<Guid>(),
                Arg.Any<string>(),
-               Arg.Any<decimal>(),
-               Arg.Any<string>()
-               ).ConfigureAwait(false);
+               Arg.Any<decimal>()).ConfigureAwait(false);
         }
     }
 }

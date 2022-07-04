@@ -47,11 +47,10 @@ namespace Tgs.GameFundTransfer.Core.UnitTest
 
             _ = fakeFundTransferTransactionRepository.AddFundOutAsync(
                 Arg.Is(query.GameProviderId),
-                Arg.Is(query.WalletId),
-                Arg.Is(query.PlayerCode),
                 Arg.Is(query.GameProviderCode),
-                Arg.Is(query.Amount * -1),
-                Arg.Is(string.Empty)).Returns(ValueTask.FromResult(gameProviderFundTransferTransactionId));
+                Arg.Is(query.PlayerCode),
+                Arg.Is(query.WalletId),
+                Arg.Is(query.Amount * -1)).Returns(ValueTask.FromResult(gameProviderFundTransferTransactionId));
 
             _ = fakeCashServiceClient.GameProviderFundOutAsync(
                  Arg.Is(query.WalletId),
@@ -71,9 +70,7 @@ namespace Tgs.GameFundTransfer.Core.UnitTest
                 Arg.Is(gameProviderFundTransferTransactionId),
                 Arg.Is(transactionResponse.TransactionId),
                 Arg.Is(gameProviderTransactionId),
-                Arg.Is(transactionResponse.Balance),
-                Arg.Is(string.Empty)
-                );
+                Arg.Is(transactionResponse.Balance));
 
             var fakeService = new FundOutCommandService(
                 fakeCashServiceClient,

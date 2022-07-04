@@ -43,12 +43,11 @@ namespace Tgs.GameFundTransfer.Core.UnitTest
                 Arg.Is(query.PlayerCode)).Returns(ValueTask.FromResult(gameProviderBalance));
 
             _ = fakeGameProviderFundTransferTransactionRepository.AddFundInAsync(
-                Arg.Is(query.GameProviderId),
-                Arg.Is(query.WalletId),
-                Arg.Is(query.PlayerCode),
-                Arg.Is(query.GameProviderCode),
-                Arg.Is(query.Amount),
-                Arg.Is(string.Empty)).Returns(ValueTask.FromResult(gameProviderFundTransferTransactionId));
+                gameProviderId: Arg.Is(query.GameProviderId),
+                gameProviderCode: Arg.Is(query.GameProviderCode),
+                playerCode: Arg.Is(query.PlayerCode),
+                walletId: Arg.Is(query.WalletId),
+                amount: Arg.Is(query.Amount)).Returns(ValueTask.FromResult(gameProviderFundTransferTransactionId));
 
             _ = fakeGameProvidersClient.PlayerFundInAsync(
                 Arg.Is(query.GameProviderCode),
@@ -68,8 +67,7 @@ namespace Tgs.GameFundTransfer.Core.UnitTest
                  Arg.Is(gameProviderFundTransferTransactionId),
                  Arg.Is(transactionResponse.TransactionId),
                  Arg.Is(gameProviderTransactionId),
-                 Arg.Is(transactionResponse.Balance),
-                 Arg.Is(string.Empty));
+                 Arg.Is(transactionResponse.Balance));
 
             var fakeService = new FundInCommandService(
                 fakeCashServiceClient,

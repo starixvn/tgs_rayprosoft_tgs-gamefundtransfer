@@ -19,128 +19,113 @@ namespace Tgs.GameFundTransfer.Repositories
 
         public async ValueTask<Guid> AddFundInAsync(
             Guid gameProviderId,
-            Guid WalletId,
-            string playerCode,
             string gameProviderCode,
+            string playerCode,
+            Guid walletId,
             decimal amount,
-            string description)
+            CancellationToken cancellationToken = default)
         {
-            var gameProviderFundTransferTransactionId = await _serialNumberGenerator.GenerateAsync().ConfigureAwait(false);
+            var gameProviderFundTransferTransactionId = await _serialNumberGenerator.GenerateAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var systemDateTime = DateTime.UtcNow;
             var fundTransferTransaction = new GameProviderFundTransferTransaction()
             {
                 GameProviderFundTransferTransactionId = gameProviderFundTransferTransactionId,
                 GameProviderId = gameProviderId,
-                WalletId = WalletId,
+                WalletId = walletId,
                 PlayerCode = playerCode,
                 FundSource = (short)FundSource.FundIn,
                 FromWallet = gameProviderCode,
                 ToWallet = MainWallet,
                 Amount = amount,
-                Description = description,
                 Status = (short)FundTransferTransactionStatus.FailureOnGameProvider,
                 CreatedOn = systemDateTime,
                 UpdatedOn = systemDateTime
             };
             _ = await _context.GameProviderFundTransferTransactions
-                .AddAsync(fundTransferTransaction)
-                .ConfigureAwait(false);
+                .AddAsync(
+                    entity: fundTransferTransaction,
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
 
             _ = await _context
-                 .SaveChangesAsync()
-                 .ConfigureAwait(false);
+                 .SaveChangesAsync(
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
 
             return gameProviderFundTransferTransactionId;
         }
 
         public async ValueTask<Guid> AddFundOutAsync(
             Guid gameProviderId,
-            Guid WalletId,
-            string playerCode,
             string gameProviderCode,
+            string playerCode,
+            Guid walletId,
             decimal amount,
-            string description)
+            CancellationToken cancellationToken = default)
         {
-            var gameProviderFundTransferTransactionId = await _serialNumberGenerator.GenerateAsync().ConfigureAwait(false);
+            var gameProviderFundTransferTransactionId = await _serialNumberGenerator.GenerateAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var systemDateTime = DateTime.UtcNow;
             var fundTransferTransaction = new GameProviderFundTransferTransaction()
             {
                 GameProviderFundTransferTransactionId = gameProviderFundTransferTransactionId,
                 GameProviderId = gameProviderId,
-                WalletId = WalletId,
+                WalletId = walletId,
                 PlayerCode = playerCode,
                 FundSource = (short)FundSource.FundOut,
                 FromWallet = MainWallet,
                 ToWallet = gameProviderCode,
                 Amount = amount,
-                Description = description,
                 Status = (short)FundTransferTransactionStatus.FailureOnMainWallet,
                 CreatedOn = systemDateTime,
                 UpdatedOn = systemDateTime
             };
             _ = await _context.GameProviderFundTransferTransactions
-                .AddAsync(fundTransferTransaction)
-                .ConfigureAwait(false);
+                .AddAsync(
+                    entity: fundTransferTransaction,
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
 
             _ = await _context
-                  .SaveChangesAsync()
-                  .ConfigureAwait(false);
+                  .SaveChangesAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
             return gameProviderFundTransferTransactionId;
         }
 
         public async ValueTask UpdateByFailureOnGameProviderAsync(
             Guid gameProviderFundTransferTransactionId,
-            Guid? transactionsId,
-            string gameProviderTransactionId,
-            decimal postBalance,
-            string description)
+            CancellationToken cancellationToken = default)
         {
             var fundTransferTransaction = await _context.GameProviderFundTransferTransactions
                 .Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-                .FirstAsync()
-                .ConfigureAwait(false);
+                .FirstAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
-            fundTransferTransaction.TransactionId = transactionsId;
-            fundTransferTransaction.GameProviderTransactionId = gameProviderTransactionId;
+            fundTransferTransaction.TransactionId = null;
+            fundTransferTransaction.GameProviderTransactionId = null;
             fundTransferTransaction.Status = (short)FundTransferTransactionStatus.FailureOnGameProvider;
-            fundTransferTransaction.Balance = postBalance;
             fundTransferTransaction.UpdatedOn = DateTime.UtcNow;
-            fundTransferTransaction.Description = description;
 
             _ = _context.GameProviderFundTransferTransactions
                .Update(fundTransferTransaction);
 
             _ = await _context
-                 .SaveChangesAsync()
-                 .ConfigureAwait(false);
+                 .SaveChangesAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
         public async ValueTask UpdateByFailureOnMainWalletAsync(
-                    Guid gameProviderFundTransferTransactionId,
-            Guid? transactionsId,
+            Guid gameProviderFundTransferTransactionId,
             string gameProviderTransactionId,
-            decimal postBalance,
-            string description)
+            CancellationToken cancellationToken = default)
         {
             var fundTransferTransaction = await _context.GameProviderFundTransferTransactions
-                            .Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-                            .FirstAsync()
-                            .ConfigureAwait(false);
+                .Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
+                .FirstAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
-            fundTransferTransaction.TransactionId = transactionsId;
             fundTransferTransaction.GameProviderTransactionId = gameProviderTransactionId;
             fundTransferTransaction.Status = (short)FundTransferTransactionStatus.FailureOnMainWallet;
-            fundTransferTransaction.Balance = postBalance;
             fundTransferTransaction.UpdatedOn = DateTime.UtcNow;
-            fundTransferTransaction.Description = description;
 
             _ = _context.GameProviderFundTransferTransactions
                .Update(fundTransferTransaction);
 
             _ = await _context
-                 .SaveChangesAsync()
-                 .ConfigureAwait(false);
+                 .SaveChangesAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
         public async ValueTask UpdateBySuccessAsync(
@@ -148,26 +133,23 @@ namespace Tgs.GameFundTransfer.Repositories
             Guid? transactionsId,
             string gameProviderTransactionId,
             decimal postBalance,
-            string description)
+            CancellationToken cancellationToken = default)
         {
             var fundTransferTransaction = await _context.GameProviderFundTransferTransactions
                 .Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-                .FirstAsync()
-                .ConfigureAwait(false);
+                .FirstAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
             fundTransferTransaction.TransactionId = transactionsId;
             fundTransferTransaction.GameProviderTransactionId = gameProviderTransactionId;
             fundTransferTransaction.Status = (short)FundTransferTransactionStatus.Success;
             fundTransferTransaction.Balance = postBalance;
             fundTransferTransaction.UpdatedOn = DateTime.UtcNow;
-            fundTransferTransaction.Description = description;
 
             _ = _context.GameProviderFundTransferTransactions
                .Update(fundTransferTransaction);
 
             _ = await _context
-                .SaveChangesAsync()
-                .ConfigureAwait(false);
+                .SaveChangesAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -29,8 +29,9 @@ namespace Tgs.GameFundTransfer.Core.ApplicationServices
             var amount = query.Amount;
 
             var gameProviderBalance = await _gameProvidersClient.PlayerBalanceAsync(
-                query.GameProviderCode,
-                query.PlayerCode).ConfigureAwait(false);
+                gameProviderCode: query.GameProviderCode,
+                playerCode: query.PlayerCode,
+                cancellationToken: cancellationToken).ConfigureAwait(false);
 
             if (gameProviderBalance - amount < 0)
             {
@@ -38,33 +39,27 @@ namespace Tgs.GameFundTransfer.Core.ApplicationServices
             }
 
             var gameProviderFundTransferTransactionId = await _fundTransferTransactionRepository.AddFundInAsync(
-                query.GameProviderId,
-                query.WalletId,
-                query.PlayerCode,
-                query.GameProviderCode,
-                amount,
-                string.Empty)
-                .ConfigureAwait(false);
+                gameProviderId: query.GameProviderId,
+                gameProviderCode: query.GameProviderCode,
+                playerCode: query.PlayerCode,
+                walletId: query.WalletId,
+                amount: amount,
+                cancellationToken: cancellationToken).ConfigureAwait(false);
 
             var gameProviderTransactionId = await _gameProvidersClient.PlayerFundInAsync(
-                query.GameProviderCode,
-                query.BrandCode,
-                query.PlayerCode,
-                query.CurrencyCode,
-                gameProviderFundTransferTransactionId.ToString("N"),
-                amount)
-                .ConfigureAwait(false);
+                gameProviderCode: query.GameProviderCode,
+                brandCode: query.BrandCode,
+                playerCode: query.PlayerCode,
+                currencyCode: query.CurrencyCode,
+                orderId: gameProviderFundTransferTransactionId.ToString("N"),
+                amount: amount,
+                cancellationToken: cancellationToken).ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(gameProviderTransactionId))
             {
                 await _fundTransferTransactionRepository.UpdateByFailureOnGameProviderAsync(
-                    gameProviderFundTransferTransactionId,
-                    null,
-                    string.Empty,
-                    -1,
-                    string.Empty
-                     )
-                    .ConfigureAwait(false);
+                    gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
                 throw new Exception("The game manufacturer's transfer failed.");
             }
 
@@ -79,22 +74,18 @@ namespace Tgs.GameFundTransfer.Core.ApplicationServices
                       .ConfigureAwait(false);
 
                 await _fundTransferTransactionRepository.UpdateBySuccessAsync(
-                gameProviderFundTransferTransactionId,
-                transactionResponse.TransactionId,
-                gameProviderTransactionId,
-                transactionResponse.Balance,
-                string.Empty
-                )
-                .ConfigureAwait(false);
+                    gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
+                    transactionsId: transactionResponse.TransactionId,
+                    gameProviderTransactionId: gameProviderTransactionId,
+                    postBalance: transactionResponse.Balance,
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 await _fundTransferTransactionRepository.UpdateByFailureOnMainWalletAsync(
-                    gameProviderFundTransferTransactionId,
-                    null,
-                    gameProviderTransactionId,
-                    -1,
-                    string.Empty).ConfigureAwait(false);
+                    gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
+                    gameProviderTransactionId: gameProviderTransactionId,
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
                 _logger.LogError(exception: ex, "The main wallet transfer failed.({gameProviderFundTransferTransactionId})", gameProviderFundTransferTransactionId);
             }
         }
