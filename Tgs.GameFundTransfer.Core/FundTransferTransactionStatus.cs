@@ -27,9 +27,9 @@
         Success,
 
         /// <summary>
-        /// The manuel fund in
+        /// The manual fund in
         /// 手動補點回主錢包
         /// </summary>
-        ManuelFundIn,
+        ManualFundIn,
     }
 }
