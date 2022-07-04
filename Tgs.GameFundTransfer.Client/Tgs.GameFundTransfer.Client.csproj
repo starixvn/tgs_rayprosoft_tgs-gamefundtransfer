@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<Version>0.0.1</Version>
+		<Authors>Raypro</Authors>
+		<Description>TGS GameFundTransfer Client</Description>
+		<PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-gamefundtransfer</PackageProjectUrl>
+		<RepositoryUrl>https://gitlab.com/rayprosoft/tgs-gamefundtransfer.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>tgs-gamefundtransfer</PackageTags>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.46.0" />
+		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.46.0" />
+		<PackageReference Include="Grpc.Tools" Version="2.46.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.6" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Protobuf Include="..\Tgs.GameFundTransfer\Potos\gamefundtransfer.proto" GrpcServices="Client">
+			<Link>gamefundtransfer.proto</Link>
+		</Protobuf>
+	</ItemGroup>
+
+</Project>
