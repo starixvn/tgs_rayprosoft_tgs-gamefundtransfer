@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+import "phoenix/protobuf/guid.proto";
+import "phoenix/protobuf/decimal.proto";
+
+option csharp_namespace = "Tgs.GameFundTransfer.Protos";
+
+package gamefundtransfer;
+
+// The greeting service definition.
+service GameFundTransferService {
+  // Sends a greeting
+  rpc FundIn (GameFundTransferFundRequest) returns (GameFundTransferReply);
+  rpc FundOut (GameFundTransferFundRequest) returns (GameFundTransferReply);
+}
+
+// The request message containing the user's name.
+message GameFundTransferFundRequest {
+    phoenix.protobuf.GuidValue game_provider_id = 1;
+    string game_provider_code = 2;
+    string brand_code = 3;
+    string player_code = 4;
+    phoenix.protobuf.GuidValue wallet_id = 5;
+    string currency_code = 6;
+    phoenix.protobuf.DecimalValue amount = 7;
+}
+
+// The response message containing the greetings.
+message GameFundTransferReply {
+  bool state = 1;
+}
