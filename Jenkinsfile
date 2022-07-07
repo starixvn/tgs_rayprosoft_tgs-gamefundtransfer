@@ -6,7 +6,7 @@ pipeline {
     
     environment {
         BuildConfiguration="Debug"
-        ImageName="harbor.rpgp.cc/tgs/game-gamefundtransfer"
+        ImageName="pgtgs/game-gamefundtransfer"
     }
 
     stages {
