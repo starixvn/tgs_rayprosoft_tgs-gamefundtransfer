@@ -1,15 +1,20 @@
-﻿using StackExchange.Redis;
+﻿using Microsoft.Extensions.Options;
+using StackExchange.Redis;
 
 namespace Tgs.GameFundTransfer.Core
 {
     internal class FundsLocked : IFundsLocked
     {
         private readonly IDatabase _database;
+        private readonly FundsLockedOptions _fundslocked;
         private readonly string _redisKey = "fundslocked:{0}:{1}";
 
-        public FundsLocked(IDatabase database)
+        public FundsLocked(
+            IDatabase database,
+            IOptions<FundsLockedOptions> options)
         {
             _database = database ?? throw new ArgumentNullException(nameof(database));
+            _fundslocked = options.Value;
         }
 
         public Task<bool> ExistAsync(string gameProviderCode, string playerCode)
@@ -30,7 +35,7 @@ namespace Tgs.GameFundTransfer.Core
             return _database.StringSetAsync(
                 key: key,
                 value: DateTime.UtcNow.ToString("O"),
-                expiry: TimeSpan.FromMinutes(1),
+                expiry: TimeSpan.FromSeconds(_fundslocked.LockSeconds),
                 when: When.NotExists);
         }
 
