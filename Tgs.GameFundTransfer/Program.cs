@@ -67,18 +67,27 @@ builder.Services.AddGameTransferRepository((sp, dbBuilder) =>
     _ = dbBuilder.UseNpgsql(
         config.GetConnectionString("Tgs"));
 });
+builder.Services
+    .AddGameFundTransfer(
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        options.ConnectionString = configuration.GetConnectionString("Redis");
+    })
+    .AddGameTransferCore(
+    sp => sp.GetRequiredService<RedisConnectionManager>().Database,
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:CashServiceBaseUrl");
+    },
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:GameProvidersBaseUrl");
+    }
 
-builder.Services.AddGameTransferCore(
-      (options, sp) =>
-      {
-          var configuration = sp.GetRequiredService<IConfiguration>();
-          options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:CashServiceBaseUrl");
-      },
-      (options, sp) =>
-      {
-          var configuration = sp.GetRequiredService<IConfiguration>();
-          options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:GameProvidersBaseUrl");
-      });
+    );
 
 builder.Services
      .AddSingleton<IConfigureOptions<OtlpExporterOptions>>(
