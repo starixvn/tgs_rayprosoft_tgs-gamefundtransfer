@@ -79,6 +79,11 @@ builder.Services
     (options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
+        configuration.GetSection("LockSeconds").Bind(options);
+    },
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
         options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:CashServiceBaseUrl");
     },
     (options, sp) =>
