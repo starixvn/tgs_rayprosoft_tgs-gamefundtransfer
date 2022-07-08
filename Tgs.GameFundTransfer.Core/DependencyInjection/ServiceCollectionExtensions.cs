@@ -11,9 +11,13 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddGameTransferCore(
             this IServiceCollection services,
             Func<IServiceProvider, IDatabase> redisDatabaseResolver,
+            Action<FundsLockedOptions, IServiceProvider> fundsLockedOptions,
             Action<CashServiceClientOptions, IServiceProvider> cashServiceClientOptions,
             Action<GameProvidersClientOptions, IServiceProvider> gameProvidersClientOptions)
             => services
+                .AddOptions<FundsLockedOptions>()
+                .Configure(fundsLockedOptions)
+                .Services
                 .RegisterAllServiceUtilityTypes(
                     Assembly.GetExecutingAssembly(),
                     ServiceLifetime.Transient)

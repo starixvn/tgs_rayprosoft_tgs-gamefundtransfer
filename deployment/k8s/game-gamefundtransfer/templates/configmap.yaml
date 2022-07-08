@@ -24,6 +24,9 @@ data:
         "GameTransfer": {
           "GameProvidersBaseUrl": "http://game-gameproviders",
           "CashServiceBaseUrl": "http://cashservice-api"
+        },
+        "FundsLockedSetting": {
+          "LockSeconds": 60
         }
     }
   monitor.settings.json: |
