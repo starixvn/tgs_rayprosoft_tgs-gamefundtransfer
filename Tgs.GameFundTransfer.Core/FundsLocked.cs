@@ -5,7 +5,7 @@ namespace Tgs.GameFundTransfer.Core
     internal class FundsLocked : IFundsLocked
     {
         private readonly IDatabase _database;
-        private readonly string _redisKey = "{0}:{1}";
+        private readonly string _redisKey = "fundslocked:{0}:{1}";
 
         public FundsLocked(IDatabase database)
         {
@@ -16,7 +16,7 @@ namespace Tgs.GameFundTransfer.Core
         {
             try
             {
-                return _database.KeyExistsAsync(string.Format(_redisKey, gameProviderCode, playerCode));
+                return _database.KeyExistsAsync(string.Format(_redisKey, gameProviderCode, playerCode).ToLower());
             }
             catch
             {
@@ -26,7 +26,7 @@ namespace Tgs.GameFundTransfer.Core
 
         public Task<bool> LockingAsync(string gameProviderCode, string playerCode)
         {
-            string key = string.Format(_redisKey, gameProviderCode, playerCode);
+            string key = string.Format(_redisKey, gameProviderCode, playerCode).ToLower();
             return _database.StringSetAsync(
                 key: key,
                 value: DateTime.UtcNow.ToString("O"),
@@ -36,7 +36,7 @@ namespace Tgs.GameFundTransfer.Core
 
         public async ValueTask UnlockAsync(string gameProviderCode, string playerCode)
             => await _database.KeyDeleteAsync(
-                key: string.Format(_redisKey, gameProviderCode, playerCode),
+                key: string.Format(_redisKey, gameProviderCode, playerCode).ToLower(),
                 flags: CommandFlags.FireAndForget).ConfigureAwait(false);
     }
 }
