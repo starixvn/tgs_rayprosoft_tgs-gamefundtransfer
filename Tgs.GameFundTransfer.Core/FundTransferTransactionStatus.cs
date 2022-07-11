@@ -9,27 +9,33 @@
         WaitForResponse = 1,
 
         /// <summary>
-        /// The failure on game provider
-        /// 遊戲供應失敗
+        /// The game provider fund failed
+        /// 遊戲供應商資金失敗
         /// </summary>
-        FailureOnGameProvider,
+        GameProviderFundFailed = 2,
 
         /// <summary>
-        /// The failure on main wallet
-        /// 主錢包失敗
+        /// The main wallet failed
+        /// 主錢包資金失敗
         /// </summary>
-        FailureOnMainWallet,
+        MainWalletFundFailed = 3,
 
         /// <summary>
         /// The success
         /// 完成
         /// </summary>
-        Success,
+        Success = 4,
 
         /// <summary>
-        /// The manual fund in
-        /// 手動補點回主錢包
+        /// The main wallet fund refund success
+        /// 主金包資金退款成功
         /// </summary>
-        ManualFundIn,
+        MainWalletFundRefundSuccess = 100,
+
+        /// <summary>
+        /// The main wallet fund refund failed
+        /// 主錢包資金退款失敗
+        /// </summary>
+        MainWalletFundRefundFailed = 110,
     }
 }
