@@ -7,7 +7,6 @@ namespace Tgs.GameFundTransfer.Repositories
 {
     internal class FundTransferTransactionRepository : IFundTransferTransactionRepository
     {
-        private const string MainWallet = "Default";
         private readonly TgsContext _context;
         private readonly ISerialNumberGenerator _serialNumberGenerator;
 
@@ -35,9 +34,9 @@ namespace Tgs.GameFundTransfer.Repositories
                 PlayerCode = playerCode,
                 FundSource = (short)FundSource.FundIn,
                 FromWallet = gameProviderCode,
-                ToWallet = MainWallet,
+                ToWallet = WalletDef.MainWallet,
                 Amount = amount,
-                Status = (short)FundTransferTransactionStatus.FailureOnGameProvider,
+                Status = (short)FundTransferTransactionStatus.GameProviderFundFailed,
                 CreatedOn = systemDateTime,
                 UpdatedOn = systemDateTime
             };
@@ -70,10 +69,10 @@ namespace Tgs.GameFundTransfer.Repositories
                 WalletId = walletId,
                 PlayerCode = playerCode,
                 FundSource = (short)FundSource.FundOut,
-                FromWallet = MainWallet,
+                FromWallet = WalletDef.MainWallet,
                 ToWallet = gameProviderCode,
-                Amount = amount,
-                Status = (short)FundTransferTransactionStatus.FailureOnMainWallet,
+                Amount = -amount,
+                Status = (short)FundTransferTransactionStatus.MainWalletFundFailed,
                 CreatedOn = systemDateTime,
                 UpdatedOn = systemDateTime
             };
@@ -88,7 +87,7 @@ namespace Tgs.GameFundTransfer.Repositories
             return gameProviderFundTransferTransactionId;
         }
 
-        public async ValueTask UpdateByFailureOnGameProviderAsync(
+        public async ValueTask UpdateByGameProviderFundFailedAsync(
             Guid gameProviderFundTransferTransactionId,
             CancellationToken cancellationToken = default)
         {
@@ -98,7 +97,7 @@ namespace Tgs.GameFundTransfer.Repositories
 
             fundTransferTransaction.TransactionId = null;
             fundTransferTransaction.GameProviderTransactionId = null;
-            fundTransferTransaction.Status = (short)FundTransferTransactionStatus.FailureOnGameProvider;
+            fundTransferTransaction.Status = (short)FundTransferTransactionStatus.GameProviderFundFailed;
             fundTransferTransaction.UpdatedOn = DateTime.UtcNow;
 
             _ = _context.GameProviderFundTransferTransactions
@@ -108,7 +107,7 @@ namespace Tgs.GameFundTransfer.Repositories
                  .SaveChangesAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
-        public async ValueTask UpdateByFailureOnMainWalletAsync(
+        public async ValueTask UpdateByMainWalletFundFailedAsync(
             Guid gameProviderFundTransferTransactionId,
             string gameProviderTransactionId,
             CancellationToken cancellationToken = default)
@@ -118,7 +117,51 @@ namespace Tgs.GameFundTransfer.Repositories
                 .FirstAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
             fundTransferTransaction.GameProviderTransactionId = gameProviderTransactionId;
-            fundTransferTransaction.Status = (short)FundTransferTransactionStatus.FailureOnMainWallet;
+            fundTransferTransaction.Status = (short)FundTransferTransactionStatus.MainWalletFundFailed;
+            fundTransferTransaction.UpdatedOn = DateTime.UtcNow;
+
+            _ = _context.GameProviderFundTransferTransactions
+               .Update(fundTransferTransaction);
+
+            _ = await _context
+                 .SaveChangesAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+
+        public async ValueTask UpdateByMainWalletFundRefundFailedAsync(
+            Guid gameProviderFundTransferTransactionId,
+            string description,
+            CancellationToken cancellationToken = default)
+
+        {
+            var fundTransferTransaction = await _context.GameProviderFundTransferTransactions
+                .Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
+                .FirstAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            fundTransferTransaction.Status = (short)FundTransferTransactionStatus.MainWalletFundRefundFailed;
+            fundTransferTransaction.Description = description;
+            fundTransferTransaction.UpdatedOn = DateTime.UtcNow;
+
+            _ = _context.GameProviderFundTransferTransactions
+               .Update(fundTransferTransaction);
+
+            _ = await _context
+                 .SaveChangesAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+
+        public async ValueTask UpdateByMainWalletFundRefundSuccessAsync(
+            Guid gameProviderFundTransferTransactionId,
+            Guid transactionId,
+            decimal balance,
+            string description,
+            CancellationToken cancellationToken = default)
+        {
+            var fundTransferTransaction = await _context.GameProviderFundTransferTransactions
+                .Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
+                .FirstAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            fundTransferTransaction.TransactionId = transactionId;
+            fundTransferTransaction.Status = (short)FundTransferTransactionStatus.MainWalletFundRefundSuccess;
+            fundTransferTransaction.Description = description;
             fundTransferTransaction.UpdatedOn = DateTime.UtcNow;
 
             _ = _context.GameProviderFundTransferTransactions
@@ -130,19 +173,19 @@ namespace Tgs.GameFundTransfer.Repositories
 
         public async ValueTask UpdateBySuccessAsync(
             Guid gameProviderFundTransferTransactionId,
-            Guid? transactionsId,
+            Guid transactionId,
             string gameProviderTransactionId,
-            decimal postBalance,
+            decimal balance,
             CancellationToken cancellationToken = default)
         {
             var fundTransferTransaction = await _context.GameProviderFundTransferTransactions
                 .Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
                 .FirstAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
-            fundTransferTransaction.TransactionId = transactionsId;
+            fundTransferTransaction.TransactionId = transactionId;
             fundTransferTransaction.GameProviderTransactionId = gameProviderTransactionId;
             fundTransferTransaction.Status = (short)FundTransferTransactionStatus.Success;
-            fundTransferTransaction.Balance = postBalance;
+            fundTransferTransaction.Balance = balance;
             fundTransferTransaction.UpdatedOn = DateTime.UtcNow;
 
             _ = _context.GameProviderFundTransferTransactions

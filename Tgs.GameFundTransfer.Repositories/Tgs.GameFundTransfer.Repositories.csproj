@@ -12,10 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Tgs.GameFundTransfer.Core\Tgs.GameFundTransfer.Core.csproj" />
   </ItemGroup>
 

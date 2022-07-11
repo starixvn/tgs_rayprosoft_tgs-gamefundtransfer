@@ -30,16 +30,16 @@ namespace Tgs.GameFundTransfer.Core.ApplicationServices
         public async ValueTask ExecuteAsync(FundOutCommand query, CancellationToken cancellationToken = default)
         {
             if (await _fundsLocked.ExistAsync(
-                gameProviderCode: query.GameProviderCode,
-                playerCode: query.PlayerCode).ConfigureAwait(false))
+                    gameProviderCode: query.GameProviderCode,
+                    playerCode: query.PlayerCode).ConfigureAwait(false))
             {
                 _logger.LogWarning("Player ({playerCode}) funds transfer game provider ({gameProviderCode}) has been locked.", query.PlayerCode, query.GameProviderCode);
                 return;
             }
 
             if (!await _fundsLocked.LockingAsync(
-                gameProviderCode: query.GameProviderCode,
-                playerCode: query.PlayerCode).ConfigureAwait(false))
+                    gameProviderCode: query.GameProviderCode,
+                    playerCode: query.PlayerCode).ConfigureAwait(false))
             {
                 _logger.LogWarning("Player ({playerCode}) funds transfer game provider ({gameProviderCode}) has been locked.", query.PlayerCode, query.GameProviderCode);
                 return;
@@ -47,81 +47,117 @@ namespace Tgs.GameFundTransfer.Core.ApplicationServices
 
             try
             {
-                var amount = query.Amount;
-
                 _ = await _gameProvidersClient.PlayerBalanceAsync(
-                    gameProviderCode: query.GameProviderCode,
-                    playerCode: query.PlayerCode,
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
+                        gameProviderCode: query.GameProviderCode,
+                        playerCode: query.PlayerCode,
+                        cancellationToken: cancellationToken).ConfigureAwait(false);
 
-                var playerBalance = await _cashServiceClient.GetBalanceAsync(query.WalletId, cancellationToken).ConfigureAwait(false);
+                var playerBalance = await _cashServiceClient.GetBalanceAsync(
+                        walletId: query.WalletId,
+                        cancellationToken: cancellationToken).ConfigureAwait(false);
 
-                if (playerBalance - amount < 0)
+                if (playerBalance - query.Amount < 0)
                 {
                     throw new Exception($"Insufficient balance in main wallet.({playerBalance})");
                 }
 
                 var gameProviderFundTransferTransactionId = await _fundTransferTransactionRepository.AddFundOutAsync(
-                    gameProviderId: query.GameProviderId,
-                    gameProviderCode: query.GameProviderCode,
-                    playerCode: query.PlayerCode,
-                    walletId: query.WalletId,
-                    amount: amount * -1,
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
+                        gameProviderId: query.GameProviderId,
+                        gameProviderCode: query.GameProviderCode,
+                        playerCode: query.PlayerCode,
+                        walletId: query.WalletId,
+                        amount: query.Amount,
+                        cancellationToken: cancellationToken).ConfigureAwait(false);
 
                 var transactionResponse = await _cashServiceClient.GameProviderFundOutAsync(
-                    query.WalletId,
-                    amount,
-                    $"【Default】->【{query.GameProviderCode}】",
-                    gameProviderFundTransferTransactionId.ToString(),
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
+                        walletId: query.WalletId,
+                        amount: query.Amount,
+                        description: $"【Default】->【{query.GameProviderCode}】",
+                        externalId: gameProviderFundTransferTransactionId.ToString(),
+                        cancellationToken: cancellationToken).ConfigureAwait(false);
 
                 if (transactionResponse == null)
                 {
-                    await _fundTransferTransactionRepository.UpdateByFailureOnMainWalletAsync(
+                    await _fundTransferTransactionRepository.UpdateByMainWalletFundFailedAsync(
                         gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
                         gameProviderTransactionId: string.Empty,
                         cancellationToken: cancellationToken).ConfigureAwait(false);
                     throw new Exception("The main wallet transfer failed.");
                 }
 
+                if (transactionResponse.Balance < 0)
+                {
+                    var description = $"The main wallet balance ({transactionResponse.Balance}) is negative to perform this transaction transaction id ({transactionResponse.TransactionId}) refund.";
+
+                    try
+                    {
+                        var fundRefundResponse = await _cashServiceClient.GameProviderFundRefundAsync(
+                                walletId: query.WalletId,
+                                amount: query.Amount,
+                                description: transactionResponse.TransactionId.ToString(),
+                                externalId: gameProviderFundTransferTransactionId.ToString(),
+                                cancellationToken: cancellationToken).ConfigureAwait(false);
+
+                        await _fundTransferTransactionRepository.UpdateByMainWalletFundRefundSuccessAsync(
+                                gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
+                                transactionId: fundRefundResponse.TransactionId,
+                                balance: fundRefundResponse.Balance,
+                                description: description,
+                                cancellationToken: cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(exception: ex, "This transaction id({transactionId}) main wallet fund refund failed.", transactionResponse.TransactionId);
+
+                        await _fundTransferTransactionRepository.UpdateByMainWalletFundRefundFailedAsync(
+                                gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
+                                description: description,
+                                cancellationToken: cancellationToken).ConfigureAwait(false);
+                    }
+                    finally
+                    {
+                        _logger.LogWarning("The main wallet balance ({balance}) is negative to perform this transaction transaction id ({transactionId}) refund.", transactionResponse.Balance, transactionResponse.TransactionId);
+                    }
+                    return;
+                }
+
                 try
                 {
                     var gameProviderTransactionId = await _gameProvidersClient.PlayerFundOutAsync(
-                        gameProviderCode: query.GameProviderCode,
-                        brandCode: query.BrandCode,
-                        playerCode: query.PlayerCode,
-                        currencyCode: query.CurrencyCode,
-                        orderId: gameProviderFundTransferTransactionId.ToString("N"),
-                        amount: amount,
-                        cancellationToken: cancellationToken).ConfigureAwait(false);
+                            gameProviderCode: query.GameProviderCode,
+                            brandCode: query.BrandCode,
+                            playerCode: query.PlayerCode,
+                            currencyCode: query.CurrencyCode,
+                            orderId: gameProviderFundTransferTransactionId.ToString("N"),
+                            amount: query.Amount,
+                            cancellationToken: cancellationToken).ConfigureAwait(false);
 
                     if (string.IsNullOrWhiteSpace(gameProviderTransactionId))
                     {
-                        throw new Exception($"The game manufacturer's transfer failed..({gameProviderFundTransferTransactionId})");
+                        throw new Exception($"The game manufacturer's transfer failed.({gameProviderFundTransferTransactionId})");
                     }
 
                     await _fundTransferTransactionRepository.UpdateBySuccessAsync(
-                        gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-                        transactionsId: transactionResponse.TransactionId,
-                        gameProviderTransactionId: gameProviderTransactionId,
-                        postBalance: transactionResponse.Balance,
-                        cancellationToken: cancellationToken).ConfigureAwait(false);
+                            gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
+                            transactionId: transactionResponse.TransactionId,
+                            gameProviderTransactionId: gameProviderTransactionId,
+                            balance: transactionResponse.Balance,
+                            cancellationToken: cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(exception: ex, "The game manufacturer's transfer failed..({gameProviderFundTransferTransactionId})", gameProviderFundTransferTransactionId);
+                    _logger.LogError(exception: ex, "The game manufacturer's transfer failed.({gameProviderFundTransferTransactionId})", gameProviderFundTransferTransactionId);
 
-                    await _fundTransferTransactionRepository.UpdateByFailureOnGameProviderAsync(
-                        gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-                        cancellationToken: cancellationToken).ConfigureAwait(false);
+                    await _fundTransferTransactionRepository.UpdateByGameProviderFundFailedAsync(
+                            gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
+                            cancellationToken: cancellationToken).ConfigureAwait(false);
                 }
             }
             finally
             {
                 await _fundsLocked.UnlockAsync(
-                      gameProviderCode: query.GameProviderCode,
-                      playerCode: query.PlayerCode).ConfigureAwait(false);
+                          gameProviderCode: query.GameProviderCode,
+                          playerCode: query.PlayerCode).ConfigureAwait(false);
             }
         }
     }
