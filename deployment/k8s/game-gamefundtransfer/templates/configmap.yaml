@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-{{ include "game-gamefundtransfer.fullname" . }}
+  labels:
+    {{- include "game-gamefundtransfer.labels" . | nindent 4 }}
+data:
+  appsettings.json: |
+    {
+        "Kestrel": {
+          "EndpointDefaults": {
+                "Protocols": "Http2"
+          },
+          "Endpoints": {
+            "HealthCheck": {
+                "Url": "http://*:{{ .Values.service.port }}",
+                "Protocols": "Http1"
+            },
+            "Grpc": {
+                "Url": "http://*:{{ .Values.servicegrpc.port }}"
+            }
+          }
+        },
+        "GameTransfer": {
+          "GameProvidersBaseUrl": "http://game-gameproviders",
+          "CashServiceBaseUrl": "http://cashservice-api"
+        },
+        "FundsLockedSetting": {
+          "LockSeconds": 60
+        }
+    }
+  monitor.settings.json: |
+    {
+      "Metrics": {
+        "MetricCount": "1"
+      },
+      "Logging":{
+        "Console": {
+          "FormatterName": "json"
+        },
+        "LogLevel": {
+          "Default": "Warning",
+          "Microsoft": "Warning",
+          "Microsoft.Diagnostics": "Warning",
+          "Microsoft.Hosting.Lifetime": "Information"
+        }
+      }
+    }
