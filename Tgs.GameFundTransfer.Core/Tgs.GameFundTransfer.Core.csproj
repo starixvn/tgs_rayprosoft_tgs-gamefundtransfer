@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="StackExchange.Redis" Version="2.6.48" />
     <PackageReference Include="Tgs.CashService.Client" Version="0.1.2" />
-    <PackageReference Include="Tgs.GameCurrency.Client" Version="0.0.3" />
+    <PackageReference Include="Tgs.GameCurrency.Client" Version="0.0.4" />
     <PackageReference Include="TGS.GameProviders.Client" Version="0.0.41" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
   </ItemGroup>
