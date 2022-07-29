@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Tgs.CashService.Client;
+using Tgs.GameCurrency.Client;
 using Tgs.GameProviders.Client;
 using Tgs.ServiceUtility;
 
@@ -10,25 +11,36 @@ namespace Tgs.GameFundTransfer.Core.ApplicationServices
         private readonly ICashServiceClient _cashServiceClient;
         private readonly IFundsLocked _fundsLocked;
         private readonly IFundTransferTransactionRepository _fundTransferTransactionRepository;
+        private readonly IGameCurrencyClient _gameCurrencyClient;
         private readonly IGameProvidersClient _gameProvidersClient;
         private readonly ILogger<FundOutCommandService> _logger;
 
         public FundOutCommandService(
+            ILogger<FundOutCommandService> logger,
             ICashServiceClient cashServiceClient,
-             IFundsLocked fundsLocked,
+            IFundsLocked fundsLocked,
             IFundTransferTransactionRepository fundTransferTransactionRepository,
-            IGameProvidersClient gameProvidersClient,
-            ILogger<FundOutCommandService> logger)
+            IGameCurrencyClient gameCurrencyClient,
+            IGameProvidersClient gameProvidersClient)
         {
             _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
             _fundsLocked = fundsLocked ?? throw new ArgumentNullException(nameof(fundsLocked));
             _fundTransferTransactionRepository = fundTransferTransactionRepository ?? throw new ArgumentNullException(nameof(fundTransferTransactionRepository));
             _gameProvidersClient = gameProvidersClient ?? throw new ArgumentNullException(nameof(gameProvidersClient));
+            _gameCurrencyClient = gameCurrencyClient ?? throw new ArgumentNullException(nameof(gameCurrencyClient));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async ValueTask ExecuteAsync(FundOutCommand query, CancellationToken cancellationToken = default)
         {
+            var exchangeRateFundResult = await _gameCurrencyClient.GetExchangeRateFundOutAsync(
+                query.GameProviderCode,
+                query.CurrencyCode,
+                query.Amount,
+                cancellationToken).ConfigureAwait(false);
+
+            var amount = exchangeRateFundResult.Amount;
+
             if (await _fundsLocked.ExistAsync(
                     gameProviderCode: query.GameProviderCode,
                     playerCode: query.PlayerCode).ConfigureAwait(false))
@@ -129,7 +141,7 @@ namespace Tgs.GameFundTransfer.Core.ApplicationServices
                             playerCode: query.PlayerCode,
                             currencyCode: query.CurrencyCode,
                             orderId: gameProviderFundTransferTransactionId.ToString("N"),
-                            amount: query.Amount,
+                            amount: amount,
                             cancellationToken: cancellationToken).ConfigureAwait(false);
 
                     if (string.IsNullOrWhiteSpace(gameProviderTransactionId))
