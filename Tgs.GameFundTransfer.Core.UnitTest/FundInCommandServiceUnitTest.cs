@@ -41,7 +41,7 @@ namespace Tgs.GameFundTransfer.Core.UnitTest
                 Balance = 10
             };
 
-            _ = fakeGameCurrencyClient.GetExchangeRateFundInAsync(
+            _ = fakeGameCurrencyClient.GetExchangeRateFundOutAsync(
                 Arg.Is(query.GameProviderCode),
                 Arg.Is(query.CurrencyCode),
                 Arg.Is(query.Amount)
@@ -135,7 +135,7 @@ namespace Tgs.GameFundTransfer.Core.UnitTest
                 Balance = 10
             };
 
-            _ = fakeGameCurrencyClient.GetExchangeRateFundInAsync(
+            _ = fakeGameCurrencyClient.GetExchangeRateFundOutAsync(
                 Arg.Is(query.GameProviderCode),
                 Arg.Is(query.CurrencyCode),
                 Arg.Is(query.Amount)
@@ -229,7 +229,7 @@ namespace Tgs.GameFundTransfer.Core.UnitTest
                 Balance = 10
             };
 
-            _ = fakeGameCurrencyClient.GetExchangeRateFundInAsync(
+            _ = fakeGameCurrencyClient.GetExchangeRateFundOutAsync(
                 Arg.Is(query.GameProviderCode),
                 Arg.Is(query.CurrencyCode),
                 Arg.Is(query.Amount)
@@ -319,7 +319,7 @@ namespace Tgs.GameFundTransfer.Core.UnitTest
                 Balance = 10
             };
 
-            _ = fakeGameCurrencyClient.GetExchangeRateFundInAsync(
+            _ = fakeGameCurrencyClient.GetExchangeRateFundOutAsync(
                 Arg.Is(query.GameProviderCode),
                 Arg.Is(query.CurrencyCode),
                 Arg.Is(query.Amount)
@@ -390,7 +390,7 @@ namespace Tgs.GameFundTransfer.Core.UnitTest
                 ExchangeRate: 0.001m,
                 Amount: 1m);
 
-            _ = fakeGameCurrencyClient.GetExchangeRateFundInAsync(
+            _ = fakeGameCurrencyClient.GetExchangeRateFundOutAsync(
                 Arg.Is(query.GameProviderCode),
                 Arg.Is(query.CurrencyCode),
                 Arg.Is(query.Amount)).Returns(exchangeRateFundResult);
@@ -485,7 +485,7 @@ namespace Tgs.GameFundTransfer.Core.UnitTest
                 ExchangeRate: 0.001m,
                 Amount: 1000m);
 
-            _ = fakeGameCurrencyClient.GetExchangeRateFundInAsync(
+            _ = fakeGameCurrencyClient.GetExchangeRateFundOutAsync(
                 Arg.Is(query.GameProviderCode),
                 Arg.Is(query.CurrencyCode),
                 Arg.Is(query.Amount)).Returns(exchangeRateFundResult);
@@ -580,7 +580,7 @@ namespace Tgs.GameFundTransfer.Core.UnitTest
                 ExchangeRate: 1000,
                 Amount: 1);
 
-            _ = fakeGameCurrencyClient.GetExchangeRateFundInAsync(
+            _ = fakeGameCurrencyClient.GetExchangeRateFundOutAsync(
                 Arg.Is(query.GameProviderCode),
                 Arg.Is(query.CurrencyCode),
                 Arg.Is(query.Amount)).Returns(exchangeRateFundResult);
@@ -675,7 +675,7 @@ namespace Tgs.GameFundTransfer.Core.UnitTest
                 ExchangeRate: 1000,
                 Amount: 0.001m);
 
-            _ = fakeGameCurrencyClient.GetExchangeRateFundInAsync(
+            _ = fakeGameCurrencyClient.GetExchangeRateFundOutAsync(
                 Arg.Is(query.GameProviderCode),
                 Arg.Is(query.CurrencyCode),
                 Arg.Is(query.Amount)).Returns(exchangeRateFundResult);

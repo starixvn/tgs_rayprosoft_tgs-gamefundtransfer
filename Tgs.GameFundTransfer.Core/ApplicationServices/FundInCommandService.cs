@@ -33,7 +33,7 @@ namespace Tgs.GameFundTransfer.Core.ApplicationServices
 
         public async ValueTask ExecuteAsync(FundInCommand query, CancellationToken cancellationToken = default)
         {
-            var exchangeRateFundResult = await _gameCurrencyClient.GetExchangeRateFundInAsync(
+            var exchangeRateFundResult = await _gameCurrencyClient.GetExchangeRateFundOutAsync(
                 query.GameProviderCode,
                 query.CurrencyCode,
                 query.Amount,
