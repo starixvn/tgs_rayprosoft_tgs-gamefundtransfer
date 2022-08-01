@@ -33,13 +33,13 @@ namespace Tgs.GameFundTransfer.Core.ApplicationServices
 
         public async ValueTask ExecuteAsync(FundOutCommand query, CancellationToken cancellationToken = default)
         {
-            var exchangeRateFundResult = await _gameCurrencyClient.GetExchangeRateFundOutAsync(
+            var exchangeRateFundResult = await _gameCurrencyClient.ConvertGameProviderFundsAsync(
                 query.GameProviderCode,
                 query.CurrencyCode,
                 query.Amount,
                 cancellationToken).ConfigureAwait(false);
 
-            var amount = exchangeRateFundResult.Amount;
+            var gameProviderAmount = exchangeRateFundResult.Amount;
 
             if (await _fundsLocked.ExistAsync(
                     gameProviderCode: query.GameProviderCode,
@@ -141,7 +141,7 @@ namespace Tgs.GameFundTransfer.Core.ApplicationServices
                             playerCode: query.PlayerCode,
                             currencyCode: query.CurrencyCode,
                             orderId: gameProviderFundTransferTransactionId.ToString("N"),
-                            amount: amount,
+                            amount: gameProviderAmount,
                             cancellationToken: cancellationToken).ConfigureAwait(false);
 
                     if (string.IsNullOrWhiteSpace(gameProviderTransactionId))
