@@ -84,15 +84,18 @@ builder.Services
     (options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
-        options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:CashServiceBaseUrl");
+        options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:CashServiceClientBaseUrl");
     },
     (options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
-        options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:GameProvidersBaseUrl");
-    }
-
-    );
+        options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:GameProvidersClientBaseUrl");
+    },
+    (options, sp) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:GameCurrencyClientBaseUrl");
+    });
 
 builder.Services
      .AddSingleton<IConfigureOptions<OtlpExporterOptions>>(
