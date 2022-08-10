@@ -33,6 +33,6 @@ namespace Microsoft.Extensions.DependencyInjection
             .Services
             .AddSingleton<DiagnosticsInterceptorOptions>()
             .AddSingleton<LoggingInterceptor>()
-            .AddTransient<IGameFundTransferGrpcService, GameFundTransferGrpcService>();
+            .AddTransient<IGameFundTransferClient, GameFundTransferClient>();
     }
 }

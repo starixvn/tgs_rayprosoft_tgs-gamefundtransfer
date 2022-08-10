@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using StackExchange.Redis;
 using Tgs.CashService.Client;
+using Tgs.GameCurrency.Client;
 using Tgs.GameFundTransfer.Core;
 using Tgs.GameProviders.Client;
 
@@ -13,7 +14,8 @@ namespace Microsoft.Extensions.DependencyInjection
             Func<IServiceProvider, IDatabase> redisDatabaseResolver,
             Action<FundsLockedOptions, IServiceProvider> fundsLockedOptions,
             Action<CashServiceClientOptions, IServiceProvider> cashServiceClientOptions,
-            Action<GameProvidersClientOptions, IServiceProvider> gameProvidersClientOptions)
+            Action<GameProvidersClientOptions, IServiceProvider> gameProvidersClientOptions,
+            Action<GameCurrencyClientOptions, IServiceProvider> gameCurrencyClientOptions)
             => services
                 .AddOptions<FundsLockedOptions>()
                 .Configure(fundsLockedOptions)
@@ -23,6 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     ServiceLifetime.Transient)
                 .AddCashServiceClient(cashServiceClientOptions)
                 .AddGameProvidersClient(gameProvidersClientOptions)
+                .AddGameCurrencyClient(gameCurrencyClientOptions)
                 .AddTransient<IFundsLocked>(sp => ActivatorUtilities.CreateInstance<FundsLocked>(sp, redisDatabaseResolver(sp)));
     }
 }
