@@ -103,10 +103,12 @@ pipeline {
                         def resources = getResources(env.k8s_config, env.kube_ns, "game-gamefundtransfer")
                         def dedicated = getTgsSettings(env.k8s_config, env.kube_ns, "dedicated")
                         def node_selector = getTgsSettings(env.k8s_config, env.kube_ns, "node-selector")
-                        
+                        def autoscaling = getAutoscaling(env.k8s_config, env.kube_ns, "game-gamefundtransfer")
+
                         println resources
                         println dedicated
                         println node_selector
+                        println autoscaling
 
                         sh """
                             cat << EOF | yq e -P | helm template deployment/k8s/game-gamefundtransfer \
@@ -116,7 +118,8 @@ pipeline {
                             {
                                 "nodeSelector": $node_selector,
                                 "tolerations": [$dedicated],
-                                "resources": $resources
+                                "resources": $resources,
+                                "autoscaling": $autoscaling
                             }
                         """
                         sh """
@@ -128,7 +131,8 @@ pipeline {
                             {
                                 "nodeSelector": $node_selector,
                                 "tolerations": [$dedicated],
-                                "resources": $resources
+                                "resources": $resources,
+                                "autoscaling": $autoscaling
                             }
                         """
                     }
