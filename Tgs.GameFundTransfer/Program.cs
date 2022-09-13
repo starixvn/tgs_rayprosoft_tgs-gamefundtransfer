@@ -47,6 +47,9 @@ builder.Services.AddSingleton<LoggingInterceptor>();
 builder.Services.AddGrpc(options =>
 {
     options.Interceptors.Add<LoggingInterceptor>();
+    // If true, detailed exception messages are returned to clients when an exception is thrown in a service method.
+    // The default is false. Setting EnableDetailedErrors to true can leak sensitive information.
+    options.EnableDetailedErrors = true;
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
