@@ -24,7 +24,8 @@ data:
         "GameTransfer": {
           "GameProvidersClientBaseUrl": "http://game-gameproviders",
           "CashServiceClientBaseUrl": "http://cashservice-api",
-          "GameCurrencyClientBaseUrl": "http://game-gamecurrency"
+          "GameCurrencyClientBaseUrl": "http://game-gamecurrency",
+          "GameInterfaceSabaClientBaseUrl": "https://localhost:7099/"
         },
         "FundsLockedSetting": {
           "LockSeconds": 60

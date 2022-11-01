@@ -3,6 +3,7 @@ using StackExchange.Redis;
 using Tgs.CashService.Client;
 using Tgs.GameCurrency.Client;
 using Tgs.GameFundTransfer.Core;
+using Tgs.GameInterface.SabaService.Client;
 using Tgs.GameProviders.Client;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -15,7 +16,8 @@ public static class ServiceCollectionExtensions
         Action<FundsLockedOptions, IServiceProvider> fundsLockedOptions,
         Action<CashServiceClientOptions, IServiceProvider> cashServiceClientOptions,
         Action<GameProvidersClientOptions, IServiceProvider> gameProvidersClientOptions,
-        Action<GameCurrencyClientOptions, IServiceProvider> gameCurrencyClientOptions)
+        Action<GameCurrencyClientOptions, IServiceProvider> gameCurrencyClientOptions,
+        Action<GameInterfaceSabaClientOptions, IServiceProvider> gameInterfaceSabaClientOptions)
         => services
             .AddOptions<FundsLockedOptions>()
             .Configure(fundsLockedOptions)
@@ -26,5 +28,6 @@ public static class ServiceCollectionExtensions
             .AddCashServiceClient(cashServiceClientOptions)
             .AddGameProvidersClient(gameProvidersClientOptions)
             .AddGameCurrencyClient(gameCurrencyClientOptions)
+            .AddGameInterfaceSabaServiceClient(gameInterfaceSabaClientOptions)
             .AddTransient<IFundsLocked>(sp => ActivatorUtilities.CreateInstance<FundsLocked>(sp, redisDatabaseResolver(sp)));
 }
