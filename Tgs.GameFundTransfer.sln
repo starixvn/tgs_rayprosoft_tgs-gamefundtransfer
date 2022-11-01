@@ -6,7 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "方案項目", "方案項目", "{39826F14-B6DF-450D-96B7-F395F902E0A4}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		NuGet.config = NuGet.config
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.GameFundTransfer.Core", "Tgs.GameFundTransfer.Core\Tgs.GameFundTransfer.Core.csproj", "{49DD4F39-25E2-4653-9164-BCF18DBAE164}"
