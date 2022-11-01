@@ -47,8 +47,8 @@ Selector labels
 */}}
 {{- define "game-gamefundtransfer.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "game-gamefundtransfer.name" . }}
+app.kubernetes.io/instance: RELEASE-NAME
 app: {{ include "game-gamefundtransfer.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
 tgs.kind: game
 {{- end }}
 
