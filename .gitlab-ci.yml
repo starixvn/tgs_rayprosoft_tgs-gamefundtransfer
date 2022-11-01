@@ -2,7 +2,7 @@ variables:
   ImageName: pgtgs/game-gamefundtransfer
   TgsSettingKey: game-gamefundtransfer
   HelmTemplateFolderName: game-gamefundtransfer
-  BuildCacheKey: Tgs.GameProviders.$CI_PIPELINE_ID
+  BuildCacheKey: Tgs.GameFundTransfer.$CI_PIPELINE_ID
 
 default:
   before_script:
