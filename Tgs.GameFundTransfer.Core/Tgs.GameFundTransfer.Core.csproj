@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="StackExchange.Redis" Version="2.6.48" />
-    <PackageReference Include="Tgs.CashService.Client" Version="0.1.3" />
+    <PackageReference Include="StackExchange.Redis" Version="2.6.70" />
+    <PackageReference Include="Tgs.CashService.Client" Version="0.1.5" />
     <PackageReference Include="Tgs.GameCurrency.Client" Version="0.0.8" />
-    <PackageReference Include="TGS.GameProviders.Client" Version="0.0.43" />
-    <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
+    <PackageReference Include="TGS.GameProviders.Client" Version="0.0.48" />
+    <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
   </ItemGroup>
 
 </Project>
