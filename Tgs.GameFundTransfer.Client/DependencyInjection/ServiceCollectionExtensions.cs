@@ -2,37 +2,36 @@
 using Tgs.GameFundTransfer.Client;
 using Tgs.GameFundTransfer.Protos;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
-    {
-        public static IServiceCollection AddGameFundTransferClient(
-            this IServiceCollection services,
-            Action<GameFundTransferClientOptions, IServiceProvider> configure)
-            => services
-            .AddOptions<GameFundTransferClientOptions>()
-            .Configure(configure)
-            .Services
-            .AddGrpcClient<GameFundTransferService.GameFundTransferServiceClient>((sp, configureClient) =>
+    public static IServiceCollection AddGameFundTransferClient(
+        this IServiceCollection services,
+        Action<GameFundTransferClientOptions, IServiceProvider> configure)
+        => services
+        .AddOptions<GameFundTransferClientOptions>()
+        .Configure(configure)
+        .Services
+        .AddGrpcClient<GameFundTransferService.GameFundTransferServiceClient>((sp, configureClient) =>
+        {
+            var options = sp.GetRequiredService<IOptions<GameFundTransferClientOptions>>().Value;
+            configureClient.Address = options.BaseUrl;
+        })
+        .ConfigureChannel((sp, configureChannel) =>
+        {
+            var handler = new SocketsHttpHandler
             {
-                var options = sp.GetRequiredService<IOptions<GameFundTransferClientOptions>>().Value;
-                configureClient.Address = options.BaseUrl;
-            })
-            .ConfigureChannel((sp, configureChannel) =>
-            {
-                var handler = new SocketsHttpHandler
-                {
-                    PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
-                    KeepAlivePingDelay = TimeSpan.FromSeconds(60),
-                    KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
-                    EnableMultipleHttp2Connections = true
-                };
-                configureChannel.HttpHandler = handler;
-            })
-            .AddInterceptor<LoggingInterceptor>()
-            .Services
-            .AddSingleton<DiagnosticsInterceptorOptions>()
-            .AddSingleton<LoggingInterceptor>()
-            .AddTransient<IGameFundTransferClient, GameFundTransferClient>();
-    }
+                PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
+                KeepAlivePingDelay = TimeSpan.FromSeconds(60),
+                KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
+                EnableMultipleHttp2Connections = true
+            };
+            configureChannel.HttpHandler = handler;
+        })
+        .AddInterceptor<LoggingInterceptor>()
+        .Services
+        .AddSingleton<DiagnosticsInterceptorOptions>()
+        .AddSingleton<LoggingInterceptor>()
+        .AddTransient<IGameFundTransferClient, GameFundTransferClient>();
 }

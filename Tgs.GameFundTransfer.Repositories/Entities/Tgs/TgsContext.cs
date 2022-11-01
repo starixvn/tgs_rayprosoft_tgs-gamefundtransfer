@@ -7,31 +7,30 @@ using Tgs.GameFundTransfer.Repositories.Entities.Configurations;
 
 #nullable disable
 
-namespace Tgs.GameFundTransfer.Repositories.Entities
+namespace Tgs.GameFundTransfer.Repositories.Entities;
+
+public partial class TgsContext : DbContext
 {
-    public partial class TgsContext : DbContext
+    public TgsContext()
     {
-        public TgsContext()
-        {
-        }
-
-        public TgsContext(DbContextOptions<TgsContext> options)
-            : base(options)
-        {
-        }
-
-        public virtual DbSet<GameProviderFundTransferTransaction> GameProviderFundTransferTransactions { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.HasPostgresExtension("ltree")
-                .HasPostgresExtension("pg_trgm")
-                .HasAnnotation("Relational:Collation", "en_US.utf8");
-
-            modelBuilder.ApplyConfiguration(new Configurations.GameProviderFundTransferTransactionConfiguration());
-            OnModelCreatingPartial(modelBuilder);
-        }
-
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
+
+    public TgsContext(DbContextOptions<TgsContext> options)
+        : base(options)
+    {
+    }
+
+    public virtual DbSet<GameProviderFundTransferTransaction> GameProviderFundTransferTransactions { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.HasPostgresExtension("ltree")
+            .HasPostgresExtension("pg_trgm")
+            .HasAnnotation("Relational:Collation", "en_US.utf8");
+
+        modelBuilder.ApplyConfiguration(new Configurations.GameProviderFundTransferTransactionConfiguration());
+        OnModelCreatingPartial(modelBuilder);
+    }
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

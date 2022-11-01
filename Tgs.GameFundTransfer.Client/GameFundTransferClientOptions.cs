@@ -1,7 +1,6 @@
-﻿namespace Tgs.GameFundTransfer.Client
+﻿namespace Tgs.GameFundTransfer.Client;
+
+public class GameFundTransferClientOptions
 {
-    public class GameFundTransferClientOptions
-    {
-        public Uri BaseUrl { get; set; } = default!;
-    }
+    public Uri BaseUrl { get; set; } = default!;
 }
