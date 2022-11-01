@@ -1,7 +1,6 @@
-﻿namespace Tgs.GameFundTransfer.Core
+﻿namespace Tgs.GameFundTransfer.Core;
+
+public class FundsLockedOptions
 {
-    public class FundsLockedOptions
-    {
-        public int LockSeconds { get; init; } = 60;
-    }
+    public int LockSeconds { get; init; } = 60;
 }

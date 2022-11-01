@@ -7,71 +7,70 @@ using Tgs.GameFundTransfer.Repositories.Entities;
 
 #nullable disable
 
-namespace Tgs.GameFundTransfer.Repositories.Entities.Configurations
+namespace Tgs.GameFundTransfer.Repositories.Entities.Configurations;
+
+public partial class GameProviderFundTransferTransactionConfiguration : IEntityTypeConfiguration<GameProviderFundTransferTransaction>
 {
-    public partial class GameProviderFundTransferTransactionConfiguration : IEntityTypeConfiguration<GameProviderFundTransferTransaction>
+    public void Configure(EntityTypeBuilder<GameProviderFundTransferTransaction> entity)
     {
-        public void Configure(EntityTypeBuilder<GameProviderFundTransferTransaction> entity)
-        {
-            entity.ToTable("game_provider_fund_transfer_transactions", "dbo");
+        entity.ToTable("game_provider_fund_transfer_transactions", "dbo");
 
-            entity.HasIndex(e => e.PlayerCode, "ix_game_provider_fund_transfer_transactions_player_code");
+        entity.HasIndex(e => e.PlayerCode, "ix_game_provider_fund_transfer_transactions_player_code");
 
-            entity.HasIndex(e => e.TransactionId, "ix_game_provider_fund_transfer_transactions_transaction_id");
+        entity.HasIndex(e => e.TransactionId, "ix_game_provider_fund_transfer_transactions_transaction_id");
 
-            entity.HasIndex(e => e.WalletId, "ix_game_provider_fund_transfer_transactions_wallet_id");
+        entity.HasIndex(e => e.WalletId, "ix_game_provider_fund_transfer_transactions_wallet_id");
 
-            entity.Property(e => e.GameProviderFundTransferTransactionId)
-                .ValueGeneratedNever()
-                .HasColumnName("game_provider_fund_transfer_transaction_id");
+        entity.Property(e => e.GameProviderFundTransferTransactionId)
+            .ValueGeneratedNever()
+            .HasColumnName("game_provider_fund_transfer_transaction_id");
 
-            entity.Property(e => e.Amount)
-                .HasPrecision(18, 6)
-                .HasColumnName("amount");
+        entity.Property(e => e.Amount)
+            .HasPrecision(18, 6)
+            .HasColumnName("amount");
 
-            entity.Property(e => e.Balance)
-                .HasPrecision(18, 6)
-                .HasColumnName("balance");
+        entity.Property(e => e.Balance)
+            .HasPrecision(18, 6)
+            .HasColumnName("balance");
 
-            entity.Property(e => e.CreatedOn)
-                .HasColumnType("timestamp with time zone")
-                .HasColumnName("created_on");
+        entity.Property(e => e.CreatedOn)
+            .HasColumnType("timestamp with time zone")
+            .HasColumnName("created_on");
 
-            entity.Property(e => e.Description)
-                .HasMaxLength(256)
-                .HasColumnName("description");
+        entity.Property(e => e.Description)
+            .HasMaxLength(256)
+            .HasColumnName("description");
 
-            entity.Property(e => e.FromWallet)
-                .IsRequired()
-                .HasColumnName("from_wallet");
+        entity.Property(e => e.FromWallet)
+            .IsRequired()
+            .HasColumnName("from_wallet");
 
-            entity.Property(e => e.FundSource).HasColumnName("fund_source");
+        entity.Property(e => e.FundSource).HasColumnName("fund_source");
 
-            entity.Property(e => e.GameProviderId).HasColumnName("game_provider_id");
+        entity.Property(e => e.GameProviderId).HasColumnName("game_provider_id");
 
-            entity.Property(e => e.GameProviderTransactionId).HasColumnName("game_provider_transaction_id");
+        entity.Property(e => e.GameProviderTransactionId).HasColumnName("game_provider_transaction_id");
 
-            entity.Property(e => e.PlayerCode)
-                .IsRequired()
-                .HasColumnName("player_code");
+        entity.Property(e => e.PlayerCode)
+            .IsRequired()
+            .HasColumnName("player_code");
 
-            entity.Property(e => e.Status).HasColumnName("status");
+        entity.Property(e => e.Status).HasColumnName("status");
 
-            entity.Property(e => e.ToWallet)
-                .IsRequired()
-                .HasColumnName("to_wallet");
+        entity.Property(e => e.ToWallet)
+            .IsRequired()
+            .HasColumnName("to_wallet");
 
-            entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
+        entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
 
-            entity.Property(e => e.UpdatedOn)
-                .HasColumnType("timestamp with time zone")
-                .HasColumnName("updated_on");
+        entity.Property(e => e.UpdatedOn)
+            .HasColumnType("timestamp with time zone")
+            .HasColumnName("updated_on");
 
-            entity.Property(e => e.WalletId).HasColumnName("wallet_id");
+        entity.Property(e => e.WalletId).HasColumnName("wallet_id");
 
-            OnConfigurePartial(entity);
-        }
-
-        partial void OnConfigurePartial(EntityTypeBuilder<GameProviderFundTransferTransaction> entity);
+        OnConfigurePartial(entity);
     }
+
+    partial void OnConfigurePartial(EntityTypeBuilder<GameProviderFundTransferTransaction> entity);
 }

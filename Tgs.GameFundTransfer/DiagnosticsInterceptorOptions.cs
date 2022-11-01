@@ -1,10 +1,9 @@
 ﻿using System.Diagnostics;
 
-namespace Tgs.GameFundTransfer
+namespace Tgs.GameFundTransfer;
+
+public class DiagnosticsInterceptorOptions
 {
-    public class DiagnosticsInterceptorOptions
-    {
-        public ActivitySource InterceptorActivitySource { get; set; } =
-            new ActivitySource($"Tgs.GameTransfer.DiagnosticsInterceptor");
-    }
+    public ActivitySource InterceptorActivitySource { get; set; } =
+        new ActivitySource($"Tgs.GameTransfer.DiagnosticsInterceptor");
 }

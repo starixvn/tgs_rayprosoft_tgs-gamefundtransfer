@@ -1,7 +1,6 @@
-﻿namespace Tgs.GameFundTransfer.Core
+﻿namespace Tgs.GameFundTransfer.Core;
+
+public class WalletDef
 {
-    public class WalletDef
-    {
-        public const string MainWallet = "Default";
-    }
+    public const string MainWallet = "Default";
 }
