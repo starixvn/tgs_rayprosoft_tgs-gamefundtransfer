@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Npgsql;
@@ -61,6 +62,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         c.IncludeXmlComments(xmlFileName);
     }
+    c.DocumentFilter<HiddenFilter>();
 });
 
 builder.Services.AddGameTransferRepository((sp, dbBuilder) =>

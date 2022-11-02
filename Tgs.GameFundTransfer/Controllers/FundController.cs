@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using Tgs.GameFundTransfer.Attributes;
 using Tgs.GameFundTransfer.Core.ApplicationServices;
 using Tgs.GameFundTransfer.ViewModels;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameFundTransfer.Controllers;
 
+[HiddenApi]
 [ApiController]
 [Route("[controller]")]
 public class FundController : ControllerBase

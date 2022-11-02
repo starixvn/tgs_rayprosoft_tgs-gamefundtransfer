@@ -8,11 +8,7 @@
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU' or 
-				              '$(Configuration)|$(Platform)'=='Release|AnyCPU' or
-							  '$(Configuration)|$(Platform)'=='dev|AnyCPU' or 
-							  '$(Configuration)|$(Platform)'=='staging|AnyCPU'or
-							  '$(Configuration)|$(Platform)'=='prod|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU' or &#xD;&#xA;				              '$(Configuration)|$(Platform)'=='Release|AnyCPU' or&#xD;&#xA;							  '$(Configuration)|$(Platform)'=='dev|AnyCPU' or &#xD;&#xA;							  '$(Configuration)|$(Platform)'=='staging|AnyCPU'or&#xD;&#xA;							  '$(Configuration)|$(Platform)'=='prod|AnyCPU'">
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 		<NoWarn>$(NoWarn);1591;0063</NoWarn>
 	</PropertyGroup>
