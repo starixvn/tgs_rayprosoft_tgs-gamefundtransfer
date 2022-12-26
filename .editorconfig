@@ -256,5 +256,9 @@ dotnet_naming_style.begins_with_underscore_camlcase.word_separator =
 dotnet_naming_style.begins_with_underscore_camlcase.capitalization = camel_case
 
 # ReSharper properties
-resharper_csharp_use_indent_from_vs = true
-resharper_wrap_object_and_collection_initializer_style = chop_always
+resharper_keep_user_linebreaks = true
+resharper_wrap_text = false
+resharper_xmldoc_indent_text = DoNotTouch
+resharper_xmldoc_keep_user_linebreaks = true
+resharper_xmldoc_linebreaks_inside_tags_for_multiline_elements = false
+resharper_xmldoc_wrap_around_elements = false

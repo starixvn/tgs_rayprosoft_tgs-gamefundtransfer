@@ -21,7 +21,7 @@ namespace Tgs.GameFundTransfer.Controllers
         ///     我方訂單號:32fd88b0-8401-0000-0001-0000010a3742
         ///     遊戲廠商訂單號:tg_32fd88b08401000000010000010a3742
         ///     VendorTransId:32fd88b08401000000010000010a3742
-        ///     
+        ///
         ///     Post
         ///
         ///         {

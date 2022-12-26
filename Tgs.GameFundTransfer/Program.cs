@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using Google.Protobuf.WellKnownTypes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Npgsql;
@@ -77,7 +76,7 @@ builder.Services
     (options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
-        options.ConnectionString = configuration.GetConnectionString("Redis");
+        options.ConnectionString = configuration.GetConnectionString("Redis")!;
     })
     .AddGameTransferCore(
     sp => sp.GetRequiredService<RedisConnectionManager>().Database,
