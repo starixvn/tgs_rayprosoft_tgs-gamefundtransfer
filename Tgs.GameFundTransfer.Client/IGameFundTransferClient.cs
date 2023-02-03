@@ -14,7 +14,7 @@ public interface IGameFundTransferClient
         decimal amount,
         CancellationToken cancellationToken = default);
 
-    ValueTask<GameFundTransferReslutReply> FundInReslutAsync(
+    ValueTask<GameFundTransferResultReply> FundInResultAsync(
         Guid gameProviderId,
         string gameProviderCode,
         string brandCode,

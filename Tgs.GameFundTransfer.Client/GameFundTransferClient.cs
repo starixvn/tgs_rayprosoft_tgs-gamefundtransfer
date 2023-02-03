@@ -41,7 +41,7 @@ internal class GameFundTransferClient : IGameFundTransferClient
         return reply.State;
     }
 
-    public async ValueTask<GameFundTransferReslutReply> FundInReslutAsync(
+    public async ValueTask<GameFundTransferResultReply> FundInResultAsync(
         Guid gameProviderId,
         string gameProviderCode,
         string brandCode,
@@ -63,7 +63,7 @@ internal class GameFundTransferClient : IGameFundTransferClient
         };
 
         return await _client
-            .FundInReslutAsync(
+            .FundInResultAsync(
                 request: request,
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);

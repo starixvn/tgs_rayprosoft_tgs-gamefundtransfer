@@ -7,7 +7,7 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameFundTransfer.Core.ApplicationServices;
 
-internal class FundInGetService : IGetService<FundInQuery, FundReslut>
+internal class FundInGetService : IGetService<FundInQuery, FundResult>
 {
     private readonly ICashServiceClient _cashServiceClient;
     private readonly IFundsDistributedLock _distributedLock;
@@ -32,7 +32,7 @@ internal class FundInGetService : IGetService<FundInQuery, FundReslut>
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
     }
 
-    public async ValueTask<FundReslut> GetAsync(FundInQuery query, CancellationToken cancellationToken = default)
+    public async ValueTask<FundResult> GetAsync(FundInQuery query, CancellationToken cancellationToken = default)
     {
         var exchangeRateFundResult = await _gameCurrencyClient
             .ConvertGameProviderFundsAsync(
@@ -53,7 +53,7 @@ internal class FundInGetService : IGetService<FundInQuery, FundReslut>
 
             _logger.LogWarning(message);
 
-            return new FundReslut(
+            return new FundResult(
                 state: StateCode.TransactionLock,
                 message: message);
         }
@@ -73,7 +73,7 @@ internal class FundInGetService : IGetService<FundInQuery, FundReslut>
 
                 _logger.LogWarning(message);
 
-                return new FundReslut(
+                return new FundResult(
                     state: StateCode.InsufficientBalance,
                     message: message);
             }
@@ -127,7 +127,7 @@ internal class FundInGetService : IGetService<FundInQuery, FundReslut>
                         cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-                return new FundReslut(
+                return new FundResult(
                     state: StateCode.Success,
                     message: StateCode.Success.GetDescription(),
                     fundTransactionId: gameProviderFundTransferTransactionId,
@@ -146,7 +146,7 @@ internal class FundInGetService : IGetService<FundInQuery, FundReslut>
                 string message = $"The main wallet transfer failed.({gameProviderFundTransferTransactionId})";
                 _logger.LogError(exception: ex, message);
 
-                return new FundReslut(
+                return new FundResult(
                     state: StateCode.Exception,
                     message: message,
                     fundTransactionId: gameProviderFundTransferTransactionId,

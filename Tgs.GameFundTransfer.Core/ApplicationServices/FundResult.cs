@@ -1,13 +1,13 @@
 ﻿namespace Tgs.GameFundTransfer.Core.ApplicationServices;
 
-public record FundReslut
+public record FundResult
 {
     public StateCode State { get; init; }
     public string Message { get; init; }
     public Guid FundTransactionId { get; init; }
     public Guid TransactionId { get; init; }
     public string ExternalTransactionId { get; init; }
-    public FundReslut(
+    public FundResult(
         StateCode state,
         string message)
     {
@@ -18,7 +18,7 @@ public record FundReslut
         ExternalTransactionId = string.Empty;
     }
 
-    public FundReslut(
+    public FundResult(
         StateCode state,
         string message,
         Guid fundTransactionId,

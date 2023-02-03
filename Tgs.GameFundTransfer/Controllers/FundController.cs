@@ -38,7 +38,7 @@ public class FundController : ControllerBase
     /// <returns></returns>
     [HttpPost(template: "in-result", Name = "FundInResult")]
     public async ValueTask<FundResultViewModel> FundInResultAsync(
-        [FromServices] IGetService<FundInQuery, FundReslut> service,
+        [FromServices] IGetService<FundInQuery, FundResult> service,
         FundRequestViewModel model)
     {
         var query = new FundInQuery(
@@ -49,18 +49,18 @@ public class FundController : ControllerBase
             WalletId: model.WalletId,
             CurrencyCode: model.CurrencyCode,
             Amount: model.Amount);
-        var reslut = await service
+        var result = await service
              .GetAsync(
                  query: query,
                  cancellationToken: HttpContext.RequestAborted)
              .ConfigureAwait(false);
 
         return new FundResultViewModel(
-            reslut.State,
-            reslut.Message,
-            reslut.FundTransactionId,
-            reslut.TransactionId,
-            reslut.ExternalTransactionId);
+            result.State,
+            result.Message,
+            result.FundTransactionId,
+            result.TransactionId,
+            result.ExternalTransactionId);
     }
 
     /// <summary>

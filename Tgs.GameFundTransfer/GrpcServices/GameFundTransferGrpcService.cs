@@ -7,19 +7,19 @@ namespace Tgs.GameFundTransfer.GrpcServices;
 
 public class GameFundTransferGrpcService : GameFundTransferService.GameFundTransferServiceBase
 {
-    private readonly IGetService<FundInQuery, FundReslut> _fundInReslutService;
+    private readonly IGetService<FundInQuery, FundResult> _fundInResultService;
     private readonly ICommandService<FundInCommand> _fundInService;
     private readonly ICommandService<FundOutCommand> _fundOutService;
 
     public GameFundTransferGrpcService(
         ICommandService<FundInCommand> fundInService,
         ICommandService<FundOutCommand> fundOutService,
-        IGetService<FundInQuery, FundReslut> fundInReslutService
+        IGetService<FundInQuery, FundResult> fundInResultService
         )
     {
         _fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
         _fundOutService = fundOutService ?? throw new ArgumentNullException(nameof(fundOutService));
-        _fundInReslutService = fundInReslutService ?? throw new ArgumentNullException(nameof(fundInReslutService));
+        _fundInResultService = fundInResultService ?? throw new ArgumentNullException(nameof(fundInResultService));
     }
 
     public override async Task<GameFundTransferReply> FundIn(GameFundTransferFundRequest request, ServerCallContext context)
@@ -45,7 +45,7 @@ public class GameFundTransferGrpcService : GameFundTransferService.GameFundTrans
         };
     }
 
-    public override async Task<GameFundTransferReslutReply> FundInReslut(GameFundTransferFundRequest request, ServerCallContext context)
+    public override async Task<GameFundTransferResultReply> FundInResult(GameFundTransferFundRequest request, ServerCallContext context)
     {
         var query = new FundInQuery(
                     GameProviderId: request.GameProviderId,
@@ -56,25 +56,25 @@ public class GameFundTransferGrpcService : GameFundTransferService.GameFundTrans
                     CurrencyCode: request.CurrencyCode,
                     Amount: request.Amount);
 
-        var reslut = await _fundInReslutService
+        var result = await _fundInResultService
              .GetAsync(
                  query: query,
                  cancellationToken: context.CancellationToken)
              .ConfigureAwait(false);
 
-        return new GameFundTransferReslutReply()
+        return new GameFundTransferResultReply()
         {
-            State = reslut.State switch
+            State = result.State switch
             {
                 Core.StateCode.Success => StateCode.Success,
                 Core.StateCode.TransactionLock => StateCode.TransactionLock,
                 Core.StateCode.InsufficientBalance => StateCode.InsufficientBalance,
                 _ => StateCode.Exception
             },
-            Message = reslut.Message,
-            FundTransactionId = reslut.FundTransactionId,
-            TransactionId = reslut.TransactionId,
-            ExternalTransactionId = reslut.ExternalTransactionId
+            Message = result.Message,
+            FundTransactionId = result.FundTransactionId,
+            TransactionId = result.TransactionId,
+            ExternalTransactionId = result.ExternalTransactionId
         };
     }
 
