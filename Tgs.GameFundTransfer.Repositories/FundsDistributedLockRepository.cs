@@ -1,32 +1,21 @@
 ﻿using Microsoft.Extensions.Options;
 using StackExchange.Redis;
+using Tgs.GameFundTransfer.Core;
 
-namespace Tgs.GameFundTransfer.Core;
+namespace Tgs.GameFundTransfer.Repositories;
 
-internal class FundsLocked : IFundsLocked
+internal class FundsDistributedLock : IFundsDistributedLock
 {
     private readonly IDatabase _database;
     private readonly FundsLockedOptions _fundslocked;
     private readonly string _redisKey = "fundslocked:{0}:{1}";
 
-    public FundsLocked(
+    public FundsDistributedLock(
         IDatabase database,
         IOptions<FundsLockedOptions> options)
     {
         _database = database ?? throw new ArgumentNullException(nameof(database));
         _fundslocked = options.Value;
-    }
-
-    public Task<bool> ExistAsync(string gameProviderCode, string playerCode)
-    {
-        try
-        {
-            return _database.KeyExistsAsync(string.Format(_redisKey, gameProviderCode, playerCode).ToLower());
-        }
-        catch
-        {
-            return Task.FromResult(true);
-        }
     }
 
     public Task<bool> LockingAsync(string gameProviderCode, string playerCode)
@@ -39,8 +28,8 @@ internal class FundsLocked : IFundsLocked
             when: When.NotExists);
     }
 
-    public async ValueTask UnlockAsync(string gameProviderCode, string playerCode)
-        => await _database.KeyDeleteAsync(
+    public Task UnlockAsync(string gameProviderCode, string playerCode)
+        => _database.KeyDeleteAsync(
             key: string.Format(_redisKey, gameProviderCode, playerCode).ToLower(),
-            flags: CommandFlags.FireAndForget).ConfigureAwait(false);
+            flags: CommandFlags.FireAndForget);
 }

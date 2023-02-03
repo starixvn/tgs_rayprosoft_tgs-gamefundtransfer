@@ -11,16 +11,90 @@ internal class GameFundTransferClient : IGameFundTransferClient
         _client = client ?? throw new ArgumentNullException(nameof(client));
     }
 
-    public async ValueTask<bool> FundInAsync(GameFundTransferFundRequest request, CancellationToken cancellationToken = default)
+    public async ValueTask<bool> FundInAsync(
+        Guid gameProviderId,
+        string gameProviderCode,
+        string brandCode,
+        string playerCode,
+        Guid walletId,
+        string currencyCode,
+        decimal amount,
+        CancellationToken cancellationToken = default)
     {
-        var reply = await _client.FundInAsync(request, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var request = new GameFundTransferFundRequest
+        {
+            GameProviderId = gameProviderId,
+            GameProviderCode = gameProviderCode,
+            BrandCode = brandCode,
+            PlayerCode = playerCode,
+            WalletId = walletId,
+            CurrencyCode = currencyCode,
+            Amount = amount,
+        };
+
+        var reply = await _client
+            .FundInAsync(
+                request: request,
+                cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
         return reply.State;
     }
 
-    public async ValueTask<bool> FundOutAsync(GameFundTransferFundRequest request, CancellationToken cancellationToken = default)
+    public async ValueTask<GameFundTransferResultReply> FundInResultAsync(
+        Guid gameProviderId,
+        string gameProviderCode,
+        string brandCode,
+        string playerCode,
+        Guid walletId,
+        string currencyCode,
+        decimal amount,
+        CancellationToken cancellationToken = default)
     {
-        var reply = await _client.FundOutAsync(request, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var request = new GameFundTransferFundRequest
+        {
+            GameProviderId = gameProviderId,
+            GameProviderCode = gameProviderCode,
+            BrandCode = brandCode,
+            PlayerCode = playerCode,
+            WalletId = walletId,
+            CurrencyCode = currencyCode,
+            Amount = amount,
+        };
+
+        return await _client
+            .FundInResultAsync(
+                request: request,
+                cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async ValueTask<bool> FundOutAsync(
+        Guid gameProviderId,
+        string gameProviderCode,
+        string brandCode,
+        string playerCode,
+        Guid walletId,
+        string currencyCode,
+        decimal amount,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new GameFundTransferFundRequest
+        {
+            GameProviderId = gameProviderId,
+            GameProviderCode = gameProviderCode,
+            BrandCode = brandCode,
+            PlayerCode = playerCode,
+            WalletId = walletId,
+            CurrencyCode = currencyCode,
+            Amount = amount,
+        };
+
+        var reply = await _client
+            .FundOutAsync(
+                request: request,
+                cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
         return reply.State;
     }

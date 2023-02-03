@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Npgsql;
@@ -64,22 +64,19 @@ builder.Services.AddSwaggerGen(c =>
     c.DocumentFilter<HiddenFilter>();
 });
 
-builder.Services.AddGameTransferRepository((sp, dbBuilder) =>
-{
-    var config = sp.GetRequiredService<IConfiguration>();
-
-    _ = dbBuilder.UseNpgsql(
-        config.GetConnectionString("Tgs"));
-});
-builder.Services
-    .AddGameFundTransfer(
+builder.Services.AddGameFundTransfer(
     (options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
         options.ConnectionString = configuration.GetConnectionString("Redis")!;
-    })
-    .AddGameTransferCore(
-    sp => sp.GetRequiredService<RedisConnectionManager>().Database,
+    },
+    (sp, dbBuilder) =>
+    {
+        var config = sp.GetRequiredService<IConfiguration>();
+
+        _ = dbBuilder.UseNpgsql(
+            config.GetConnectionString("Tgs"));
+    },
     (options, sp) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
@@ -105,7 +102,6 @@ builder.Services
         var configuration = sp.GetRequiredService<IConfiguration>();
         options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:GameInterfaceSabaClientBaseUrl");
     });
-
 builder.Services
      .AddSingleton<IConfigureOptions<OtlpExporterOptions>>(
         sp => new ConfigureNamedOptions<OtlpExporterOptions>(
@@ -139,10 +135,16 @@ builder.Services
                 || !httpContext.Request.Path.StartsWithSegments("/swagger")
                 && !httpContext.Request.Path.StartsWithSegments("/healthz")
                 && !httpContext.Request.Path.StartsWithSegments("/profiler/")
-                && !new[] { "html", "ico", "png", "jpg" }.Any(
-                    ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
+                && !httpContext.Request.Path.StartsWithSegments("/hangfire")
+                && !httpContext.Request.Path.StartsWithSegments("/metrics")
+                   && !new[] { "html", "ico", "png", "jpg" }.Any(
+                       ext => httpContext.Request.Path.Value.EndsWith($".{ext}"));
         };
     });
+
+builder.Services
+    .AddInterceptionService()
+    .AddServiceUtiltiyInterceptors();
 
 builder.Services
     .AddHealthChecks();
