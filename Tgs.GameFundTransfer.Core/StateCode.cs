@@ -12,8 +12,9 @@ public enum StateCode
 
     [Description("This transaction is locked.")]
     TransactionLock = 423,
+
     [Description("The transaction number provided by this game provider is empty.")]
-    ExternalTransactionIdEmpty =424,
+    ExternalTransactionIdEmpty = 424,
 
     [Description("This balance is insufficient.")]
     InsufficientBalance = 500,
