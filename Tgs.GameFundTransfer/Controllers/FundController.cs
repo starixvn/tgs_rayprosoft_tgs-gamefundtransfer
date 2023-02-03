@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Tgs.GameFundTransfer.Attributes;
+using Tgs.GameFundTransfer.Core;
 using Tgs.GameFundTransfer.Core.ApplicationServices;
 using Tgs.GameFundTransfer.ViewModels;
 using Tgs.ServiceUtility;

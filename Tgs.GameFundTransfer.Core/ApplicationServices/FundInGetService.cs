@@ -49,13 +49,13 @@ internal class FundInGetService : IGetService<FundInQuery, FundResult>
                 playerCode: query.PlayerCode).ConfigureAwait(false))
 
         {
-            string message = $"This player ({query.PlayerCode}) transfer game provider({query.GameProviderCode}) is locked.";
-
-            _logger.LogWarning(message);
+            _logger.LogWarning("This player ({playerCode}) transfer game provider({gameProviderCode}) is locked.",
+                query.PlayerCode,
+                query.GameProviderCode);
 
             return new FundResult(
                 state: StateCode.TransactionLock,
-                message: message);
+                message: $"This player ({query.PlayerCode}) transfer game provider({query.GameProviderCode}) is locked.");
         }
 
         try
@@ -69,16 +69,18 @@ internal class FundInGetService : IGetService<FundInQuery, FundResult>
 
             if (gameProviderBalance - gameProviderAmount < 0)
             {
-                string message = $"This player ({query.PlayerCode}) game provider ({query.GameProviderCode})has insufficient balance({gameProviderBalance}).";
-
-                _logger.LogWarning(message);
+                _logger.LogWarning(
+                    "This player ({playerCode}) game provider ({gameProviderCode})has insufficient balance({gameProviderBalance}).",
+                    query.PlayerCode,
+                    query.GameProviderCode,
+                    gameProviderBalance);
 
                 return new FundResult(
                     state: StateCode.InsufficientBalance,
-                    message: message);
+                    message: $"This player ({query.PlayerCode}) game provider ({query.GameProviderCode})has insufficient balance({gameProviderBalance}).");
             }
 
-            var gameProviderFundTransferTransactionId = await _repository
+            var fundTransactionId = await _repository
                 .AddFundInAsync(
                     gameProviderId: query.GameProviderId,
                     gameProviderCode: query.GameProviderCode,
@@ -94,7 +96,7 @@ internal class FundInGetService : IGetService<FundInQuery, FundResult>
                     brandCode: query.BrandCode,
                     playerCode: query.PlayerCode,
                     currencyCode: query.CurrencyCode,
-                    orderId: gameProviderFundTransferTransactionId.ToString("N"),
+                    orderId: fundTransactionId.ToString("N"),
                     amount: gameProviderAmount,
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
@@ -102,9 +104,20 @@ internal class FundInGetService : IGetService<FundInQuery, FundResult>
             if (string.IsNullOrEmpty(gameProviderTransactionId))
             {
                 await _repository.UpdateByGameProviderFundFailedAsync(
-                        gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
+                        gameProviderFundTransferTransactionId: fundTransactionId,
                         cancellationToken: cancellationToken).ConfigureAwait(false);
-                throw new Exception("The game manufacturer's transfer failed.");
+
+                _logger.LogError(
+                    "The transaction number provided by this game provider ({gameProviderCode}) is empty.({gameProviderFundTransferTransactionId})",
+                    query.GameProviderCode,
+                    fundTransactionId);
+
+                return new FundResult(
+                    state: StateCode.ExternalTransactionIdEmpty,
+                    message: $"The transaction number provided by this game provider ({query.GameProviderCode}) is empty.({fundTransactionId})",
+                    fundTransactionId: fundTransactionId,
+                    transactionId: Guid.Empty,
+                    externalTransactionId: string.Empty);
             }
 
             try
@@ -114,13 +127,13 @@ internal class FundInGetService : IGetService<FundInQuery, FundResult>
                         walletId: query.WalletId,
                         amount: query.Amount,
                         description: $"【{query.GameProviderCode}】->【Default】",
-                        externalId: gameProviderFundTransferTransactionId.ToString(),
+                        externalId: fundTransactionId.ToString(),
                         cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
                 await _repository
                     .UpdateBySuccessAsync(
-                        gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
+                        gameProviderFundTransferTransactionId: fundTransactionId,
                         transactionId: transactionResponse.TransactionId,
                         gameProviderTransactionId: gameProviderTransactionId,
                         balance: transactionResponse.Balance,
@@ -130,7 +143,7 @@ internal class FundInGetService : IGetService<FundInQuery, FundResult>
                 return new FundResult(
                     state: StateCode.Success,
                     message: StateCode.Success.GetDescription(),
-                    fundTransactionId: gameProviderFundTransferTransactionId,
+                    fundTransactionId: fundTransactionId,
                     transactionId: transactionResponse.TransactionId,
                     externalTransactionId: gameProviderTransactionId);
             }
@@ -138,18 +151,17 @@ internal class FundInGetService : IGetService<FundInQuery, FundResult>
             {
                 await _repository
                     .UpdateByMainWalletFundFailedAsync(
-                        gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
+                        gameProviderFundTransferTransactionId: fundTransactionId,
                         gameProviderTransactionId: gameProviderTransactionId,
                         cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-                string message = $"The main wallet transfer failed.({gameProviderFundTransferTransactionId})";
-                _logger.LogError(exception: ex, message);
+                _logger.LogError(exception: ex, "The main wallet transfer failed.({gameProviderFundTransferTransactionId})", fundTransactionId);
 
                 return new FundResult(
                     state: StateCode.Exception,
-                    message: message,
-                    fundTransactionId: gameProviderFundTransferTransactionId,
+                    message: $"The main wallet transfer failed.({fundTransactionId})",
+                    fundTransactionId: fundTransactionId,
                     transactionId: Guid.Empty,
                     externalTransactionId: gameProviderTransactionId);
             }

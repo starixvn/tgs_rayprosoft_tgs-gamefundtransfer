@@ -1,4 +1,5 @@
 ﻿using Grpc.Core;
+using Tgs.GameFundTransfer.Core;
 using Tgs.GameFundTransfer.Core.ApplicationServices;
 using Tgs.GameFundTransfer.Protos;
 using Tgs.ServiceUtility;
@@ -66,10 +67,11 @@ public class GameFundTransferGrpcService : GameFundTransferService.GameFundTrans
         {
             State = result.State switch
             {
-                Core.StateCode.Success => StateCode.Success,
-                Core.StateCode.TransactionLock => StateCode.TransactionLock,
-                Core.StateCode.InsufficientBalance => StateCode.InsufficientBalance,
-                _ => StateCode.Exception
+                Core.StateCode.Success => Protos.StateCode.Success,
+                Core.StateCode.TransactionLock => Protos.StateCode.TransactionLock,
+                Core.StateCode.InsufficientBalance => Protos.StateCode.InsufficientBalance,
+                Core.StateCode.ExternalTransactionIdEmpty => Protos.StateCode.ExternalTransactionIdEmpty,
+                _ => Protos.StateCode.Exception
             },
             Message = result.Message,
             FundTransactionId = result.FundTransactionId,
