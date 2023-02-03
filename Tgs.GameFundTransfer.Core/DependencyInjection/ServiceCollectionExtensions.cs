@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using StackExchange.Redis;
 using Tgs.CashService.Client;
 using Tgs.GameCurrency.Client;
 using Tgs.GameFundTransfer.Core;
@@ -12,7 +11,6 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddGameTransferCore(
         this IServiceCollection services,
-        Func<IServiceProvider, IDatabase> redisDatabaseResolver,
         Action<FundsLockedOptions, IServiceProvider> fundsLockedOptions,
         Action<CashServiceClientOptions, IServiceProvider> cashServiceClientOptions,
         Action<GameProvidersClientOptions, IServiceProvider> gameProvidersClientOptions,
@@ -28,6 +26,5 @@ public static class ServiceCollectionExtensions
             .AddCashServiceClient(cashServiceClientOptions)
             .AddGameProvidersClient(gameProvidersClientOptions)
             .AddGameCurrencyClient(gameCurrencyClientOptions)
-            .AddGameInterfaceSabaServiceClient(gameInterfaceSabaClientOptions)
-            .AddTransient<IFundsLocked>(sp => ActivatorUtilities.CreateInstance<FundsLocked>(sp, redisDatabaseResolver(sp)));
+            .AddGameInterfaceSabaServiceClient(gameInterfaceSabaClientOptions);
 }

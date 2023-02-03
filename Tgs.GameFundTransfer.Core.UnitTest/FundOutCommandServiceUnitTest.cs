@@ -16,7 +16,7 @@ public class FundOutCommandServiceUnitTest
     {
         var faceLogger = NullLogger<FundOutCommandService>.Instance;
         var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-        var fakeFundsLocked = Substitute.For<IFundsLocked>();
+        var fakeFundsLocked = Substitute.For<IFundsDistributedLock>();
         var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
         var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
         var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
@@ -30,7 +30,7 @@ public class FundOutCommandServiceUnitTest
             "CNY",
             10m);
 
-        decimal? gameProviderBalance = 0m;
+        decimal gameProviderBalance = 0m;
         var balance = 10.0m;
         var gameProviderFundTransferTransactionId = Guid.NewGuid();
         var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
@@ -48,10 +48,6 @@ public class FundOutCommandServiceUnitTest
             ).Returns(new ConvertGameProviderFundsResult(
                 ExchangeRate: 1,
                 Amount: query.Amount));
-
-        _ = fakeFundsLocked.ExistAsync(
-            Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(Task.FromResult(false));
 
         _ = fakeFundsLocked.LockingAsync(
             Arg.Is(query.GameProviderCode),
@@ -83,7 +79,7 @@ public class FundOutCommandServiceUnitTest
             Arg.Is(query.PlayerCode),
             Arg.Is(query.CurrencyCode),
             Arg.Is(gameProviderFundTransferTransactionId.ToString("N")),
-            Arg.Is(query.Amount)).Returns(ValueTask.FromResult<string?>(gameProviderTransactionId));
+            Arg.Is(query.Amount)).Returns(ValueTask.FromResult(gameProviderTransactionId));
 
         await fakeGameProviderFundTransferTransactionRepository.UpdateBySuccessAsync(
             Arg.Is(gameProviderFundTransferTransactionId),
@@ -113,7 +109,7 @@ public class FundOutCommandServiceUnitTest
     {
         var faceLogger = NullLogger<FundOutCommandService>.Instance;
         var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-        var fakeFundsLocked = Substitute.For<IFundsLocked>();
+        var fakeFundsLocked = Substitute.For<IFundsDistributedLock>();
         var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
         var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
         var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
@@ -127,7 +123,7 @@ public class FundOutCommandServiceUnitTest
             "CNY",
             10m);
 
-        decimal? gameProviderBalance = 0m;
+        decimal gameProviderBalance = 0m;
         var balance = 10.0m;
         var gameProviderFundTransferTransactionId = Guid.NewGuid();
         var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
@@ -145,10 +141,6 @@ public class FundOutCommandServiceUnitTest
             ).Returns(new ConvertGameProviderFundsResult(
                 ExchangeRate: 1,
                 Amount: query.Amount));
-
-        _ = fakeFundsLocked.ExistAsync(
-            Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(Task.FromResult(false));
 
         _ = fakeFundsLocked.LockingAsync(
             Arg.Is(query.GameProviderCode),
@@ -180,100 +172,7 @@ public class FundOutCommandServiceUnitTest
             Arg.Is(query.PlayerCode),
             Arg.Is(query.CurrencyCode),
             Arg.Is(gameProviderFundTransferTransactionId.ToString("N")),
-            Arg.Is(query.Amount)).Returns(ValueTask.FromResult<string?>(gameProviderTransactionId));
-
-        await fakeGameProviderFundTransferTransactionRepository.UpdateBySuccessAsync(
-            Arg.Is(gameProviderFundTransferTransactionId),
-            Arg.Is(transactionResponse.TransactionId),
-            Arg.Is(gameProviderTransactionId),
-            Arg.Is(transactionResponse.Balance));
-
-        var fakeService = new FundOutCommandService(
-            faceLogger,
-            fakeCashServiceClient,
-            fakeFundsLocked,
-            fakeGameProviderFundTransferTransactionRepository,
-            fakeGameCurrencyClient,
-            fakeGameProvidersClient);
-
-        await fakeService.ExecuteAsync(query).ConfigureAwait(false);
-
-        _ = fakeFundsLocked
-            .Received(0)
-            .UnlockAsync(
-            Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode));
-    }
-
-    [TestMethod]
-    public async Task Funds_Transfer_Exists()
-    {
-        var faceLogger = NullLogger<FundOutCommandService>.Instance;
-        var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-        var fakeFundsLocked = Substitute.For<IFundsLocked>();
-        var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
-        var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
-        var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
-
-        var query = new FundOutCommand(
-            Guid.NewGuid(),
-            GameProviderType.KY,
-            "GPI",
-            "4ucmqplxb029",
-            Guid.NewGuid(),
-            "CNY",
-            10m);
-
-        decimal? gameProviderBalance = 0m;
-        var balance = 10.0m;
-        var gameProviderFundTransferTransactionId = Guid.NewGuid();
-        var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
-
-        var transactionResponse = new TransactionResponse()
-        {
-            TransactionId = Guid.NewGuid(),
-            Balance = 10
-        };
-
-        _ = fakeGameCurrencyClient.ConvertGameProviderFundsAsync(
-            Arg.Is(query.GameProviderCode),
-            Arg.Is(query.CurrencyCode),
-            Arg.Is(query.Amount)
-            ).Returns(new ConvertGameProviderFundsResult(
-                ExchangeRate: 1,
-                Amount: query.Amount));
-
-        _ = fakeFundsLocked.ExistAsync(
-            Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(Task.FromResult(true));
-
-        _ = fakeGameProvidersClient.PlayerBalanceAsync(
-            Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(ValueTask.FromResult(gameProviderBalance));
-
-        _ = fakeCashServiceClient.GetBalanceAsync(
-            Arg.Is(query.WalletId)).Returns(ValueTask.FromResult(balance));
-
-        _ = fakeGameProviderFundTransferTransactionRepository.AddFundOutAsync(
-            Arg.Is(query.GameProviderId),
-            Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode),
-            Arg.Is(query.WalletId),
-            Arg.Is(query.Amount)).Returns(ValueTask.FromResult(gameProviderFundTransferTransactionId));
-
-        _ = fakeCashServiceClient.GameProviderFundOutAsync(
-             Arg.Is(query.WalletId),
-             Arg.Is(query.Amount),
-             Arg.Is($"【Default】->【{query.GameProviderCode}】"),
-             Arg.Is(gameProviderFundTransferTransactionId.ToString())).Returns(ValueTask.FromResult(transactionResponse));
-
-        _ = fakeGameProvidersClient.PlayerFundOutAsync(
-            Arg.Is(query.GameProviderCode),
-            Arg.Is(query.BrandCode),
-            Arg.Is(query.PlayerCode),
-            Arg.Is(query.CurrencyCode),
-            Arg.Is(gameProviderFundTransferTransactionId.ToString("N")),
-            Arg.Is(query.Amount)).Returns(ValueTask.FromResult<string?>(gameProviderTransactionId));
+            Arg.Is(query.Amount)).Returns(ValueTask.FromResult(gameProviderTransactionId));
 
         await fakeGameProviderFundTransferTransactionRepository.UpdateBySuccessAsync(
             Arg.Is(gameProviderFundTransferTransactionId),
@@ -303,7 +202,7 @@ public class FundOutCommandServiceUnitTest
     {
         var faceLogger = NullLogger<FundOutCommandService>.Instance;
         var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-        var fakeFundsLocked = Substitute.For<IFundsLocked>();
+        var fakeFundsLocked = Substitute.For<IFundsDistributedLock>();
         var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
         var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
         var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
@@ -317,7 +216,7 @@ public class FundOutCommandServiceUnitTest
             "CNY",
             10m);
 
-        decimal? gameProviderBalance = 0m;
+        decimal gameProviderBalance = 0m;
         var balance = 9m;
         var gameProviderFundTransferTransactionId = Guid.NewGuid();
         var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
@@ -335,10 +234,6 @@ public class FundOutCommandServiceUnitTest
             ).Returns(new ConvertGameProviderFundsResult(
                 ExchangeRate: 1,
                 Amount: query.Amount));
-
-        _ = fakeFundsLocked.ExistAsync(
-            Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(Task.FromResult(false));
 
         _ = fakeFundsLocked.LockingAsync(
             Arg.Is(query.GameProviderCode),
@@ -373,7 +268,7 @@ public class FundOutCommandServiceUnitTest
     {
         var faceLogger = NullLogger<FundOutCommandService>.Instance;
         var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-        var fakeFundsLocked = Substitute.For<IFundsLocked>();
+        var fakeFundsLocked = Substitute.For<IFundsDistributedLock>();
         var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
         var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
         var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
@@ -387,7 +282,7 @@ public class FundOutCommandServiceUnitTest
             "CNY",
             10m);
 
-        decimal? gameProviderBalance = 0m;
+        decimal gameProviderBalance = 0m;
         var balance = 10.0m;
         var gameProviderFundTransferTransactionId = Guid.NewGuid();
 
@@ -398,10 +293,6 @@ public class FundOutCommandServiceUnitTest
             ).Returns(new ConvertGameProviderFundsResult(
                 ExchangeRate: 1,
                 Amount: query.Amount));
-
-        _ = fakeFundsLocked.ExistAsync(
-            Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(Task.FromResult(false));
 
         _ = fakeFundsLocked.LockingAsync(
             Arg.Is(query.GameProviderCode),
@@ -468,7 +359,7 @@ public class FundOutCommandServiceUnitTest
     {
         var faceLogger = NullLogger<FundOutCommandService>.Instance;
         var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-        var fakeFundsLocked = Substitute.For<IFundsLocked>();
+        var fakeFundsLocked = Substitute.For<IFundsDistributedLock>();
         var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
         var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
         var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
@@ -482,7 +373,7 @@ public class FundOutCommandServiceUnitTest
             "CNY",
             10m);
 
-        decimal? gameProviderBalance = 0m;
+        decimal gameProviderBalance = 0m;
         var balance = 10.0m;
         var gameProviderFundTransferTransactionId = Guid.NewGuid();
 
@@ -493,10 +384,6 @@ public class FundOutCommandServiceUnitTest
             ).Returns(new ConvertGameProviderFundsResult(
                 ExchangeRate: 1,
                 Amount: query.Amount));
-
-        _ = fakeFundsLocked.ExistAsync(
-            Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(Task.FromResult(false));
 
         _ = fakeFundsLocked.LockingAsync(
             Arg.Is(query.GameProviderCode),
@@ -568,7 +455,7 @@ public class FundOutCommandServiceUnitTest
     {
         var faceLogger = NullLogger<FundOutCommandService>.Instance;
         var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-        var fakeFundsLocked = Substitute.For<IFundsLocked>();
+        var fakeFundsLocked = Substitute.For<IFundsDistributedLock>();
         var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
         var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
         var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
@@ -582,7 +469,7 @@ public class FundOutCommandServiceUnitTest
             "IDR",
             1000m);
 
-        decimal? gameProviderBalance = 0m;
+        decimal gameProviderBalance = 0m;
         var balance = 1000m;
         var gameProviderFundTransferTransactionId = Guid.NewGuid();
         var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
@@ -602,10 +489,6 @@ public class FundOutCommandServiceUnitTest
             Arg.Is(query.CurrencyCode),
             Arg.Is(query.Amount)
             ).Returns(exchangeRateFundResult);
-
-        _ = fakeFundsLocked.ExistAsync(
-            Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(Task.FromResult(false));
 
         _ = fakeFundsLocked.LockingAsync(
             Arg.Is(query.GameProviderCode),
@@ -637,7 +520,7 @@ public class FundOutCommandServiceUnitTest
             Arg.Is(query.PlayerCode),
             Arg.Is(query.CurrencyCode),
             Arg.Is(gameProviderFundTransferTransactionId.ToString("N")),
-            Arg.Is(exchangeRateFundResult.Amount)).Returns(ValueTask.FromResult<string?>(gameProviderTransactionId));
+            Arg.Is(exchangeRateFundResult.Amount)).Returns(ValueTask.FromResult(gameProviderTransactionId));
 
         await fakeGameProviderFundTransferTransactionRepository.UpdateBySuccessAsync(
             Arg.Is(gameProviderFundTransferTransactionId),
@@ -667,7 +550,7 @@ public class FundOutCommandServiceUnitTest
     {
         var faceLogger = NullLogger<FundOutCommandService>.Instance;
         var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-        var fakeFundsLocked = Substitute.For<IFundsLocked>();
+        var fakeFundsLocked = Substitute.For<IFundsDistributedLock>();
         var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
         var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
         var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
@@ -681,7 +564,7 @@ public class FundOutCommandServiceUnitTest
             "IDR",
             1m);
 
-        decimal? gameProviderBalance = 0m;
+        decimal gameProviderBalance = 0m;
         var balance = 1m;
         var gameProviderFundTransferTransactionId = Guid.NewGuid();
         var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
@@ -701,10 +584,6 @@ public class FundOutCommandServiceUnitTest
             Arg.Is(query.CurrencyCode),
             Arg.Is(query.Amount)
             ).Returns(exchangeRateFundResult);
-
-        _ = fakeFundsLocked.ExistAsync(
-            Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(Task.FromResult(false));
 
         _ = fakeFundsLocked.LockingAsync(
             Arg.Is(query.GameProviderCode),
@@ -736,7 +615,7 @@ public class FundOutCommandServiceUnitTest
             Arg.Is(query.PlayerCode),
             Arg.Is(query.CurrencyCode),
             Arg.Is(gameProviderFundTransferTransactionId.ToString("N")),
-            Arg.Is(exchangeRateFundResult.Amount)).Returns(ValueTask.FromResult<string?>(gameProviderTransactionId));
+            Arg.Is(exchangeRateFundResult.Amount)).Returns(ValueTask.FromResult(gameProviderTransactionId));
 
         await fakeGameProviderFundTransferTransactionRepository.UpdateBySuccessAsync(
             Arg.Is(gameProviderFundTransferTransactionId),

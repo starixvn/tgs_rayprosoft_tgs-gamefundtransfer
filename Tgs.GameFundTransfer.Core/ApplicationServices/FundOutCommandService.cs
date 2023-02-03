@@ -9,7 +9,7 @@ namespace Tgs.GameFundTransfer.Core.ApplicationServices;
 internal class FundOutCommandService : ICommandService<FundOutCommand>
 {
     private readonly ICashServiceClient _cashServiceClient;
-    private readonly IFundsLocked _fundsLocked;
+    private readonly IFundsDistributedLock _fundsLocked;
     private readonly IFundTransferTransactionRepository _fundTransferTransactionRepository;
     private readonly IGameCurrencyClient _gameCurrencyClient;
     private readonly IGameProvidersClient _gameProvidersClient;
@@ -18,7 +18,7 @@ internal class FundOutCommandService : ICommandService<FundOutCommand>
     public FundOutCommandService(
         ILogger<FundOutCommandService> logger,
         ICashServiceClient cashServiceClient,
-        IFundsLocked fundsLocked,
+        IFundsDistributedLock fundsLocked,
         IFundTransferTransactionRepository fundTransferTransactionRepository,
         IGameCurrencyClient gameCurrencyClient,
         IGameProvidersClient gameProvidersClient)
@@ -40,14 +40,6 @@ internal class FundOutCommandService : ICommandService<FundOutCommand>
             cancellationToken).ConfigureAwait(false);
 
         var gameProviderAmount = exchangeRateFundResult.Amount;
-
-        if (await _fundsLocked.ExistAsync(
-                gameProviderCode: query.GameProviderCode,
-                playerCode: query.PlayerCode).ConfigureAwait(false))
-        {
-            _logger.LogWarning("Player ({playerCode}) funds transfer game provider ({gameProviderCode}) has been locked.", query.PlayerCode, query.GameProviderCode);
-            return;
-        }
 
         if (!await _fundsLocked.LockingAsync(
                 gameProviderCode: query.GameProviderCode,

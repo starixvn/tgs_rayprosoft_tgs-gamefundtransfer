@@ -1,0 +1,35 @@
+﻿namespace Tgs.GameFundTransfer.Core.ApplicationServices;
+
+public record FundReslut
+{
+    public StateCode State { get; init; }
+    public string Message { get; init; }
+    public Guid FundTransactionId { get; init; }
+    public Guid TransactionId { get; init; }
+    public string ExternalTransactionId { get; init; }
+    public FundReslut(
+        StateCode state,
+        string message)
+    {
+        State = state;
+        Message = message;
+        FundTransactionId = Guid.Empty;
+        TransactionId = Guid.Empty;
+        ExternalTransactionId = string.Empty;
+    }
+
+    public FundReslut(
+        StateCode state,
+        string message,
+        Guid fundTransactionId,
+        Guid transactionId,
+        string externalTransactionId
+        )
+    {
+        State = state;
+        Message = message;
+        FundTransactionId = fundTransactionId;
+        TransactionId = transactionId;
+        ExternalTransactionId = externalTransactionId;
+    }
+}

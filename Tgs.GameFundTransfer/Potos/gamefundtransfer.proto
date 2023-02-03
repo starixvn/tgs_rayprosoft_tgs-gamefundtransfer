@@ -1,4 +1,4 @@
-syntax = "proto3";
+﻿syntax = "proto3";
 
 import "phoenix/protobuf/guid.proto";
 import "phoenix/protobuf/decimal.proto";
@@ -11,6 +11,7 @@ package gamefundtransfer;
 service GameFundTransferService {
   // Sends a greeting
   rpc FundIn (GameFundTransferFundRequest) returns (GameFundTransferReply);
+  rpc FundInReslut (GameFundTransferFundRequest) returns (GameFundTransferReslutReply);
   rpc FundOut (GameFundTransferFundRequest) returns (GameFundTransferReply);
 }
 
@@ -27,5 +28,20 @@ message GameFundTransferFundRequest {
 
 // The response message containing the greetings.
 message GameFundTransferReply {
-  bool state = 1;
+    bool state = 1;
+}
+
+message GameFundTransferReslutReply {
+    StateCode State = 1;
+    string message = 2;
+    phoenix.protobuf.GuidValue fund_transaction_id =3;
+    phoenix.protobuf.GuidValue transaction_id =4;
+    string external_transaction_id =5;
+}
+
+enum StateCode {
+  STATE_CODE_SUCCESS = 0;
+  STATE_CODE_EXCEPTION = 404;
+  STATE_CODE_TRANSACTION_LOCK = 423;
+  STATE_CODE_INSUFFICIENT_BALANCE = 500;
 }
