@@ -65,6 +65,38 @@ public class FundController : ControllerBase
     }
 
     /// <summary>
+    /// Funds the in zero result asynchronous.
+    /// </summary>
+    /// <param name="service">The service.</param>
+    /// <param name="model">The model.</param>
+    /// <returns></returns>
+    [HttpPost(template: "in-result-zero", Name = "FundInZeroResult")]
+    public async ValueTask<FundResultViewModel> FundInZeroResultAsync(
+        [FromServices] IGetService<FundInZeroQuery, FundResult> service,
+        FundZeroRequestViewModel model)
+    {
+        var query = new FundInZeroQuery(
+            GameProviderId: model.GameProviderId,
+            GameProviderCode: model.GameProviderCode,
+            BrandCode: model.BrandCode,
+            PlayerCode: model.PlayerCode,
+            WalletId: model.WalletId,
+            CurrencyCode: model.CurrencyCode);
+        var result = await service
+             .GetAsync(
+                 query: query,
+                 cancellationToken: HttpContext.RequestAborted)
+             .ConfigureAwait(false);
+
+        return new FundResultViewModel(
+            result.State,
+            result.Message,
+            result.FundTransactionId,
+            result.TransactionId,
+            result.ExternalTransactionId);
+    }
+
+    /// <summary>
     /// Funds the out asynchronous.
     /// </summary>
     /// <param name="service">The service.</param>

@@ -10,17 +10,21 @@ public class GameFundTransferGrpcService : GameFundTransferService.GameFundTrans
 {
     private readonly IGetService<FundInQuery, FundResult> _fundInResultService;
     private readonly ICommandService<FundInCommand> _fundInService;
+    private readonly IGetService<FundInZeroQuery, FundResult> _fundInZeroService;
     private readonly ICommandService<FundOutCommand> _fundOutService;
 
     public GameFundTransferGrpcService(
+        IGetService<FundInQuery, FundResult> fundInResultService,
+        IGetService<FundInZeroQuery, FundResult> fundInZeroService,
         ICommandService<FundInCommand> fundInService,
-        ICommandService<FundOutCommand> fundOutService,
-        IGetService<FundInQuery, FundResult> fundInResultService
+        ICommandService<FundOutCommand> fundOutService
+
         )
     {
         _fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
         _fundOutService = fundOutService ?? throw new ArgumentNullException(nameof(fundOutService));
         _fundInResultService = fundInResultService ?? throw new ArgumentNullException(nameof(fundInResultService));
+        _fundInZeroService = fundInZeroService ?? throw new ArgumentNullException(nameof(fundInZeroService));
     }
 
     public override async Task<GameFundTransferReply> FundIn(GameFundTransferFundRequest request, ServerCallContext context)
@@ -58,6 +62,39 @@ public class GameFundTransferGrpcService : GameFundTransferService.GameFundTrans
                     Amount: request.Amount);
 
         var result = await _fundInResultService
+             .GetAsync(
+                 query: query,
+                 cancellationToken: context.CancellationToken)
+             .ConfigureAwait(false);
+
+        return new GameFundTransferResultReply()
+        {
+            State = result.State switch
+            {
+                Core.StateCode.Success => Protos.StateCode.Success,
+                Core.StateCode.TransactionLock => Protos.StateCode.TransactionLock,
+                Core.StateCode.InsufficientBalance => Protos.StateCode.InsufficientBalance,
+                Core.StateCode.ExternalTransactionIdEmpty => Protos.StateCode.ExternalTransactionIdEmpty,
+                _ => Protos.StateCode.Exception
+            },
+            Message = result.Message,
+            FundTransactionId = result.FundTransactionId,
+            TransactionId = result.TransactionId,
+            ExternalTransactionId = result.ExternalTransactionId
+        };
+    }
+
+    public override async Task<GameFundTransferResultReply> FundInZeroResult(GameFundTransferFundZeroRequest request, ServerCallContext context)
+    {
+        var query = new FundInZeroQuery(
+                    GameProviderId: request.GameProviderId,
+                    GameProviderCode: request.GameProviderCode,
+                    BrandCode: request.BrandCode,
+                    PlayerCode: request.PlayerCode,
+                    WalletId: request.WalletId,
+                    CurrencyCode: request.CurrencyCode);
+
+        var result = await _fundInZeroService
              .GetAsync(
                  query: query,
                  cancellationToken: context.CancellationToken)

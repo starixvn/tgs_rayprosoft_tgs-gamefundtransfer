@@ -69,6 +69,32 @@ internal class GameFundTransferClient : IGameFundTransferClient
             .ConfigureAwait(false);
     }
 
+    public async ValueTask<GameFundTransferResultReply> FundInZeroResultAsync(
+        Guid gameProviderId,
+        string gameProviderCode,
+        string brandCode,
+        string playerCode,
+        Guid walletId,
+        string currencyCode,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new GameFundTransferFundZeroRequest
+        {
+            GameProviderId = gameProviderId,
+            GameProviderCode = gameProviderCode,
+            BrandCode = brandCode,
+            PlayerCode = playerCode,
+            WalletId = walletId,
+            CurrencyCode = currencyCode,
+        };
+
+        return await _client
+            .FundInZeroResultAsync(
+                request: request,
+                cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     public async ValueTask<bool> FundOutAsync(
         Guid gameProviderId,
         string gameProviderCode,

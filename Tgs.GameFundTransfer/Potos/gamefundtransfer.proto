@@ -12,6 +12,7 @@ service GameFundTransferService {
   // Sends a greeting
   rpc FundIn (GameFundTransferFundRequest) returns (GameFundTransferReply);
   rpc FundInResult (GameFundTransferFundRequest) returns (GameFundTransferResultReply);
+  rpc FundInZeroResult (GameFundTransferFundZeroRequest) returns (GameFundTransferResultReply);
   rpc FundOut (GameFundTransferFundRequest) returns (GameFundTransferReply);
 }
 
@@ -24,6 +25,15 @@ message GameFundTransferFundRequest {
     phoenix.protobuf.GuidValue wallet_id = 5;
     string currency_code = 6;
     phoenix.protobuf.DecimalValue amount = 7;
+}
+
+message GameFundTransferFundZeroRequest {
+    phoenix.protobuf.GuidValue game_provider_id = 1;
+    string game_provider_code = 2;
+    string brand_code = 3;
+    string player_code = 4;
+    phoenix.protobuf.GuidValue wallet_id = 5;
+    string currency_code = 6;
 }
 
 // The response message containing the greetings.
