@@ -7,44 +7,65 @@ metadata:
 data:
   appsettings.json: |
     {
-        "Kestrel": {
-          "EndpointDefaults": {
-                "Protocols": "Http2"
-          },
-          "Endpoints": {
-            "HealthCheck": {
-                "Url": "http://*:{{ .Values.service.port }}",
-                "Protocols": "Http1"
-            },
-            "Grpc": {
-                "Url": "http://*:{{ .Values.servicegrpc.port }}"
-            }
-          }
-        },
-        "GameTransfer": {
-          "GameProvidersClientBaseUrl": "http://game-gameproviders",
-          "CashServiceClientBaseUrl": "http://cashservice-api",
-          "GameCurrencyClientBaseUrl": "http://game-gamecurrency",
-          "GameInterfaceSabaClientBaseUrl": "http://game-gameinterface-saba-service:9090"
-        },
-        "FundsLockedSetting": {
-          "LockSeconds": 60
-        }
-    }
-  monitor.settings.json: |
-    {
-      "Metrics": {
-        "MetricCount": "1"
-      },
-      "Logging":{
-        "Console": {
-          "FormatterName": "json"
-        },
+      "Logging": {
         "LogLevel": {
-          "Default": "Warning",
-          "Microsoft": "Warning",
-          "Microsoft.Diagnostics": "Warning",
-          "Microsoft.Hosting.Lifetime": "Information"
+          "Default": "Warning"
         }
+      },
+      "Kestrel": {
+        "EndpointDefaults": {
+          "Protocols": "Http2"
+        },
+        "Endpoints": {
+          "HealthCheck": {
+            "Url": "http://*:{{ .Values.service.port }}",
+            "Protocols": "Http1"
+          },
+          "Grpc": {
+            "Url": "http://*:{{ .Values.servicegrpc.port }}"
+          }
+        }
+      },
+      "GameTransfer": {
+        "GameProvidersClientBaseUrl": "http://game-gameproviders",
+        "CashServiceClientBaseUrl": "http://cashservice-api",
+        "GameCurrencyClientBaseUrl": "http://game-gamecurrency",
+        "GameInterfaceSabaClientBaseUrl": "http://game-gameinterface-saba-service:9090"
+      },
+      "FundsLockedSetting": {
+        "LockSeconds": 60
       }
     }
+  otel-collector-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+
+    processors:
+      batch:
+
+    exporters:
+      otlp:
+        endpoint: "$NODE_IP:4317"
+        tls:
+          insecure: true
+      prometheus:
+        endpoint: "0.0.0.0:8889"
+        namespace: "tgs"
+
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13133
+
+    service:
+      extensions: [health_check]
+      pipelines:
+        traces: 
+          receivers: [otlp]
+          processors:
+            - batch
+          exporters: [otlp]
+        metrics:
+          receivers: [otlp]
+          exporters: [prometheus]

@@ -218,14 +218,6 @@ public class FundInGetServiceUnitTest
             );
 
         decimal gameProviderBalance = 9m;
-        var gameProviderFundTransferTransactionId = Guid.NewGuid();
-        var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
-
-        var transactionResponse = new TransactionResponse()
-        {
-            TransactionId = Guid.NewGuid(),
-            Balance = 10
-        };
 
         _ = fakeGameCurrencyClient.ConvertGameProviderFundsAsync(
             Arg.Is(query.GameProviderCode),
