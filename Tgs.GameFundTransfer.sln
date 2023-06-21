@@ -3,12 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "方案項目", "方案項目", "{39826F14-B6DF-450D-96B7-F395F902E0A4}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-		nuget.config = nuget.config
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.GameFundTransfer.Core", "Tgs.GameFundTransfer.Core\Tgs.GameFundTransfer.Core.csproj", "{49DD4F39-25E2-4653-9164-BCF18DBAE164}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.GameFundTransfer.Repositories", "Tgs.GameFundTransfer.Repositories\Tgs.GameFundTransfer.Repositories.csproj", "{F237EC99-CB71-4620-A608-973F13809D15}"
