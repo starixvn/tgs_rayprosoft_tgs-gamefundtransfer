@@ -14,13 +14,17 @@ public class FundTransferTransactionRepositoryUnitTest
     public async Task Add_FundIn()
     {
         var options = new DbContextOptionsBuilder<TgsContext>()
-           .UseInMemoryDatabase(databaseName: "tgs")
+           .UseInMemoryDatabase(databaseName: "tgs-fund-in")
            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
            .Options;
         var context = new TgsContext(options);
         _ = context.Database.EnsureDeleted();
 
         var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+
+        var repository = new FundTransferTransactionRepository(
+            context,
+            fakeSerialNumberGenerator);
 
         var gameProviderFundTransferTransactionId = Guid.NewGuid();
         var gameProviderId = Guid.NewGuid();
@@ -29,47 +33,49 @@ public class FundTransferTransactionRepositoryUnitTest
         var walletId = Guid.NewGuid();
         var amount = 10.0m;
 
-        _ = fakeSerialNumberGenerator.GenerateAsync()
+        _ = fakeSerialNumberGenerator
+            .GenerateAsync(
+            cancellationToken: Arg.Any<CancellationToken>())
             .Returns(gameProviderFundTransferTransactionId);
 
-        var repository = new FundTransferTransactionRepository(
-            context,
-            fakeSerialNumberGenerator);
-
-        var actual = await repository.AddFundInAsync(
+        var actual = await repository
+            .AddFundInAsync(
             gameProviderId: gameProviderId,
             gameProviderCode: gameProviderCode,
             playerCode: playerCode,
             walletId: walletId,
-            amount: amount).ConfigureAwait(false);
+            amount: amount)
+            .ConfigureAwait(false);
 
-        Assert.IsNotNull(actual);
-        Assert.IsTrue(actual == gameProviderFundTransferTransactionId);
+        Assert.AreEqual(gameProviderFundTransferTransactionId, actual);
 
-        var data = await context
-                    .GameProviderFundTransferTransactions
-                    .AsQueryable()
-                    .SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-                    .ConfigureAwait(false);
+        var data = await context.GameProviderFundTransferTransactions
+            .AsQueryable()
+            .SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
+            .ConfigureAwait(false);
 
-        Assert.IsTrue(data.FromWallet == gameProviderCode);
-        Assert.IsTrue(data.ToWallet == WalletDef.MainWallet);
-        Assert.IsTrue(data.FundSource == (short)FundSource.FundIn);
-        Assert.IsTrue(data.Status == (short)FundTransferTransactionStatus.GameProviderFundFailed);
-        Assert.IsTrue(data.Amount == amount);
+        Assert.AreEqual(gameProviderCode, data.FromWallet);
+        Assert.AreEqual(WalletDef.MainWallet, data.ToWallet);
+        Assert.AreEqual((short)FundSource.FundIn, data.FundSource);
+        Assert.AreEqual((short)FundTransferTransactionStatus.GameProviderFundFailed, data.Status);
+        Assert.AreEqual(amount, data.Amount);
     }
 
     [TestMethod]
     public async Task Add_FundOut()
     {
         var options = new DbContextOptionsBuilder<TgsContext>()
-           .UseInMemoryDatabase(databaseName: "tgs")
+           .UseInMemoryDatabase(databaseName: "tgs-fund-out")
            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
            .Options;
         var context = new TgsContext(options);
         _ = context.Database.EnsureDeleted();
 
         var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+
+        var repository = new FundTransferTransactionRepository(
+            context,
+            fakeSerialNumberGenerator);
 
         var gameProviderFundTransferTransactionId = Guid.NewGuid();
         var gameProviderId = Guid.NewGuid();
@@ -78,43 +84,41 @@ public class FundTransferTransactionRepositoryUnitTest
         var walletId = Guid.NewGuid();
         var amount = 10.0m;
 
-        _ = fakeSerialNumberGenerator.GenerateAsync()
+        _ = fakeSerialNumberGenerator
+            .GenerateAsync(
+             cancellationToken: Arg.Any<CancellationToken>())
             .Returns(gameProviderFundTransferTransactionId);
 
-        var repository = new FundTransferTransactionRepository(
-            context,
-            fakeSerialNumberGenerator);
-
-        var actual = await repository.AddFundOutAsync(
+        var actual = await repository
+            .AddFundOutAsync(
             gameProviderId: gameProviderId,
             gameProviderCode: gameProviderCode,
             playerCode: playerCode,
             walletId: walletId,
-            amount: amount).ConfigureAwait(false);
+            amount: amount)
+            .ConfigureAwait(false);
 
-        Assert.IsNotNull(actual);
-        Assert.IsTrue(actual == gameProviderFundTransferTransactionId);
+        Assert.AreEqual(actual, gameProviderFundTransferTransactionId);
 
-        var data = await context
-                    .GameProviderFundTransferTransactions
-                    .AsQueryable()
-                    .SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-                    .ConfigureAwait(false);
+        var data = await context.GameProviderFundTransferTransactions
+            .AsQueryable()
+            .SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
+            .ConfigureAwait(false);
 
-        Assert.IsTrue(data.FromWallet == WalletDef.MainWallet);
-        Assert.IsTrue(data.ToWallet == gameProviderCode);
-        Assert.IsTrue(data.FundSource == (short)FundSource.FundOut);
-        Assert.IsTrue(data.Status == (short)FundTransferTransactionStatus.MainWalletFundFailed);
-        Assert.IsTrue(data.Amount == -amount);
+        Assert.AreEqual(WalletDef.MainWallet, data.FromWallet);
+        Assert.AreEqual(gameProviderCode, data.ToWallet);
+        Assert.AreEqual((short)FundSource.FundOut, data.FundSource);
+        Assert.AreEqual((short)FundTransferTransactionStatus.MainWalletFundFailed, data.Status);
+        Assert.AreEqual(-amount, data.Amount);
     }
 
     [TestMethod]
     public async Task Update_By_GameProvider_FundFailed()
     {
         var options = new DbContextOptionsBuilder<TgsContext>()
-                       .UseInMemoryDatabase(databaseName: "tgs")
-                       .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-                       .Options;
+            .UseInMemoryDatabase(databaseName: "tgs-update-by-gameprovider-fundfailed")
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
         var context = new TgsContext(options);
         _ = context.Database.EnsureDeleted();
 
@@ -150,25 +154,26 @@ public class FundTransferTransactionRepositoryUnitTest
             context,
             fakeSerialNumberGenerator);
 
-        await repository.UpdateByGameProviderFundFailedAsync(
-                gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId).ConfigureAwait(false);
+        await repository
+            .UpdateByGameProviderFundFailedAsync(
+            gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId)
+            .ConfigureAwait(false);
 
-        var data = await context
-                    .GameProviderFundTransferTransactions
-                    .AsQueryable()
-                    .SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-                    .ConfigureAwait(false);
+        var data = await context.GameProviderFundTransferTransactions
+            .AsQueryable()
+            .SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
+            .ConfigureAwait(false);
 
-        Assert.IsTrue(data.Status == (short)FundTransferTransactionStatus.GameProviderFundFailed);
+        Assert.AreEqual((short)FundTransferTransactionStatus.GameProviderFundFailed, data.Status);
     }
 
     [TestMethod]
     public async Task Update_By_MainWallet_FundFailed()
     {
         var options = new DbContextOptionsBuilder<TgsContext>()
-                       .UseInMemoryDatabase(databaseName: "tgs")
-                       .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-                       .Options;
+            .UseInMemoryDatabase(databaseName: "tgs-update-by-mainwallet-fundfailed")
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
         var context = new TgsContext(options);
         _ = context.Database.EnsureDeleted();
 
@@ -200,33 +205,34 @@ public class FundTransferTransactionRepositoryUnitTest
 
         var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 
+        var gameProviderTransactionId = Guid.NewGuid().ToString("N");
+
         var repository = new FundTransferTransactionRepository(
             context,
             fakeSerialNumberGenerator);
 
-        var gameProviderTransactionId = Guid.NewGuid().ToString("N");
-
-        await repository.UpdateByMainWalletFundFailedAsync(
+        await repository
+            .UpdateByMainWalletFundFailedAsync(
             gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-            gameProviderTransactionId: gameProviderTransactionId).ConfigureAwait(false);
+            gameProviderTransactionId: gameProviderTransactionId)
+            .ConfigureAwait(false);
 
-        var data = await context
-                    .GameProviderFundTransferTransactions
-                    .AsQueryable()
-                    .SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-                    .ConfigureAwait(false);
+        var data = await context.GameProviderFundTransferTransactions
+            .AsQueryable()
+            .SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
+            .ConfigureAwait(false);
 
-        Assert.IsTrue(data.Status == (short)FundTransferTransactionStatus.MainWalletFundFailed);
-        Assert.IsTrue(data.GameProviderTransactionId == gameProviderTransactionId);
+        Assert.AreEqual((short)FundTransferTransactionStatus.MainWalletFundFailed, data.Status);
+        Assert.AreEqual(gameProviderTransactionId, data.GameProviderTransactionId);
     }
 
     [TestMethod]
     public async Task Update_By_MainWallet_FundRefund_Failed()
     {
         var options = new DbContextOptionsBuilder<TgsContext>()
-                       .UseInMemoryDatabase(databaseName: "tgs")
-                       .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-                       .Options;
+            .UseInMemoryDatabase(databaseName: "tgs-update-by-mainwallet-fundrefund-failed")
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
         var context = new TgsContext(options);
         _ = context.Database.EnsureDeleted();
 
@@ -262,26 +268,27 @@ public class FundTransferTransactionRepositoryUnitTest
             context,
             fakeSerialNumberGenerator);
 
-        await repository.UpdateByMainWalletFundRefundFailedAsync(
-                gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-                description: Arg.Any<string>()).ConfigureAwait(false);
+        await repository
+            .UpdateByMainWalletFundRefundFailedAsync(
+            gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
+            description: Arg.Any<string>())
+            .ConfigureAwait(false);
 
-        var data = await context
-                    .GameProviderFundTransferTransactions
-                    .AsQueryable()
-                    .SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-                    .ConfigureAwait(false);
+        var data = await context.GameProviderFundTransferTransactions
+            .AsQueryable()
+            .SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
+            .ConfigureAwait(false);
 
-        Assert.IsTrue(data.Status == (short)FundTransferTransactionStatus.MainWalletFundRefundFailed);
+        Assert.AreEqual((short)FundTransferTransactionStatus.MainWalletFundRefundFailed, data.Status);
     }
 
     [TestMethod]
-    public async Task Update_By_MainWallet_FundRefund_Success_Async()
+    public async Task Update_By_MainWallet_FundRefund_Success()
     {
         var options = new DbContextOptionsBuilder<TgsContext>()
-                       .UseInMemoryDatabase(databaseName: "tgs")
-                       .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-                       .Options;
+            .UseInMemoryDatabase(databaseName: "tgs-update-by-mainwallet-fundrefund-success")
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
         var context = new TgsContext(options);
         _ = context.Database.EnsureDeleted();
 
@@ -319,30 +326,32 @@ public class FundTransferTransactionRepositoryUnitTest
 
         var transactionId = Guid.NewGuid();
         var balance = 0m;
-        await repository.UpdateByMainWalletFundRefundSuccessAsync(
-                gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-                transactionId: transactionId,
-                balance: balance,
-                description: Arg.Any<string>()).ConfigureAwait(false);
 
-        var data = await context
-                    .GameProviderFundTransferTransactions
-                    .AsQueryable()
-                    .SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-                    .ConfigureAwait(false);
+        await repository
+            .UpdateByMainWalletFundRefundSuccessAsync(
+            gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
+            transactionId: transactionId,
+            balance: balance,
+            description: Arg.Any<string>())
+            .ConfigureAwait(false);
 
-        Assert.IsTrue(data.Status == (short)FundTransferTransactionStatus.MainWalletFundRefundSuccess);
-        Assert.IsTrue(data.TransactionId == transactionId);
-        Assert.IsTrue(data.Balance == balance);
+        var data = await context.GameProviderFundTransferTransactions
+            .AsQueryable()
+            .SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
+            .ConfigureAwait(false);
+
+        Assert.AreEqual((short)FundTransferTransactionStatus.MainWalletFundRefundSuccess, data.Status);
+        Assert.AreEqual(transactionId, data.TransactionId);
+        Assert.AreEqual(balance, data.Balance);
     }
 
     [TestMethod]
     public async Task Update_By_Success()
     {
         var options = new DbContextOptionsBuilder<TgsContext>()
-                       .UseInMemoryDatabase(databaseName: "tgs")
-                       .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-                       .Options;
+            .UseInMemoryDatabase(databaseName: "tgs-update-by-success")
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
         var context = new TgsContext(options);
         _ = context.Database.EnsureDeleted();
 
@@ -381,21 +390,23 @@ public class FundTransferTransactionRepositoryUnitTest
         var transactionId = Guid.NewGuid();
         var gameProviderTransactionId = Guid.NewGuid().ToString("N");
         var balance = 0m;
-        await repository.UpdateBySuccessAsync(
-                gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-                transactionId: transactionId,
-                gameProviderTransactionId: gameProviderTransactionId,
-                balance: balance).ConfigureAwait(false);
 
-        var data = await context
-                    .GameProviderFundTransferTransactions
-                    .AsQueryable()
-                    .SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-                    .ConfigureAwait(false);
+        await repository
+            .UpdateBySuccessAsync(
+            gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
+            transactionId: transactionId,
+            gameProviderTransactionId: gameProviderTransactionId,
+            balance: balance)
+            .ConfigureAwait(false);
 
-        Assert.IsTrue(data.Status == (short)FundTransferTransactionStatus.Success);
-        Assert.IsTrue(data.TransactionId == transactionId);
-        Assert.IsTrue(data.GameProviderTransactionId == gameProviderTransactionId);
-        Assert.IsTrue(data.Balance == balance);
+        var data = await context.GameProviderFundTransferTransactions
+            .AsQueryable()
+            .SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
+            .ConfigureAwait(false);
+
+        Assert.AreEqual((short)FundTransferTransactionStatus.Success, data.Status);
+        Assert.AreEqual(transactionId, data.TransactionId);
+        Assert.AreEqual(gameProviderTransactionId, data.GameProviderTransactionId);
+        Assert.AreEqual(balance, data.Balance);
     }
 }

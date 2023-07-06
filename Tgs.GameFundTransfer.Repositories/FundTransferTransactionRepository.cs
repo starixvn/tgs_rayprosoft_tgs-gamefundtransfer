@@ -10,7 +10,9 @@ internal class FundTransferTransactionRepository : IFundTransferTransactionRepos
     private readonly TgsContext _context;
     private readonly ISerialNumberGenerator _serialNumberGenerator;
 
-    public FundTransferTransactionRepository(TgsContext context, ISerialNumberGenerator serialNumberGenerator)
+    public FundTransferTransactionRepository(
+        TgsContext context,
+        ISerialNumberGenerator serialNumberGenerator)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _serialNumberGenerator = serialNumberGenerator ?? throw new ArgumentNullException(nameof(serialNumberGenerator));
@@ -24,7 +26,10 @@ internal class FundTransferTransactionRepository : IFundTransferTransactionRepos
         decimal amount,
         CancellationToken cancellationToken = default)
     {
-        var gameProviderFundTransferTransactionId = await _serialNumberGenerator.GenerateAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        var gameProviderFundTransferTransactionId = await _serialNumberGenerator
+            .GenerateAsync(
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
         var systemDateTime = DateTime.UtcNow;
         var fundTransferTransaction = new GameProviderFundTransferTransaction()
         {
@@ -42,12 +47,14 @@ internal class FundTransferTransactionRepository : IFundTransferTransactionRepos
         };
         _ = await _context.GameProviderFundTransferTransactions
             .AddAsync(
-                entity: fundTransferTransaction,
-                cancellationToken: cancellationToken).ConfigureAwait(false);
+            entity: fundTransferTransaction,
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
         _ = await _context
-             .SaveChangesAsync(
-                cancellationToken: cancellationToken).ConfigureAwait(false);
+            .SaveChangesAsync(
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
         return gameProviderFundTransferTransactionId;
     }
@@ -60,7 +67,10 @@ internal class FundTransferTransactionRepository : IFundTransferTransactionRepos
         decimal amount,
         CancellationToken cancellationToken = default)
     {
-        var gameProviderFundTransferTransactionId = await _serialNumberGenerator.GenerateAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+        var gameProviderFundTransferTransactionId = await _serialNumberGenerator
+            .GenerateAsync(
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
         var systemDateTime = DateTime.UtcNow;
         var fundTransferTransaction = new GameProviderFundTransferTransaction()
         {
@@ -78,11 +88,14 @@ internal class FundTransferTransactionRepository : IFundTransferTransactionRepos
         };
         _ = await _context.GameProviderFundTransferTransactions
             .AddAsync(
-                entity: fundTransferTransaction,
-                cancellationToken: cancellationToken).ConfigureAwait(false);
+            entity: fundTransferTransaction,
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
         _ = await _context
-              .SaveChangesAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            .SaveChangesAsync(
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
         return gameProviderFundTransferTransactionId;
     }
@@ -104,7 +117,9 @@ internal class FundTransferTransactionRepository : IFundTransferTransactionRepos
            .Update(fundTransferTransaction);
 
         _ = await _context
-             .SaveChangesAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+             .SaveChangesAsync(
+            cancellationToken: cancellationToken)
+             .ConfigureAwait(false);
     }
 
     public async ValueTask UpdateByMainWalletFundFailedAsync(
@@ -124,7 +139,9 @@ internal class FundTransferTransactionRepository : IFundTransferTransactionRepos
            .Update(fundTransferTransaction);
 
         _ = await _context
-             .SaveChangesAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+             .SaveChangesAsync(
+            cancellationToken: cancellationToken)
+             .ConfigureAwait(false);
     }
 
     public async ValueTask UpdateByMainWalletFundRefundFailedAsync(
@@ -145,7 +162,9 @@ internal class FundTransferTransactionRepository : IFundTransferTransactionRepos
            .Update(fundTransferTransaction);
 
         _ = await _context
-             .SaveChangesAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+             .SaveChangesAsync(
+            cancellationToken: cancellationToken)
+             .ConfigureAwait(false);
     }
 
     public async ValueTask UpdateByMainWalletFundRefundSuccessAsync(
@@ -168,7 +187,9 @@ internal class FundTransferTransactionRepository : IFundTransferTransactionRepos
            .Update(fundTransferTransaction);
 
         _ = await _context
-             .SaveChangesAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+             .SaveChangesAsync(
+            cancellationToken: cancellationToken)
+             .ConfigureAwait(false);
     }
 
     public async ValueTask UpdateBySuccessAsync(
@@ -192,6 +213,8 @@ internal class FundTransferTransactionRepository : IFundTransferTransactionRepos
            .Update(fundTransferTransaction);
 
         _ = await _context
-            .SaveChangesAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            .SaveChangesAsync(
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
     }
 }

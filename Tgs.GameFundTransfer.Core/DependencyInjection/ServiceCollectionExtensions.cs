@@ -17,14 +17,14 @@ public static class ServiceCollectionExtensions
         Action<GameCurrencyClientOptions, IServiceProvider> gameCurrencyClientOptions,
         Action<GameInterfaceSabaClientOptions, IServiceProvider> gameInterfaceSabaClientOptions)
         => services
-            .AddOptions<FundsLockedOptions>()
-            .Configure(fundsLockedOptions)
-            .Services
-            .RegisterAllServiceUtilityTypes(
-                Assembly.GetExecutingAssembly(),
-                ServiceLifetime.Transient)
-            .AddCashServiceClient(cashServiceClientOptions)
-            .AddGameProvidersClient(gameProvidersClientOptions)
-            .AddGameCurrencyClient(gameCurrencyClientOptions)
-            .AddGameInterfaceSabaServiceClient(gameInterfaceSabaClientOptions);
+        .AddOptions<FundsLockedOptions>()
+        .Configure(fundsLockedOptions)
+        .Services
+        .RegisterAllServiceUtilityTypes(
+            Assembly.GetExecutingAssembly(),
+            ServiceLifetime.Transient)
+        .AddCashServiceClient(cashServiceClientOptions)
+        .AddGameProvidersClient(gameProvidersClientOptions)
+        .AddGameCurrencyClient(gameCurrencyClientOptions)
+        .AddGameInterfaceSabaServiceClient(gameInterfaceSabaClientOptions);
 }

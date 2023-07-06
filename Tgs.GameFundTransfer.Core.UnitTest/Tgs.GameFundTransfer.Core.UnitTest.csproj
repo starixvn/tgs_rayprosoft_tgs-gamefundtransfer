@@ -1,37 +1,37 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
 
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="JunitXml.TestLogger" Version="3.0.124" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.2" />
-    <PackageReference Include="MSTest.TestAdapter" Version="3.0.4" />
-    <PackageReference Include="MSTest.TestFramework" Version="3.0.4" />
-    <PackageReference Include="coverlet.collector" Version="6.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="NLog" Version="5.2.0" />
-    <PackageReference Include="NSubstitute" Version="5.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="ExpectedObjects" Version="3.5.4" />
+		<PackageReference Include="JunitXml.TestLogger" Version="3.0.124" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.2" />
+		<PackageReference Include="MSTest.TestAdapter" Version="3.0.4" />
+		<PackageReference Include="MSTest.TestFramework" Version="3.0.4" />
+		<PackageReference Include="coverlet.collector" Version="6.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="NSubstitute" Version="5.0.0" />
+		<PackageReference Include="System.Linq.Async" Version="6.0.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EditorConfigFiles Remove="C:\Users\Gordon\Desktop\Tgs.GameTransfer\Tgs.GameTransfer.Core.UnitTest\.editorconfig" />
-  </ItemGroup>
+	<ItemGroup>
+		<EditorConfigFiles Remove="C:\Users\Gordon\Desktop\Tgs.GameTransfer\Tgs.GameTransfer.Core.UnitTest\.editorconfig" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Include="C:\Users\Gordon\Desktop\Tgs.GameTransfer\Tgs.GameTransfer.Core.UnitTest\.editorconfig" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="C:\Users\Gordon\Desktop\Tgs.GameTransfer\Tgs.GameTransfer.Core.UnitTest\.editorconfig" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Tgs.GameFundTransfer.Core\Tgs.GameFundTransfer.Core.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Tgs.GameFundTransfer.Core\Tgs.GameFundTransfer.Core.csproj" />
+	</ItemGroup>
 
 </Project>
