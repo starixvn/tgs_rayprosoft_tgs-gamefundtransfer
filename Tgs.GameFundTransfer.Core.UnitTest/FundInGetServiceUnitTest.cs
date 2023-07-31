@@ -23,7 +23,7 @@ public class FundInGetServiceUnitTest
 
         var query = new FundInQuery(
             Guid.NewGuid(),
-            GameProviderType.KY,
+            GameProviderType.Kaiyuan,
             "GPI",
             "4ucmqplxb029",
             Guid.NewGuid(),
@@ -31,7 +31,6 @@ public class FundInGetServiceUnitTest
             10m
             );
 
-        decimal gameProviderBalance = 10.0m;
         var gameProviderFundTransferTransactionId = Guid.NewGuid();
         var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
 
@@ -53,9 +52,14 @@ public class FundInGetServiceUnitTest
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.PlayerCode)).Returns(Task.FromResult(true));
 
+        var gameProviderBalance = new PlayerBalanceResponse(
+            Balance: 100m,
+            FreeBalance: 10m,
+            OutstandingBalance: 90m);
         _ = fakeGameProvidersClient.PlayerBalanceAsync(
             Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(ValueTask.FromResult(gameProviderBalance));
+            Arg.Is(query.PlayerCode))
+            .Returns(ValueTask.FromResult(gameProviderBalance));
 
         _ = fakeRepository.AddFundInAsync(
             gameProviderId: Arg.Is(query.GameProviderId),
@@ -116,7 +120,7 @@ public class FundInGetServiceUnitTest
 
         var query = new FundInQuery(
             Guid.NewGuid(),
-            GameProviderType.KY,
+            GameProviderType.Kaiyuan,
             "GPI",
             "4ucmqplxb029",
             Guid.NewGuid(),
@@ -124,7 +128,6 @@ public class FundInGetServiceUnitTest
             10m
             );
 
-        decimal gameProviderBalance = 10.0m;
         var gameProviderFundTransferTransactionId = Guid.NewGuid();
         var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
 
@@ -146,6 +149,10 @@ public class FundInGetServiceUnitTest
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.PlayerCode)).Returns(Task.FromResult(false));
 
+        var gameProviderBalance = new PlayerBalanceResponse(
+            Balance: 100m,
+            FreeBalance: 10m,
+            OutstandingBalance: 90m);
         _ = fakeGameProvidersClient.PlayerBalanceAsync(
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.PlayerCode)).Returns(ValueTask.FromResult(gameProviderBalance));
@@ -209,15 +216,13 @@ public class FundInGetServiceUnitTest
 
         var query = new FundInQuery(
             Guid.NewGuid(),
-            GameProviderType.KY,
+            GameProviderType.Kaiyuan,
             "GPI",
             "4ucmqplxb029",
             Guid.NewGuid(),
             "CNY",
             10m
             );
-
-        decimal gameProviderBalance = 9m;
 
         _ = fakeGameCurrencyClient.ConvertGameProviderFundsAsync(
             Arg.Is(query.GameProviderCode),
@@ -231,9 +236,14 @@ public class FundInGetServiceUnitTest
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.PlayerCode)).Returns(Task.FromResult(true));
 
+        var gameProviderBalance = new PlayerBalanceResponse(
+            Balance: 10m,
+            FreeBalance: 9m,
+            OutstandingBalance: 1m);
         _ = fakeGameProvidersClient.PlayerBalanceAsync(
             Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(ValueTask.FromResult(gameProviderBalance));
+            Arg.Is(query.PlayerCode))
+            .Returns(ValueTask.FromResult(gameProviderBalance));
 
         var fakeService = new FundInGetService(
             faceLogger,
@@ -267,7 +277,7 @@ public class FundInGetServiceUnitTest
 
         var query = new FundInQuery(
             Guid.NewGuid(),
-            GameProviderType.KY,
+            GameProviderType.Kaiyuan,
             "GPI",
             "4ucmqplxb029",
             Guid.NewGuid(),
@@ -275,7 +285,6 @@ public class FundInGetServiceUnitTest
             0.001m
             );
 
-        decimal gameProviderBalance = 1m;
         var gameProviderFundTransferTransactionId = Guid.NewGuid();
         var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
 
@@ -298,9 +307,14 @@ public class FundInGetServiceUnitTest
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.PlayerCode)).Returns(Task.FromResult(true));
 
+        var gameProviderBalance = new PlayerBalanceResponse(
+            Balance: 10m,
+            FreeBalance: 1m,
+            OutstandingBalance: 9m);
         _ = fakeGameProvidersClient.PlayerBalanceAsync(
             Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(ValueTask.FromResult(gameProviderBalance));
+            Arg.Is(query.PlayerCode))
+            .Returns(ValueTask.FromResult(gameProviderBalance));
 
         _ = fakeRepository.AddFundInAsync(
             gameProviderId: Arg.Is(query.GameProviderId),
@@ -361,7 +375,7 @@ public class FundInGetServiceUnitTest
 
         var query = new FundInQuery(
             Guid.NewGuid(),
-            GameProviderType.KY,
+            GameProviderType.Kaiyuan,
             "GPI",
             "4ucmqplxb029",
             Guid.NewGuid(),
@@ -369,7 +383,6 @@ public class FundInGetServiceUnitTest
             1m
             );
 
-        decimal gameProviderBalance = 1000m;
         var gameProviderFundTransferTransactionId = Guid.NewGuid();
         var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
 
@@ -392,9 +405,14 @@ public class FundInGetServiceUnitTest
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.PlayerCode)).Returns(Task.FromResult(true));
 
+        var gameProviderBalance = new PlayerBalanceResponse(
+            Balance: 1999m,
+            FreeBalance: 1000m,
+            OutstandingBalance: 999m);
         _ = fakeGameProvidersClient.PlayerBalanceAsync(
             Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(ValueTask.FromResult(gameProviderBalance));
+            Arg.Is(query.PlayerCode))
+            .Returns(ValueTask.FromResult(gameProviderBalance));
 
         _ = fakeRepository.AddFundInAsync(
             gameProviderId: Arg.Is(query.GameProviderId),
@@ -463,7 +481,6 @@ public class FundInGetServiceUnitTest
             1000m
             );
 
-        decimal gameProviderBalance = 1m;
         var gameProviderFundTransferTransactionId = Guid.NewGuid();
         var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
 
@@ -486,9 +503,15 @@ public class FundInGetServiceUnitTest
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.PlayerCode)).Returns(Task.FromResult(true));
 
-        _ = fakeGameProvidersClient.PlayerBalanceAsync(
+        var gameProviderBalance = new PlayerBalanceResponse(
+            Balance: 10m,
+            FreeBalance: 1m,
+            OutstandingBalance: 9m);
+        _ = fakeGameProvidersClient
+            .PlayerBalanceAsync(
             Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(ValueTask.FromResult(gameProviderBalance));
+            Arg.Is(query.PlayerCode))
+            .Returns(ValueTask.FromResult(gameProviderBalance));
 
         _ = fakeRepository.AddFundInAsync(
             gameProviderId: Arg.Is(query.GameProviderId),
@@ -557,7 +580,6 @@ public class FundInGetServiceUnitTest
             1m
             );
 
-        decimal gameProviderBalance = 0.001m;
         var gameProviderFundTransferTransactionId = Guid.NewGuid();
         var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
 
@@ -580,9 +602,15 @@ public class FundInGetServiceUnitTest
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.PlayerCode)).Returns(Task.FromResult(true));
 
-        _ = fakeGameProvidersClient.PlayerBalanceAsync(
+        var gameProviderBalance = new PlayerBalanceResponse(
+            Balance: 1m,
+            FreeBalance: 0.001m,
+            OutstandingBalance: 0.999m);
+        _ = fakeGameProvidersClient
+            .PlayerBalanceAsync(
             Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(ValueTask.FromResult(gameProviderBalance));
+            Arg.Is(query.PlayerCode))
+            .Returns(ValueTask.FromResult(gameProviderBalance));
 
         _ = fakeRepository.AddFundInAsync(
             gameProviderId: Arg.Is(query.GameProviderId),

@@ -23,7 +23,7 @@ public class FundInZeroGetServiceUnitTest
 
         var query = new FundInZeroQuery(
             Guid.NewGuid(),
-            GameProviderType.KY,
+            GameProviderType.Kaiyuan,
             "GPI",
             "4ucmqplxb029",
             Guid.NewGuid(),
@@ -38,22 +38,24 @@ public class FundInZeroGetServiceUnitTest
                 playerCode: Arg.Is(query.PlayerCode))
             .Returns(Task.FromResult(true));
 
-        decimal gameProviderBalance = 10.0m;
+        var gameProviderBalance = new PlayerBalanceResponse(
+            Balance: 100.0m,
+            FreeBalance: 10.0m,
+            OutstandingBalance: 90m);
         _ = fakeGameProvidersClient
             .PlayerBalanceAsync(
-                gameProviderCode: Arg.Is(query.GameProviderCode),
-                playerCode: Arg.Is(query.PlayerCode),
-                cancellationToken: Arg.Any<CancellationToken>())
+            Arg.Is(query.GameProviderCode),
+            Arg.Is(query.PlayerCode))
             .Returns(ValueTask.FromResult(gameProviderBalance));
 
         var convertPlatformBalanceResult = new ConvertPlatformBalanceResult(
             ExchangeRate: 1,
-            Balance: gameProviderBalance);
+            Balance: gameProviderBalance.FreeBalance);
         _ = fakeGameCurrencyClient
             .ConvertPlatformBalanceAsync(
                 gameProviderCode: Arg.Is(query.GameProviderCode),
                 currencyCode: Arg.Is(query.CurrencyCode),
-                balance: Arg.Is(gameProviderBalance),
+                balance: Arg.Is(gameProviderBalance.FreeBalance),
                 cancellationToken: Arg.Any<CancellationToken>())
             .Returns(convertPlatformBalanceResult);
 
@@ -74,7 +76,7 @@ public class FundInZeroGetServiceUnitTest
                 playerCode: Arg.Is(query.PlayerCode),
                 currencyCode: Arg.Is(query.CurrencyCode),
                 orderId: Arg.Is(gameProviderFundTransferTransactionId.ToString("N")),
-                amount: Arg.Is(gameProviderBalance),
+                amount: Arg.Is(gameProviderBalance.FreeBalance),
                 cancellationToken: Arg.Any<CancellationToken>())
             .Returns(ValueTask.FromResult(gameProviderTransactionId));
 
@@ -136,7 +138,7 @@ public class FundInZeroGetServiceUnitTest
 
         var query = new FundInZeroQuery(
             Guid.NewGuid(),
-            GameProviderType.KY,
+            GameProviderType.Kaiyuan,
             "GPI",
             "4ucmqplxb029",
             Guid.NewGuid(),
@@ -183,7 +185,7 @@ public class FundInZeroGetServiceUnitTest
 
         var query = new FundInZeroQuery(
             Guid.NewGuid(),
-            GameProviderType.KY,
+            GameProviderType.Kaiyuan,
             "GPI",
             "4ucmqplxb029",
             Guid.NewGuid(),
@@ -198,12 +200,14 @@ public class FundInZeroGetServiceUnitTest
                 Arg.Is(query.PlayerCode))
             .Returns(Task.FromResult(true));
 
-        decimal gameProviderBalance = 1m;
+        var gameProviderBalance = new PlayerBalanceResponse(
+            Balance: 10.0m,
+            FreeBalance: 1.0m,
+            OutstandingBalance: 9m);
         _ = fakeGameProvidersClient
             .PlayerBalanceAsync(
-                gameProviderCode: Arg.Is(query.GameProviderCode),
-                playerCode: Arg.Is(query.PlayerCode),
-                cancellationToken: Arg.Any<CancellationToken>())
+            Arg.Is(query.GameProviderCode),
+            Arg.Is(query.PlayerCode))
             .Returns(ValueTask.FromResult(gameProviderBalance));
 
         var convertPlatformBalanceResult = new ConvertPlatformBalanceResult(
@@ -213,7 +217,7 @@ public class FundInZeroGetServiceUnitTest
             .ConvertPlatformBalanceAsync(
                 Arg.Is(query.GameProviderCode),
                 Arg.Is(query.CurrencyCode),
-                Arg.Is(gameProviderBalance),
+                Arg.Is(gameProviderBalance.FreeBalance),
                 cancellationToken: Arg.Any<CancellationToken>())
             .Returns(convertPlatformBalanceResult);
 
@@ -234,7 +238,7 @@ public class FundInZeroGetServiceUnitTest
                 playerCode: Arg.Is(query.PlayerCode),
                 currencyCode: Arg.Is(query.CurrencyCode),
                 orderId: Arg.Is(gameProviderFundTransferTransactionId.ToString("N")),
-                amount: Arg.Is(gameProviderBalance),
+                amount: Arg.Is(gameProviderBalance.FreeBalance),
                 cancellationToken: Arg.Any<CancellationToken>())
             .Returns(ValueTask.FromResult(gameProviderTransactionId));
 
@@ -296,7 +300,7 @@ public class FundInZeroGetServiceUnitTest
 
         var query = new FundInZeroQuery(
             Guid.NewGuid(),
-            GameProviderType.KY,
+            GameProviderType.Kaiyuan,
             "GPI",
             "4ucmqplxb029",
             Guid.NewGuid(),
@@ -311,12 +315,14 @@ public class FundInZeroGetServiceUnitTest
                 Arg.Is(query.PlayerCode))
             .Returns(Task.FromResult(true));
 
-        decimal gameProviderBalance = 1m;
+        var gameProviderBalance = new PlayerBalanceResponse(
+            Balance: 10.0m,
+            FreeBalance: 1.0m,
+            OutstandingBalance: 9.0m);
         _ = fakeGameProvidersClient
             .PlayerBalanceAsync(
-                gameProviderCode: Arg.Is(query.GameProviderCode),
-                playerCode: Arg.Is(query.PlayerCode),
-                cancellationToken: Arg.Any<CancellationToken>())
+            Arg.Is(query.GameProviderCode),
+            Arg.Is(query.PlayerCode))
             .Returns(ValueTask.FromResult(gameProviderBalance));
 
         var convertPlatformBalanceResult = new ConvertPlatformBalanceResult(
@@ -326,7 +332,7 @@ public class FundInZeroGetServiceUnitTest
             .ConvertPlatformBalanceAsync(
                 Arg.Is(query.GameProviderCode),
                 Arg.Is(query.CurrencyCode),
-                Arg.Is(gameProviderBalance),
+                Arg.Is(gameProviderBalance.FreeBalance),
                 cancellationToken: Arg.Any<CancellationToken>())
             .Returns(convertPlatformBalanceResult);
 
@@ -347,7 +353,7 @@ public class FundInZeroGetServiceUnitTest
                 playerCode: Arg.Is(query.PlayerCode),
                 currencyCode: Arg.Is(query.CurrencyCode),
                 orderId: Arg.Is(gameProviderFundTransferTransactionId.ToString("N")),
-                amount: Arg.Is(gameProviderBalance),
+                amount: Arg.Is(gameProviderBalance.FreeBalance),
                 cancellationToken: Arg.Any<CancellationToken>())
             .Returns(ValueTask.FromResult(gameProviderTransactionId));
 
@@ -409,7 +415,7 @@ public class FundInZeroGetServiceUnitTest
 
         var query = new FundInZeroQuery(
             Guid.NewGuid(),
-            GameProviderType.KY,
+            GameProviderType.Kaiyuan,
             "GPI",
             "4ucmqplxb029",
             Guid.NewGuid(),
@@ -421,22 +427,24 @@ public class FundInZeroGetServiceUnitTest
                 playerCode: Arg.Is(query.PlayerCode))
             .Returns(Task.FromResult(true));
 
-        decimal gameProviderBalance = 0;
+        var gameProviderBalance = new PlayerBalanceResponse(
+            Balance: 10m,
+            FreeBalance: 0m,
+            OutstandingBalance: 10m);
         _ = fakeGameProvidersClient
             .PlayerBalanceAsync(
-                gameProviderCode: Arg.Is(query.GameProviderCode),
-                playerCode: Arg.Is(query.PlayerCode),
-                cancellationToken: Arg.Any<CancellationToken>())
+            Arg.Is(query.GameProviderCode),
+            Arg.Is(query.PlayerCode))
             .Returns(ValueTask.FromResult(gameProviderBalance));
 
         var convertPlatformBalanceResult = new ConvertPlatformBalanceResult(
             ExchangeRate: 1,
-            Balance: gameProviderBalance);
+            Balance: gameProviderBalance.FreeBalance);
         _ = fakeGameCurrencyClient
             .ConvertPlatformBalanceAsync(
                 gameProviderCode: Arg.Is(query.GameProviderCode),
                 currencyCode: Arg.Is(query.CurrencyCode),
-                balance: Arg.Is(gameProviderBalance),
+                balance: Arg.Is(gameProviderBalance.FreeBalance),
                 cancellationToken: Arg.Any<CancellationToken>())
             .Returns(convertPlatformBalanceResult);
 

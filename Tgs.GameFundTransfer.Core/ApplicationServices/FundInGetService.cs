@@ -60,24 +60,24 @@ internal class FundInGetService : IGetService<FundInQuery, FundResult>
 
         try
         {
-            var gameProviderBalance = await _gameProvidersClient
+            var playerBalance = await _gameProvidersClient
             .PlayerBalanceAsync(
                 gameProviderCode: query.GameProviderCode,
                 playerCode: query.PlayerCode,
                 cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-            if (gameProviderBalance - gameProviderAmount < 0)
+            if (playerBalance.FreeBalance - gameProviderAmount < 0)
             {
                 _logger.LogWarning(
                     "This player ({playerCode}) game provider ({gameProviderCode})has insufficient balance({gameProviderBalance}).",
                     query.PlayerCode,
                     query.GameProviderCode,
-                    gameProviderBalance);
+                    playerBalance.FreeBalance);
 
                 return new FundResult(
                     state: StateCode.InsufficientBalance,
-                    message: $"This player ({query.PlayerCode}) game provider ({query.GameProviderCode})has insufficient balance({gameProviderBalance}).");
+                    message: $"This player ({query.PlayerCode}) game provider ({query.GameProviderCode})has insufficient balance({playerBalance.FreeBalance}).");
             }
 
             var fundTransactionId = await _repository
@@ -124,20 +124,20 @@ internal class FundInGetService : IGetService<FundInQuery, FundResult>
             {
                 var transactionResponse = await _cashServiceClient
                     .GameProviderFundInAsync(
-                        walletId: query.WalletId,
-                        amount: query.Amount,
-                        description: $"【{query.GameProviderCode}】->【Default】",
-                        externalId: fundTransactionId.ToString(),
-                        cancellationToken: cancellationToken)
+                    walletId: query.WalletId,
+                    amount: query.Amount,
+                    description: $"【{query.GameProviderCode}】->【Default】",
+                    externalId: fundTransactionId.ToString(),
+                    cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
                 await _repository
                     .UpdateBySuccessAsync(
-                        gameProviderFundTransferTransactionId: fundTransactionId,
-                        transactionId: transactionResponse.TransactionId,
-                        gameProviderTransactionId: gameProviderTransactionId,
-                        balance: transactionResponse.Balance,
-                        cancellationToken: cancellationToken)
+                    gameProviderFundTransferTransactionId: fundTransactionId,
+                    transactionId: transactionResponse.TransactionId,
+                    gameProviderTransactionId: gameProviderTransactionId,
+                    balance: transactionResponse.Balance,
+                    cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
                 return new FundResult(
@@ -151,9 +151,9 @@ internal class FundInGetService : IGetService<FundInQuery, FundResult>
             {
                 await _repository
                     .UpdateByMainWalletFundFailedAsync(
-                        gameProviderFundTransferTransactionId: fundTransactionId,
-                        gameProviderTransactionId: gameProviderTransactionId,
-                        cancellationToken: cancellationToken)
+                    gameProviderFundTransferTransactionId: fundTransactionId,
+                    gameProviderTransactionId: gameProviderTransactionId,
+                    cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
                 _logger.LogError(exception: ex, "The main wallet transfer failed.({gameProviderFundTransferTransactionId})", fundTransactionId);
@@ -168,9 +168,11 @@ internal class FundInGetService : IGetService<FundInQuery, FundResult>
         }
         finally
         {
-            await _distributedLock.UnlockAsync(
-                  gameProviderCode: query.GameProviderCode,
-                  playerCode: query.PlayerCode).ConfigureAwait(false);
+            await _distributedLock
+                .UnlockAsync(
+                gameProviderCode: query.GameProviderCode,
+                playerCode: query.PlayerCode)
+                .ConfigureAwait(false);
         }
     }
 }
