@@ -150,7 +150,6 @@ public class FundOutCommandServiceUnitTest
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.PlayerCode)).Returns(Task.FromResult(false));
 
-
         var gameProviderBalance = new PlayerBalanceResponse(
             Balance: 0m,
             FreeBalance: 0m,

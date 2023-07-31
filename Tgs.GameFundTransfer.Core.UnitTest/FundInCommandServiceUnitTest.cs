@@ -31,7 +31,6 @@ public class FundInCommandServiceUnitTest
             10m
             );
 
-
         var gameProviderFundTransferTransactionId = Guid.NewGuid();
         var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
 
@@ -57,32 +56,41 @@ public class FundInCommandServiceUnitTest
             Balance: 100m,
             FreeBalance: 10m,
             OutstandingBalance: 90m);
-        _ = fakeGameProvidersClient.PlayerBalanceAsync(
+        _ = fakeGameProvidersClient
+            .PlayerBalanceAsync(
             Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(ValueTask.FromResult(gameProviderBalance));
+            Arg.Is(query.PlayerCode))
+            .Returns(ValueTask.FromResult(gameProviderBalance));
 
-        _ = fakeGameProviderFundTransferTransactionRepository.AddFundInAsync(
+        _ = fakeGameProviderFundTransferTransactionRepository
+            .AddFundInAsync(
             gameProviderId: Arg.Is(query.GameProviderId),
             gameProviderCode: Arg.Is(query.GameProviderCode),
             playerCode: Arg.Is(query.PlayerCode),
             walletId: Arg.Is(query.WalletId),
-            amount: Arg.Is(query.Amount)).Returns(ValueTask.FromResult(gameProviderFundTransferTransactionId));
+            amount: Arg.Is(query.Amount))
+            .Returns(ValueTask.FromResult(gameProviderFundTransferTransactionId));
 
-        _ = fakeGameProvidersClient.PlayerFundInAsync(
+        _ = fakeGameProvidersClient
+            .PlayerFundInAsync(
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.BrandCode),
             Arg.Is(query.PlayerCode),
             Arg.Is(query.CurrencyCode),
             Arg.Is(gameProviderFundTransferTransactionId.ToString("N")),
-            Arg.Is(query.Amount)).Returns(ValueTask.FromResult(gameProviderTransactionId));
+            Arg.Is(query.Amount))
+            .Returns(ValueTask.FromResult(gameProviderTransactionId));
 
-        _ = fakeCashServiceClient.GameProviderFundInAsync(
+        _ = fakeCashServiceClient
+            .GameProviderFundInAsync(
              Arg.Is(query.WalletId),
              Arg.Is(query.Amount),
              Arg.Is($"【{query.GameProviderCode}】->【Default】"),
-             Arg.Is(gameProviderFundTransferTransactionId.ToString())).Returns(ValueTask.FromResult(transactionResponse));
+             Arg.Is(gameProviderFundTransferTransactionId.ToString()))
+            .Returns(ValueTask.FromResult(transactionResponse));
 
-        await fakeGameProviderFundTransferTransactionRepository.UpdateBySuccessAsync(
+        await fakeGameProviderFundTransferTransactionRepository.
+            UpdateBySuccessAsync(
              Arg.Is(gameProviderFundTransferTransactionId),
              Arg.Is(transactionResponse.TransactionId),
              Arg.Is(gameProviderTransactionId),
@@ -134,48 +142,61 @@ public class FundInCommandServiceUnitTest
             Balance = 10
         };
 
-        _ = fakeGameCurrencyClient.ConvertGameProviderFundsAsync(
+        _ = fakeGameCurrencyClient
+            .ConvertGameProviderFundsAsync(
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.CurrencyCode),
             Arg.Is(query.Amount)
-            ).Returns(new ConvertGameProviderFundsResult(
+            )
+            .Returns(new ConvertGameProviderFundsResult(
                 ExchangeRate: 1,
                 Amount: query.Amount));
 
-        _ = fakeFundsLocked.LockingAsync(
+        _ = fakeFundsLocked
+            .LockingAsync(
             Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(Task.FromResult(false));
+            Arg.Is(query.PlayerCode))
+            .Returns(Task.FromResult(false));
 
         var gameProviderBalance = new PlayerBalanceResponse(
             Balance: 100m,
             FreeBalance: 10m,
             OutstandingBalance: 90m);
-        _ = fakeGameProvidersClient.PlayerBalanceAsync(
+        _ = fakeGameProvidersClient
+            .PlayerBalanceAsync(
             Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(ValueTask.FromResult(gameProviderBalance));
+            Arg.Is(query.PlayerCode))
+            .Returns(ValueTask.FromResult(gameProviderBalance));
 
-        _ = fakeGameProviderFundTransferTransactionRepository.AddFundInAsync(
+        _ = fakeGameProviderFundTransferTransactionRepository
+            .AddFundInAsync(
             gameProviderId: Arg.Is(query.GameProviderId),
             gameProviderCode: Arg.Is(query.GameProviderCode),
             playerCode: Arg.Is(query.PlayerCode),
             walletId: Arg.Is(query.WalletId),
-            amount: Arg.Is(query.Amount)).Returns(ValueTask.FromResult(gameProviderFundTransferTransactionId));
+            amount: Arg.Is(query.Amount))
+            .Returns(ValueTask.FromResult(gameProviderFundTransferTransactionId));
 
-        _ = fakeGameProvidersClient.PlayerFundInAsync(
+        _ = fakeGameProvidersClient
+            .PlayerFundInAsync(
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.BrandCode),
             Arg.Is(query.PlayerCode),
             Arg.Is(query.CurrencyCode),
             Arg.Is(gameProviderFundTransferTransactionId.ToString("N")),
-            Arg.Is(query.Amount)).Returns(ValueTask.FromResult(gameProviderTransactionId));
+            Arg.Is(query.Amount))
+            .Returns(ValueTask.FromResult(gameProviderTransactionId));
 
-        _ = fakeCashServiceClient.GameProviderFundInAsync(
+        _ = fakeCashServiceClient
+            .GameProviderFundInAsync(
              Arg.Is(query.WalletId),
              Arg.Is(query.Amount),
              Arg.Is($"【{query.GameProviderCode}】->【Default】"),
-             Arg.Is(gameProviderFundTransferTransactionId.ToString())).Returns(ValueTask.FromResult(transactionResponse));
+             Arg.Is(gameProviderFundTransferTransactionId.ToString()))
+            .Returns(ValueTask.FromResult(transactionResponse));
 
-        await fakeGameProviderFundTransferTransactionRepository.UpdateBySuccessAsync(
+        await fakeGameProviderFundTransferTransactionRepository
+            .UpdateBySuccessAsync(
              Arg.Is(gameProviderFundTransferTransactionId),
              Arg.Is(transactionResponse.TransactionId),
              Arg.Is(gameProviderTransactionId),
@@ -227,11 +248,12 @@ public class FundInCommandServiceUnitTest
             Balance = 10
         };
 
-        _ = fakeGameCurrencyClient.ConvertGameProviderFundsAsync(
+        _ = fakeGameCurrencyClient
+            .ConvertGameProviderFundsAsync(
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.CurrencyCode),
-            Arg.Is(query.Amount)
-            ).Returns(new ConvertGameProviderFundsResult(
+            Arg.Is(query.Amount))
+            .Returns(new ConvertGameProviderFundsResult(
                 ExchangeRate: 1,
                 Amount: query.Amount));
 
@@ -243,9 +265,11 @@ public class FundInCommandServiceUnitTest
             Balance: 10m,
             FreeBalance: 9m,
             OutstandingBalance: 1m);
-        _ = fakeGameProvidersClient.PlayerBalanceAsync(
+        _ = fakeGameProvidersClient
+            .PlayerBalanceAsync(
             Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(ValueTask.FromResult(gameProviderBalance));
+            Arg.Is(query.PlayerCode))
+            .Returns(ValueTask.FromResult(gameProviderBalance));
 
         var fakeService = new FundInCommandService(
             faceLogger,
@@ -297,14 +321,18 @@ public class FundInCommandServiceUnitTest
             ExchangeRate: 0.001m,
             Amount: 1m);
 
-        _ = fakeGameCurrencyClient.ConvertGameProviderFundsAsync(
+        _ = fakeGameCurrencyClient
+            .ConvertGameProviderFundsAsync(
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.CurrencyCode),
-            Arg.Is(query.Amount)).Returns(exchangeRateFundResult);
+            Arg.Is(query.Amount))
+            .Returns(exchangeRateFundResult);
 
-        _ = fakeFundsLocked.LockingAsync(
+        _ = fakeFundsLocked
+            .LockingAsync(
             Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode)).Returns(Task.FromResult(true));
+            Arg.Is(query.PlayerCode))
+            .Returns(Task.FromResult(true));
 
         var gameProviderBalance = new PlayerBalanceResponse(
             Balance: 100m,
@@ -316,28 +344,35 @@ public class FundInCommandServiceUnitTest
             Arg.Is(query.PlayerCode))
             .Returns(ValueTask.FromResult(gameProviderBalance));
 
-        _ = fakeGameProviderFundTransferTransactionRepository.AddFundInAsync(
+        _ = fakeGameProviderFundTransferTransactionRepository
+            .AddFundInAsync(
             gameProviderId: Arg.Is(query.GameProviderId),
             gameProviderCode: Arg.Is(query.GameProviderCode),
             playerCode: Arg.Is(query.PlayerCode),
             walletId: Arg.Is(query.WalletId),
-            amount: Arg.Is(query.Amount)).Returns(ValueTask.FromResult(gameProviderFundTransferTransactionId));
+            amount: Arg.Is(query.Amount))
+            .Returns(ValueTask.FromResult(gameProviderFundTransferTransactionId));
 
-        _ = fakeGameProvidersClient.PlayerFundInAsync(
+        _ = fakeGameProvidersClient
+            .PlayerFundInAsync(
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.BrandCode),
             Arg.Is(query.PlayerCode),
             Arg.Is(query.CurrencyCode),
             Arg.Is(gameProviderFundTransferTransactionId.ToString("N")),
-            Arg.Is(exchangeRateFundResult.Amount)).Returns(ValueTask.FromResult(gameProviderTransactionId));
+            Arg.Is(exchangeRateFundResult.Amount))
+            .Returns(ValueTask.FromResult(gameProviderTransactionId));
 
-        _ = fakeCashServiceClient.GameProviderFundInAsync(
+        _ = fakeCashServiceClient
+            .GameProviderFundInAsync(
              Arg.Is(query.WalletId),
              Arg.Is(query.Amount),
              Arg.Is($"【{query.GameProviderCode}】->【Default】"),
-             Arg.Is(gameProviderFundTransferTransactionId.ToString())).Returns(ValueTask.FromResult(transactionResponse));
+             Arg.Is(gameProviderFundTransferTransactionId.ToString()))
+            .Returns(ValueTask.FromResult(transactionResponse));
 
-        await fakeGameProviderFundTransferTransactionRepository.UpdateBySuccessAsync(
+        await fakeGameProviderFundTransferTransactionRepository
+            .UpdateBySuccessAsync(
              Arg.Is(gameProviderFundTransferTransactionId),
              Arg.Is(transactionResponse.TransactionId),
              Arg.Is(gameProviderTransactionId),
@@ -412,28 +447,35 @@ public class FundInCommandServiceUnitTest
             Arg.Is(query.PlayerCode))
             .Returns(ValueTask.FromResult(gameProviderBalance));
 
-        _ = fakeGameProviderFundTransferTransactionRepository.AddFundInAsync(
+        _ = fakeGameProviderFundTransferTransactionRepository
+            .AddFundInAsync(
             gameProviderId: Arg.Is(query.GameProviderId),
             gameProviderCode: Arg.Is(query.GameProviderCode),
             playerCode: Arg.Is(query.PlayerCode),
             walletId: Arg.Is(query.WalletId),
-            amount: Arg.Is(query.Amount)).Returns(ValueTask.FromResult(gameProviderFundTransferTransactionId));
+            amount: Arg.Is(query.Amount))
+            .Returns(ValueTask.FromResult(gameProviderFundTransferTransactionId));
 
-        _ = fakeGameProvidersClient.PlayerFundInAsync(
+        _ = fakeGameProvidersClient
+            .PlayerFundInAsync(
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.BrandCode),
             Arg.Is(query.PlayerCode),
             Arg.Is(query.CurrencyCode),
             Arg.Is(gameProviderFundTransferTransactionId.ToString("N")),
-            Arg.Is(exchangeRateFundResult.Amount)).Returns(gameProviderTransactionId);
+            Arg.Is(exchangeRateFundResult.Amount))
+            .Returns(gameProviderTransactionId);
 
-        _ = fakeCashServiceClient.GameProviderFundInAsync(
+        _ = fakeCashServiceClient
+            .GameProviderFundInAsync(
              Arg.Is(query.WalletId),
              Arg.Is(query.Amount),
              Arg.Is($"【{query.GameProviderCode}】->【Default】"),
-             Arg.Is(gameProviderFundTransferTransactionId.ToString())).Returns(ValueTask.FromResult(transactionResponse));
+             Arg.Is(gameProviderFundTransferTransactionId.ToString()))
+            .Returns(ValueTask.FromResult(transactionResponse));
 
-        await fakeGameProviderFundTransferTransactionRepository.UpdateBySuccessAsync(
+        await fakeGameProviderFundTransferTransactionRepository
+            .UpdateBySuccessAsync(
              Arg.Is(gameProviderFundTransferTransactionId),
              Arg.Is(transactionResponse.TransactionId),
              Arg.Is(gameProviderTransactionId),

@@ -61,20 +61,22 @@ internal class FundInZeroGetService : IGetService<FundInZeroQuery, FundResult>
 
             var convertPlatformBalanceResult = await _gameCurrencyClient
                 .ConvertPlatformBalanceAsync(
-                query.GameProviderCode,
-                query.CurrencyCode,
-                playerBalance.FreeBalance,
-                cancellationToken)
+                gameProviderCode: query.GameProviderCode,
+                currencyCode: query.CurrencyCode,
+                balance: playerBalance.Balance,
+                freeBalance: playerBalance.FreeBalance,
+                outstandingBalance: playerBalance.OutstandingBalance,
+                cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
-            if (convertPlatformBalanceResult.Balance <= 0)
+            if (convertPlatformBalanceResult.FreeBalance <= 0)
             {
                 _logger.LogInformation(
                     "This player  ({playerCode}) has acquired a game provider ({gameProviderCode}) less than or equal to 0.({gameProviderBalance}->{convertPlatformBalance})",
                     query.PlayerCode,
                     query.GameProviderCode,
                     playerBalance.FreeBalance,
-                    convertPlatformBalanceResult.Balance);
+                    convertPlatformBalanceResult.FreeBalance);
 
                 return new FundResult(
                     state: StateCode.Success,
@@ -90,7 +92,7 @@ internal class FundInZeroGetService : IGetService<FundInZeroQuery, FundResult>
                 gameProviderCode: query.GameProviderCode,
                 playerCode: query.PlayerCode,
                 walletId: query.WalletId,
-                amount: convertPlatformBalanceResult.Balance,
+                amount: convertPlatformBalanceResult.FreeBalance,
                 cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 

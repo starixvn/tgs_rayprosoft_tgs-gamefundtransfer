@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="StackExchange.Redis" Version="2.6.122" />
     <PackageReference Include="Tgs.CashService.Client" Version="0.1.6" />
-    <PackageReference Include="Tgs.GameCurrency.Client" Version="0.0.9" />
+    <PackageReference Include="Tgs.GameCurrency.Client" Version="0.0.10" />
     <PackageReference Include="Tgs.GameInterface.SabaService.Client" Version="0.0.6" />
     <PackageReference Include="TGS.GameProviders.Client" Version="0.0.67" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
