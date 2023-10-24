@@ -150,7 +150,7 @@ _ = app.UseSwaggerUI();
 
 //_ = app.UseHttpsRedirection();
 
-_ = app.UseAuthorization();
+//_ = app.UseAuthorization();
 
 _ = app.MapControllers();
 
