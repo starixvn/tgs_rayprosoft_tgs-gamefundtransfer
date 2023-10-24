@@ -152,7 +152,7 @@ _ = app.UseSwaggerUI();
 
 //_ = app.UseAuthorization();
 
-_ = app.MapControllers();
+//_ = app.MapControllers();
 
 app.MapHealthChecks("/healthz");
 
