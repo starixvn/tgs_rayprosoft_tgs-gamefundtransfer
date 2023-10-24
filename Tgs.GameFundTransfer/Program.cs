@@ -148,11 +148,11 @@ _ = app.UseSwagger();
 _ = app.UseSwaggerUI();
 
 
-//_ = app.UseHttpsRedirection();
+_ = app.UseHttpsRedirection();
 
-//_ = app.UseAuthorization();
+_ = app.UseAuthorization();
 
-//_ = app.MapControllers();
+_ = app.MapControllers();
 
 app.MapHealthChecks("/healthz");
 
