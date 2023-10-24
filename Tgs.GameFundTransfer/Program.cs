@@ -147,7 +147,8 @@ var app = builder.Build();
 _ = app.UseSwagger();
 _ = app.UseSwaggerUI();
 
-_ = app.UseAuthorization();
+
+_ = app.UseHttpsRedirection();
 
 _ = app.MapControllers();
 
