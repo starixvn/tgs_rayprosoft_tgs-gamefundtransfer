@@ -92,7 +92,7 @@ affinity:
     requiredDuringSchedulingIgnoredDuringExecution:
     - labelSelector:
         matchExpressions:
-        - key: app.kubernetes.io/name
+        - key: app
           operator: In
           values:
           - game-gamefundtransfer

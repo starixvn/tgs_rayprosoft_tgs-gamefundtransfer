@@ -10,8 +10,8 @@
     <PackageReference Include="StackExchange.Redis" Version="2.6.122" />
     <PackageReference Include="Tgs.CashService.Client" Version="0.1.9" />
     <PackageReference Include="Tgs.GameCurrency.Client" Version="0.0.11" />
-    <PackageReference Include="Tgs.GameInterface.SabaService.Client" Version="0.0.8" />
-    <PackageReference Include="TGS.GameProviders.Client" Version="0.0.67" />
+    <PackageReference Include="Tgs.GameInterface.SabaService.Client" Version="0.0.9" />
+    <PackageReference Include="TGS.GameProviders.Client" Version="0.0.70" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
   </ItemGroup>
 

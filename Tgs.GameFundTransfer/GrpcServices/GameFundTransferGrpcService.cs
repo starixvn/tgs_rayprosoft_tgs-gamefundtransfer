@@ -8,12 +8,14 @@ namespace Tgs.GameFundTransfer.GrpcServices;
 
 public class GameFundTransferGrpcService : GameFundTransferService.GameFundTransferServiceBase
 {
+    private readonly ILogger<GameFundTransferGrpcService> _logger;
     private readonly IGetService<FundInQuery, FundResult> _fundInResultService;
     private readonly ICommandService<FundInCommand> _fundInService;
     private readonly IGetService<FundInZeroQuery, FundResult> _fundInZeroService;
     private readonly ICommandService<FundOutCommand> _fundOutService;
 
     public GameFundTransferGrpcService(
+        ILogger<GameFundTransferGrpcService> logger,
         IGetService<FundInQuery, FundResult> fundInResultService,
         IGetService<FundInZeroQuery, FundResult> fundInZeroService,
         ICommandService<FundInCommand> fundInService,
@@ -23,8 +25,19 @@ public class GameFundTransferGrpcService : GameFundTransferService.GameFundTrans
     {
         _fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
         _fundOutService = fundOutService ?? throw new ArgumentNullException(nameof(fundOutService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _fundInResultService = fundInResultService ?? throw new ArgumentNullException(nameof(fundInResultService));
         _fundInZeroService = fundInZeroService ?? throw new ArgumentNullException(nameof(fundInZeroService));
+    }
+
+    public override Task<CheckingServiceReply> CheckingService(CheckingServiceRequest request, ServerCallContext context)
+    {
+        _logger.LogWarning("LogOn:{logOn} Message: Create a check connection.({machineName})", DateTime.Now.ToString("o"), request.MachineName);
+
+        return Task.FromResult(new CheckingServiceReply
+        {
+            MachineName = Environment.MachineName
+        });
     }
 
     public override async Task<GameFundTransferReply> FundIn(GameFundTransferFundRequest request, ServerCallContext context)

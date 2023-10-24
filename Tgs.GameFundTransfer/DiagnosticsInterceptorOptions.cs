@@ -5,5 +5,5 @@ namespace Tgs.GameFundTransfer;
 public class DiagnosticsInterceptorOptions
 {
     public ActivitySource InterceptorActivitySource { get; set; } =
-        new ActivitySource($"Tgs.GameTransfer.DiagnosticsInterceptor");
+        new ActivitySource($"Tgs.GameFundTransfer.DiagnosticsInterceptor");
 }
