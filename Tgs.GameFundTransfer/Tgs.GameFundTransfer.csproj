@@ -31,7 +31,7 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.5.1" />
 		<PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.6" />
-		<PackageReference Include="StackExchange.Redis" Version="2.6.122" />
+		<PackageReference Include="StackExchange.Redis" Version="2.7.4" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 		<PackageReference Include="Grpc.AspNetCore" Version="2.58.0" />
 		<PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
