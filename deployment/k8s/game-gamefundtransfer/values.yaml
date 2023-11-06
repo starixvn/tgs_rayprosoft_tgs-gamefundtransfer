@@ -97,3 +97,9 @@ affinity:
           values:
           - game-gamefundtransfer
       topologyKey: kubernetes.io/hostname
+
+restart:
+  enabled: false
+  serviceAccount: game-gamefundtransfer-restarter
+  annotations: {}
+  schedule: 0 0 * * * 

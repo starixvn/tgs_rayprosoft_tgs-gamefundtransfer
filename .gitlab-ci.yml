@@ -133,7 +133,11 @@ deploy-dev:
         "nodeSelector": $node_selector,
         "tolerations": [$dedicated],
         "resources": $resources,
-        "autoscaling": $autoscaling
+        "autoscaling": $autoscaling,
+        "restart": {
+            "enabled": true,
+            "schedule": "45 0 * * *"
+        }
       }
       EOF
     - |
@@ -146,7 +150,11 @@ deploy-dev:
         "nodeSelector": $node_selector,
         "tolerations": [$dedicated],
         "resources": $resources,
-        "autoscaling": $autoscaling
+        "autoscaling": $autoscaling,
+        "restart": {
+            "enabled": true,
+            "schedule": "45 0 * * *"
+        }
       }
       EOF
 
@@ -180,7 +188,11 @@ deploy-staging:
         "nodeSelector": $node_selector,
         "tolerations": [$dedicated],
         "resources": $resources,
-        "autoscaling": $autoscaling
+        "autoscaling": $autoscaling,
+        "restart": {
+            "enabled": true,
+            "schedule": "45 0 * * *"
+        }
       }
       EOF
     - |
@@ -193,7 +205,11 @@ deploy-staging:
         "nodeSelector": $node_selector,
         "tolerations": [$dedicated],
         "resources": $resources,
-        "autoscaling": $autoscaling
+        "autoscaling": $autoscaling,
+        "restart": {
+            "enabled": true,
+            "schedule": "45 0 * * *"
+        }
       }
       EOF
 
@@ -227,7 +243,11 @@ deploy-prod:
         "nodeSelector": $node_selector,
         "tolerations": [$dedicated],
         "resources": $resources,
-        "autoscaling": $autoscaling
+        "autoscaling": $autoscaling,
+        "restart": {
+            "enabled": true,
+            "schedule": "45 0 * * *"
+        }
       }
       EOF
     - |
@@ -240,6 +260,10 @@ deploy-prod:
         "nodeSelector": $node_selector,
         "tolerations": [$dedicated],
         "resources": $resources,
-        "autoscaling": $autoscaling
+        "autoscaling": $autoscaling,
+        "restart": {
+            "enabled": true,
+            "schedule": "45 0 * * *"
+        }
       }
       EOF
