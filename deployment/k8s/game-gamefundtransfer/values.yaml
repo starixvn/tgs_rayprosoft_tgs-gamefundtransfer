@@ -48,7 +48,7 @@ service:
   targetPort: 8080
   grpc:
     port: 9090
-    targetPort: 8081
+    targetPort: 9090
 
 ingress:
   enabled: false
