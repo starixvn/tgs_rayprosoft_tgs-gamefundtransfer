@@ -50,7 +50,7 @@ service:
 servicegrpc:
   type: ClusterIP
   port: 9090
-  targetPort: 8080
+  targetPort: 8081
 
 ingress:
   enabled: false
