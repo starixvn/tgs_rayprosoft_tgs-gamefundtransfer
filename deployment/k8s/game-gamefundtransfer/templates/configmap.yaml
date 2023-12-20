@@ -14,12 +14,14 @@ data:
       },
       "Kestrel": {
         "EndpointDefaults": {
-          "Protocols": "Http2"
+          "Protocols": "Http1AndHttp2AndHttp3"
         },
         "Endpoints": {
-          "HealthCheck": {
-            "Url": "http://*:{{ .Values.service.targetPort }}",
-            "Protocols": "Http1"
+          "Http": {
+            "Url": "http://*:8080"
+          },
+          "Https": {
+            "Url": "http://*:8081"
           },
           "Grpc": {
             "Url": "http://*:{{ .Values.servicegrpc.targetPort }}"
