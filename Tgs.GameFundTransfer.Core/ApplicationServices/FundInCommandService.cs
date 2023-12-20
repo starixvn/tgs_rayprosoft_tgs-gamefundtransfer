@@ -6,34 +6,17 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameFundTransfer.Core.ApplicationServices;
 
-internal class FundInCommandService : ICommandService<FundInCommand>
+internal class FundInCommandService(
+    ILogger<FundInCommandService> logger,
+    ICashServiceClient cashServiceClient,
+    IFundsDistributedLock fundsLocked,
+    IFundTransferTransactionRepository fundTransferTransactionRepository,
+    IGameCurrencyClient gameCurrencyClient,
+    IGameProvidersClient gameProvidersClient) : ICommandService<FundInCommand>
 {
-    private readonly ICashServiceClient _cashServiceClient;
-    private readonly IFundsDistributedLock _fundsLocked;
-    private readonly IFundTransferTransactionRepository _fundTransferTransactionRepository;
-    private readonly IGameCurrencyClient _gameCurrencyClient;
-    private readonly IGameProvidersClient _gameProvidersClient;
-    private readonly ILogger<FundInCommandService> _logger;
-
-    public FundInCommandService(
-        ILogger<FundInCommandService> logger,
-        ICashServiceClient cashServiceClient,
-        IFundsDistributedLock fundsLocked,
-        IFundTransferTransactionRepository fundTransferTransactionRepository,
-        IGameCurrencyClient gameCurrencyClient,
-        IGameProvidersClient gameProvidersClient)
-    {
-        _cashServiceClient = cashServiceClient ?? throw new ArgumentNullException(nameof(cashServiceClient));
-        _fundsLocked = fundsLocked ?? throw new ArgumentNullException(nameof(fundsLocked));
-        _fundTransferTransactionRepository = fundTransferTransactionRepository ?? throw new ArgumentNullException(nameof(fundTransferTransactionRepository));
-        _gameProvidersClient = gameProvidersClient ?? throw new ArgumentNullException(nameof(gameProvidersClient));
-        _gameCurrencyClient = gameCurrencyClient ?? throw new ArgumentNullException(nameof(gameCurrencyClient));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
-
     public async ValueTask ExecuteAsync(FundInCommand query, CancellationToken cancellationToken = default)
     {
-        var exchangeRateFundResult = await _gameCurrencyClient
+        var exchangeRateFundResult = await gameCurrencyClient
             .ConvertGameProviderFundsAsync(
             query.GameProviderCode,
             query.CurrencyCode,
@@ -43,20 +26,20 @@ internal class FundInCommandService : ICommandService<FundInCommand>
 
         var gameProviderAmount = exchangeRateFundResult.Amount;
 
-        if (!await _fundsLocked
+        if (!await fundsLocked
             .LockingAsync(
             gameProviderCode: query.GameProviderCode,
             playerCode: query.PlayerCode)
             .ConfigureAwait(false))
 
         {
-            _logger.LogWarning("Player ({playerCode}) funds transfer game provider ({gameProviderCode}) has been locked.", query.PlayerCode, query.GameProviderCode);
+            logger.LogWarning("Player ({playerCode}) funds transfer game provider ({gameProviderCode}) has been locked.", query.PlayerCode, query.GameProviderCode);
             return;
         }
 
         try
         {
-            var playerBalance = await _gameProvidersClient
+            var playerBalance = await gameProvidersClient
                 .PlayerBalanceAsync(
                 gameProviderCode: query.GameProviderCode,
                 playerCode: query.PlayerCode,
@@ -68,7 +51,7 @@ internal class FundInCommandService : ICommandService<FundInCommand>
                 throw new Exception($"Insufficient game wallet balance.({playerBalance.FreeBalance})");
             }
 
-            var gameProviderFundTransferTransactionId = await _fundTransferTransactionRepository
+            var gameProviderFundTransferTransactionId = await fundTransferTransactionRepository
                 .AddFundInAsync(
                 gameProviderId: query.GameProviderId,
                 gameProviderCode: query.GameProviderCode,
@@ -78,7 +61,7 @@ internal class FundInCommandService : ICommandService<FundInCommand>
                 cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
-            var gameProviderTransactionId = await _gameProvidersClient
+            var gameProviderTransactionId = await gameProvidersClient
                 .PlayerFundInAsync(
                 gameProviderCode: query.GameProviderCode,
                 brandCode: query.BrandCode,
@@ -91,7 +74,7 @@ internal class FundInCommandService : ICommandService<FundInCommand>
 
             if (string.IsNullOrEmpty(gameProviderTransactionId))
             {
-                await _fundTransferTransactionRepository
+                await fundTransferTransactionRepository
                     .UpdateByGameProviderFundFailedAsync(
                     gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
                     cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -100,7 +83,7 @@ internal class FundInCommandService : ICommandService<FundInCommand>
 
             try
             {
-                var transactionResponse = await _cashServiceClient
+                var transactionResponse = await cashServiceClient
                     .GameProviderFundInAsync(
                     walletId: query.WalletId,
                     amount: query.Amount,
@@ -109,7 +92,7 @@ internal class FundInCommandService : ICommandService<FundInCommand>
                     cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-                await _fundTransferTransactionRepository.UpdateBySuccessAsync(
+                await fundTransferTransactionRepository.UpdateBySuccessAsync(
                     gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
                     transactionId: transactionResponse.TransactionId,
                     gameProviderTransactionId: gameProviderTransactionId,
@@ -119,18 +102,18 @@ internal class FundInCommandService : ICommandService<FundInCommand>
             }
             catch (Exception ex)
             {
-                await _fundTransferTransactionRepository
+                await fundTransferTransactionRepository
                     .UpdateByMainWalletFundFailedAsync(
                     gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
                     gameProviderTransactionId: gameProviderTransactionId,
                     cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-                _logger.LogError(exception: ex, "The main wallet transfer failed.({gameProviderFundTransferTransactionId})", gameProviderFundTransferTransactionId);
+                logger.LogError(exception: ex, "The main wallet transfer failed.({gameProviderFundTransferTransactionId})", gameProviderFundTransferTransactionId);
             }
         }
         finally
         {
-            await _fundsLocked.UnlockAsync(
+            await fundsLocked.UnlockAsync(
                   gameProviderCode: query.GameProviderCode,
                   playerCode: query.PlayerCode).ConfigureAwait(false);
         }

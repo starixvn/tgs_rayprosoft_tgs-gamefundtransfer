@@ -4,32 +4,22 @@ using Tgs.GameFundTransfer.Core;
 
 namespace Tgs.GameFundTransfer.Repositories;
 
-internal class FundsDistributedLock : IFundsDistributedLock
+internal class FundsDistributedLock(
+    IDatabase database,
+    IOptions<FundsLockedOptions> options) : IFundsDistributedLock
 {
-    private readonly IDatabase _database;
-    private readonly FundsLockedOptions _fundslocked;
-    private readonly string _redisKey = "fundslocked:{0}:{1}";
-
-    public FundsDistributedLock(
-        IDatabase database,
-        IOptions<FundsLockedOptions> options)
-    {
-        _database = database ?? throw new ArgumentNullException(nameof(database));
-        _fundslocked = options.Value;
-    }
-
     public Task<bool> LockingAsync(string gameProviderCode, string playerCode)
-    {
-        string key = string.Format(_redisKey, gameProviderCode, playerCode).ToLower();
-        return _database.StringSetAsync(
-            key: key,
+        => database.StringSetAsync(
+            key: GetKey(gameProviderCode, playerCode),
             value: DateTime.UtcNow.ToString("O"),
-            expiry: TimeSpan.FromSeconds(_fundslocked.LockSeconds),
+            expiry: TimeSpan.FromSeconds(options.Value.LockSeconds),
             when: When.NotExists);
-    }
 
     public Task UnlockAsync(string gameProviderCode, string playerCode)
-        => _database.KeyDeleteAsync(
-            key: string.Format(_redisKey, gameProviderCode, playerCode).ToLower(),
+        => database.KeyDeleteAsync(
+            key: GetKey(gameProviderCode, playerCode),
             flags: CommandFlags.FireAndForget);
+
+    private static string GetKey(string gameProviderCode, string playerCode)
+        => string.Format("fundslocked:{0}:{1}", gameProviderCode, playerCode).ToLower();
 }

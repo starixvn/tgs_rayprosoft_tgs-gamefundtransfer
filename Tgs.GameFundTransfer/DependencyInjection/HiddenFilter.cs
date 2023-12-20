@@ -20,7 +20,7 @@ public class HiddenFilter : IDocumentFilter
                     string key = "/" + apiDescription.RelativePath;
                     if (key.Contains('?'))
                     {
-                        int idx = key.IndexOf("?", System.StringComparison.Ordinal);
+                        int idx = key.IndexOf('?');
                         key = key[..idx];
                     }
                     _ = swaggerDoc.Paths.Remove(key);

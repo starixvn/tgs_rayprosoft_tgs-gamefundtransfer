@@ -8,18 +8,32 @@ namespace Tgs.GameFundTransfer.Repositories.Entities;
 public partial class GameProviderFundTransferTransaction
 {
     public Guid GameProviderFundTransferTransactionId { get; set; }
+
     public Guid? TransactionId { get; set; }
+
     public Guid GameProviderId { get; set; }
+
     public Guid WalletId { get; set; }
+
     public string? GameProviderTransactionId { get; set; }
-    public string PlayerCode { get; set; } = default!;
+
+    public string PlayerCode { get; set; } = null!;
+
     public short FundSource { get; set; }
-    public string FromWallet { get; set; } = default!;
-    public string ToWallet { get; set; } = default!;
+
+    public string FromWallet { get; set; } = null!;
+
+    public string ToWallet { get; set; } = null!;
+
     public short Status { get; set; }
+
     public decimal Amount { get; set; }
+
     public decimal Balance { get; set; }
+
     public DateTime CreatedOn { get; set; }
+
     public DateTime UpdatedOn { get; set; }
+
     public string? Description { get; set; }
 }

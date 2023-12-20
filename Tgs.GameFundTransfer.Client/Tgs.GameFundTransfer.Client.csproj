@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
@@ -9,17 +9,19 @@
 	<PropertyGroup>
 		<Version>0.0.10</Version>
 		<Authors>Raypro</Authors>
-		<Description>TGS GameFundTransfer Client</Description>
+		<RootNamespace>Tgs.GameFundTransfer.Client</RootNamespace>
+		<PackageId>Tgs.GameFundTransfer.Client</PackageId>
+		<Title>Tgs.GameFundTransfer.Client</Title>
 		<PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-gamefundtransfer</PackageProjectUrl>
 		<RepositoryUrl>https://gitlab.com/rayprosoft/tgs-gamefundtransfer.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<PackageTags>tgs-gamefundtransfer</PackageTags>
+		<PackageTags>TGS GameFundTransfer Client</PackageTags>
 	</PropertyGroup>
-
+	
 	<ItemGroup>
-		<PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.58.0" />
-		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.58.0" />
-		<PackageReference Include="Grpc.Tools" Version="2.59.0">
+		<PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.59.0" />
+		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.59.0" />
+		<PackageReference Include="Grpc.Tools" Version="2.60.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>

@@ -9,11 +9,11 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: http
+      targetPort: {{ .Values.service.targetPort }}
       protocol: TCP
       name: http
     - port: {{ .Values.servicegrpc.port }}
-      targetPort: {{ .Values.servicegrpc.port }}
+      targetPort: {{ .Values.servicegrpc.targetPort }}
       protocol: TCP
       name: grpc
   selector:
