@@ -12,8 +12,8 @@ spec:
       targetPort: {{ .Values.service.targetPort }}
       protocol: TCP
       name: http
-    - port: {{ .Values.servicegrpc.port }}
-      targetPort: {{ .Values.servicegrpc.targetPort }}
+    - port: {{ .Values.service.grpc.port }}
+      targetPort: {{ .Values.service.grpc.targetPort }}
       protocol: TCP
       name: grpc
   selector:

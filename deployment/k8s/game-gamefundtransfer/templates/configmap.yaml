@@ -22,7 +22,7 @@ data:
             "Protocols": "Http1"
           },
           "Grpc": {
-            "Url": "http://*:{{ .Values.servicegrpc.targetPort }}",
+            "Url": "http://*:{{ .Values.service.grpc.targetPort }}",
             "Protocols": "Http2"
           }
         }
