@@ -18,13 +18,16 @@ data:
         },
         "Endpoints": {
           "Http": {
-            "Url": "http://*:8080"
+            "Url": "http://*:8080",
+            "Protocols": "Http1"
           },
           "Https": {
-            "Url": "http://*:8081"
+            "Url": "http://*:8081",
+            "Protocols": "Http2"
           },
           "Grpc": {
-            "Url": "http://*:{{ .Values.servicegrpc.targetPort }}"
+            "Url": "http://*:{{ .Values.servicegrpc.targetPort }}",
+            "Protocols": "Http2"
           }
         }
       },
