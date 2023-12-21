@@ -21,10 +21,6 @@ data:
             "Url": "http://*:{{ .Values.service.targetPort }}",
             "Protocols": "Http1"
           },
-          "Healthcheck": {
-            "Url": "http://*:{{ .Values.service.port }}",
-            "Protocols": "Http1"
-          },
           "Grpc": {
             "Url": "http://*:{{ .Values.service.grpc.targetPort }}",
             "Protocols": "Http2"
