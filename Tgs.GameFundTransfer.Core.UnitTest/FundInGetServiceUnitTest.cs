@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging.Abstractions;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Tgs.CashService.Client;
 using Tgs.GameCurrency.Client;
@@ -658,4 +659,44 @@ public class FundInGetServiceUnitTest
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.PlayerCode));
     }
+
+    [TestMethod]
+    public async Task Amount_Can_Only_Be_Positive()
+    {
+        var faceLogger = NullLogger<FundInGetService>.Instance;
+        var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+        var fakeDistributedLock = Substitute.For<IFundsDistributedLock>();
+        var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
+        var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
+        var fakeRepository = Substitute.For<IFundTransferTransactionRepository>();
+
+        var query = new FundInQuery(
+            Guid.NewGuid(),
+            GameProviderType.Kaiyuan,
+            "GPI",
+            "4ucmqplxb029",
+            Guid.NewGuid(),
+            "CNY",
+            -1.0m
+            );
+
+        var sut = new FundInGetService(
+            faceLogger,
+            fakeCashServiceClient,
+            fakeDistributedLock,
+            fakeGameCurrencyClient,
+            fakeGameProvidersClient,
+            fakeRepository);
+
+        _ = await Assert.ThrowsExceptionAsync<ValidationException>(async () =>
+        await sut.GetAsync(query).ConfigureAwait(false))
+            .ConfigureAwait(false);
+
+        _ = fakeDistributedLock
+            .Received(0)
+            .UnlockAsync(
+            Arg.Is(query.GameProviderCode),
+            Arg.Is(query.PlayerCode));
+    }
 }
+
