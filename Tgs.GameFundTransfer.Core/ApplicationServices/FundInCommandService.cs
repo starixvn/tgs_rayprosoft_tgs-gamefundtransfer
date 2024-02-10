@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Logging;
 using Tgs.CashService.Client;
 using Tgs.GameCurrency.Client;
 using Tgs.GameProviders.Client;
@@ -16,6 +18,11 @@ internal class FundInCommandService(
 {
     public async ValueTask ExecuteAsync(FundInCommand query, CancellationToken cancellationToken = default)
     {
+        if (query.Amount < 0)
+        {
+            throw new ValidationException($"The field Amount must be between 0 and 79228162514264337593543950335.({query.Amount})");
+        }
+
         var exchangeRateFundResult = await gameCurrencyClient
             .ConvertGameProviderFundsAsync(
             query.GameProviderCode,

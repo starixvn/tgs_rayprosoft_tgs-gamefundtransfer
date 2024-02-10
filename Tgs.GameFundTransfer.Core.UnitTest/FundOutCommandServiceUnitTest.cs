@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging.Abstractions;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Tgs.CashService.Client;
 using Tgs.GameCurrency.Client;
@@ -668,6 +669,44 @@ public class FundOutCommandServiceUnitTest
 
         _ = fakeFundsLocked
             .Received(1)
+            .UnlockAsync(
+            Arg.Is(query.GameProviderCode),
+            Arg.Is(query.PlayerCode));
+    }
+
+    [TestMethod]
+    public async Task Amount_Can_Only_Be_Positive()
+    {
+        var faceLogger = NullLogger<FundOutCommandService>.Instance;
+        var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+        var fakeFundsLocked = Substitute.For<IFundsDistributedLock>();
+        var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+        var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
+        var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
+
+        var query = new FundOutCommand(
+            Guid.NewGuid(),
+            GameProviderType.Kaiyuan,
+            "GPI",
+            "4ucmqplxb029",
+            Guid.NewGuid(),
+            "CNY",
+            -1.0m);
+
+        var sut = new FundOutCommandService(
+            faceLogger,
+            fakeCashServiceClient,
+            fakeFundsLocked,
+            fakeGameProviderFundTransferTransactionRepository,
+            fakeGameCurrencyClient,
+            fakeGameProvidersClient);
+
+        _ = await Assert.ThrowsExceptionAsync<ValidationException>(async () =>
+        await sut.ExecuteAsync(query).ConfigureAwait(false))
+            .ConfigureAwait(false);
+
+        _ = fakeFundsLocked
+            .Received(0)
             .UnlockAsync(
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.PlayerCode));
