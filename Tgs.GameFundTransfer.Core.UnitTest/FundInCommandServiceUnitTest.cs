@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Numerics;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NSubstitute.Extensions;
 using Tgs.CashService.Client;
 using Tgs.GameCurrency.Client;
 using Tgs.GameFundTransfer.Core.ApplicationServices;
+using Tgs.GameFundTransfer.Core.Exceptions;
 using Tgs.GameProviders.Client;
 using Tgs.GameProviders.Domains;
 
@@ -736,6 +738,76 @@ public class FundInCommandServiceUnitTest
 
         _ = fakeFundsLocked
             .Received(0)
+            .UnlockAsync(
+            Arg.Is(query.GameProviderCode),
+            Arg.Is(query.PlayerCode));
+    }
+
+    [TestMethod]
+    public async Task This_player_gets_a_game_provider_free_balance_less_than_zero()
+    {
+        var faceLogger = NullLogger<FundInCommandService>.Instance;
+        var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+        var fakeFundsLocked = Substitute.For<IFundsDistributedLock>();
+        var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+        var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
+        var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
+
+        var query = new FundInCommand(
+            Guid.NewGuid(),
+            GameProviderType.Kaiyuan,
+            "GPI",
+            "4ucmqplxb029",
+            Guid.NewGuid(),
+            "CNY",
+            10m
+            );
+
+        var gameProviderFundTransferTransactionId = Guid.NewGuid();
+        var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
+
+        var transactionResponse = new TransactionResponse()
+        {
+            TransactionId = Guid.NewGuid(),
+            Balance = 10
+        };
+
+        _ = fakeGameCurrencyClient.ConvertGameProviderFundsAsync(
+            Arg.Is(query.GameProviderCode),
+            Arg.Is(query.CurrencyCode),
+            Arg.Is(query.Amount)
+            ).Returns(new ConvertGameProviderFundsResult(
+                ExchangeRate: 1,
+                Amount: query.Amount));
+
+        _ = fakeFundsLocked.LockingAsync(
+            Arg.Is(query.GameProviderCode),
+            Arg.Is(query.PlayerCode)).Returns(Task.FromResult(true));
+
+        var gameProviderBalance = new PlayerBalanceResponse(
+            Balance: 1720.00m,
+            FreeBalance: -1720.00m,
+            OutstandingBalance: 0.0m);
+        _ = fakeGameProvidersClient
+            .PlayerBalanceAsync(
+            Arg.Is(query.GameProviderCode),
+            Arg.Is(query.PlayerCode))
+            .Returns(ValueTask.FromResult(gameProviderBalance));
+
+        var sut = new FundInCommandService(
+            faceLogger,
+            fakeCashServiceClient,
+            fakeFundsLocked,
+            fakeGameProviderFundTransferTransactionRepository,
+            fakeGameCurrencyClient,
+            fakeGameProvidersClient);
+
+        _ = await Assert.ThrowsExceptionAsync<FreeBalanceException>(async () =>
+        await sut.ExecuteAsync(query).ConfigureAwait(false))
+            .ConfigureAwait(false);
+
+        _ = fakeFundsLocked
+            .Received(1)
             .UnlockAsync(
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.PlayerCode));
