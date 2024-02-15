@@ -7,21 +7,22 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<Version>0.0.11</Version>
+		<Version>0.0.12</Version>
 		<Authors>Raypro</Authors>
-		<RootNamespace>Tgs.GameFundTransfer.Client</RootNamespace>
-		<PackageId>Tgs.GameFundTransfer.Client</PackageId>
-		<Title>Tgs.GameFundTransfer.Client</Title>
 		<PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-gamefundtransfer</PackageProjectUrl>
 		<RepositoryUrl>https://gitlab.com/rayprosoft/tgs-gamefundtransfer.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<PackageTags>TGS GameFundTransfer Client</PackageTags>
+		<RootNamespace>Tgs.GameFundTransfer.Client</RootNamespace>
+		<PackageId>Tgs.GameFundTransfer.Client</PackageId>
+		<Title>Tgs.GameFundTransfer.Client</Title>
+		<Description>Tgs.GameFundTransfer.Client</Description>
+		<PackageTags>Tgs GameFundTransfer Client</PackageTags>
 	</PropertyGroup>
-	
+
 	<ItemGroup>
-		<PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.59.0" />
-		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.59.0" />
-		<PackageReference Include="Grpc.Tools" Version="2.60.0">
+		<PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.60.0" />
+		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.60.0" />
+		<PackageReference Include="Grpc.Tools" Version="2.61.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>

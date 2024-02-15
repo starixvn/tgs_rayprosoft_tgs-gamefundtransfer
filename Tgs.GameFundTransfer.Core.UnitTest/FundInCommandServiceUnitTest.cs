@@ -1,8 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Numerics;
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using NSubstitute.Extensions;
 using Tgs.CashService.Client;
 using Tgs.GameCurrency.Client;
 using Tgs.GameFundTransfer.Core.ApplicationServices;
@@ -15,6 +12,55 @@ namespace Tgs.GameFundTransfer.Core.UnitTest;
 [TestClass]
 public class FundInCommandServiceUnitTest
 {
+    [TestMethod]
+    public async Task Amount_Can_Only_Be_Positive()
+
+    {
+        var faceLogger = NullLogger<FundInCommandService>.Instance;
+        var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
+        var fakeFundsLocked = Substitute.For<IFundsDistributedLock>();
+        var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+        var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
+        var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
+
+        var query = new FundInCommand(
+            Guid.NewGuid(),
+            GameProviderType.Kaiyuan,
+            "GPI",
+            "4ucmqplxb029",
+            Guid.NewGuid(),
+            "CNY",
+            -1.0m
+            );
+
+        var gameProviderFundTransferTransactionId = Guid.NewGuid();
+        var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
+
+        var transactionResponse = new TransactionResponse()
+        {
+            TransactionId = Guid.NewGuid(),
+            Balance = 10
+        };
+
+        var sut = new FundInCommandService(
+            faceLogger,
+            fakeCashServiceClient,
+            fakeFundsLocked,
+            fakeGameProviderFundTransferTransactionRepository,
+            fakeGameCurrencyClient,
+            fakeGameProvidersClient);
+
+        _ = await Assert.ThrowsExceptionAsync<AmountFormatException>(async () =>
+        await sut.ExecuteAsync(query).ConfigureAwait(false))
+            .ConfigureAwait(false);
+
+        _ = fakeFundsLocked
+            .Received(0)
+            .UnlockAsync(
+            Arg.Is(query.GameProviderCode),
+            Arg.Is(query.PlayerCode));
+    }
+
     [TestMethod]
     public async Task Fund_In()
     {
@@ -283,7 +329,7 @@ public class FundInCommandServiceUnitTest
             fakeGameCurrencyClient,
             fakeGameProvidersClient);
 
-        _ = await Assert.ThrowsExceptionAsync<Exception>(() => fakeService.ExecuteAsync(query).AsTask()).ConfigureAwait(false);
+        _ = await Assert.ThrowsExceptionAsync<FreeBalanceInsufficientException>(() => fakeService.ExecuteAsync(query).AsTask()).ConfigureAwait(false);
 
         _ = fakeFundsLocked
             .Received(1)
@@ -689,55 +735,6 @@ public class FundInCommandServiceUnitTest
 
         _ = fakeFundsLocked
             .Received(1)
-            .UnlockAsync(
-            Arg.Is(query.GameProviderCode),
-            Arg.Is(query.PlayerCode));
-    }
-
-    [TestMethod]
-    public async Task Amount_Can_Only_Be_Positive()
-
-    {
-        var faceLogger = NullLogger<FundInCommandService>.Instance;
-        var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-        var fakeFundsLocked = Substitute.For<IFundsDistributedLock>();
-        var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
-        var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
-        var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
-
-        var query = new FundInCommand(
-            Guid.NewGuid(),
-            GameProviderType.Kaiyuan,
-            "GPI",
-            "4ucmqplxb029",
-            Guid.NewGuid(),
-            "CNY",
-            -1.0m
-            );
-
-        var gameProviderFundTransferTransactionId = Guid.NewGuid();
-        var gameProviderTransactionId = $"72412{DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(+8)):yyyyMMddHHmmssfff}4udwnknl3eg7";
-
-        var transactionResponse = new TransactionResponse()
-        {
-            TransactionId = Guid.NewGuid(),
-            Balance = 10
-        };
-
-        var sut = new FundInCommandService(
-            faceLogger,
-            fakeCashServiceClient,
-            fakeFundsLocked,
-            fakeGameProviderFundTransferTransactionRepository,
-            fakeGameCurrencyClient,
-            fakeGameProvidersClient);
-
-        _ = await Assert.ThrowsExceptionAsync<ValidationException>(async () =>
-        await sut.ExecuteAsync(query).ConfigureAwait(false))
-            .ConfigureAwait(false);
-
-        _ = fakeFundsLocked
-            .Received(0)
             .UnlockAsync(
             Arg.Is(query.GameProviderCode),
             Arg.Is(query.PlayerCode));

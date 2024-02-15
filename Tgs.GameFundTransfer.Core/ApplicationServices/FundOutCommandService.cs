@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Tgs.CashService.Client;
 using Tgs.GameCurrency.Client;
+using Tgs.GameFundTransfer.Core.Exceptions;
 using Tgs.GameProviders.Client;
 using Tgs.ServiceUtility;
 
@@ -19,7 +20,7 @@ internal class FundOutCommandService(
     {
         if (query.Amount < 0)
         {
-            throw new ValidationException($"The field Amount must be between 0 and 79228162514264337593543950335.({query.Amount})");
+            throw new AmountFormatException(query.Amount);
         }
 
         var exchangeRateFundResult = await gameCurrencyClient
@@ -38,7 +39,10 @@ internal class FundOutCommandService(
             playerCode: query.PlayerCode)
             .ConfigureAwait(false))
         {
-            logger.LogWarning("Player ({playerCode}) funds transfer game provider ({gameProviderCode}) has been locked.", query.PlayerCode, query.GameProviderCode);
+            logger.LogWarning("LogOn:{logOn} Mesaage:Player ({playerCode}) funds transfer game provider ({gameProviderCode}) has been locked.",
+                DateTime.Now.ToString("o"),
+                query.PlayerCode,
+                query.GameProviderCode);
             return;
         }
 
@@ -57,9 +61,14 @@ internal class FundOutCommandService(
                 cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
+            if (playerBalance <= 0)
+            {
+                throw new MainWalletBalanceException(query.PlayerCode, playerBalance);
+            }
+
             if (playerBalance - query.Amount < 0)
             {
-                throw new Exception($"Insufficient balance in main wallet.({playerBalance})");
+                throw new MainWalletBalanceInsufficientException(query.PlayerCode, query.GameProviderCode, gameProviderAmount, playerBalance);
             }
 
             var gameProviderFundTransferTransactionId = await fundTransferTransactionRepository
