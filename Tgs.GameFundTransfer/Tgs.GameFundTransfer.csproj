@@ -18,22 +18,22 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.3.3" />
-		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
-		<PackageReference Include="Npgsql.OpenTelemetry" Version="8.0.1" />
+		<PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.3.7" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
+		<PackageReference Include="Npgsql.OpenTelemetry" Version="8.0.2" />
 		<PackageReference Include="OpenTelemetry" Version="1.7.0" />
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.7.0" />
 		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.7.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.7.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.7.1" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.7" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.GrpcCore" Version="1.0.0-beta.5" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.0.0-rc9.3" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.7.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.5.1" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.7.1" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.7.0" />
 		<PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.6" />
-		<PackageReference Include="StackExchange.Redis" Version="2.7.10" />
+		<PackageReference Include="StackExchange.Redis" Version="2.7.17" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-		<PackageReference Include="Grpc.AspNetCore" Version="2.59.0" />
+		<PackageReference Include="Grpc.AspNetCore" Version="2.60.0" />
 		<PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
 	</ItemGroup>
 

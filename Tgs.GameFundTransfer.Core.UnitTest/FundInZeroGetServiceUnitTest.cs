@@ -3,6 +3,7 @@ using NSubstitute;
 using Tgs.CashService.Client;
 using Tgs.GameCurrency.Client;
 using Tgs.GameFundTransfer.Core.ApplicationServices;
+using Tgs.GameFundTransfer.Core.Exceptions;
 using Tgs.GameProviders.Client;
 using Tgs.GameProviders.Domains;
 
@@ -472,10 +473,7 @@ public class FundInZeroGetServiceUnitTest
             fakeGameProvidersClient,
             fakeRepository);
 
-        var actual = await fakeService.GetAsync(query).ConfigureAwait(false);
-
-        Assert.IsNotNull(actual);
-        Assert.AreEqual(StateCode.Success, actual.State);
+        _ = await Assert.ThrowsExceptionAsync<FreeBalanceException>(() => fakeService.GetAsync(query).AsTask()).ConfigureAwait(false);
 
         _ = fakeRepository
             .Received(0)

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Tgs.CashService.Client;
 using Tgs.GameCurrency.Client;
+using Tgs.GameFundTransfer.Core.Exceptions;
 using Tgs.GameFundTransfer.Core.Extensions;
 using Tgs.GameProviders.Client;
 using Tgs.ServiceUtility;
@@ -23,7 +24,8 @@ internal class FundInZeroGetService(
             .ConfigureAwait(false))
 
         {
-            logger.LogWarning("This player ({playerCode}) transfer game provider({gameProviderCode}) is locked.",
+            logger.LogWarning("LogOn:{logOn} Mesaage:Player ({playerCode}) funds transfer game provider ({gameProviderCode}) has been locked.",
+                DateTime.Now.ToString("o"),
                 query.PlayerCode,
                 query.GameProviderCode);
 
@@ -41,6 +43,11 @@ internal class FundInZeroGetService(
                 cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
+            if (playerBalance.FreeBalance <= 0)
+            {
+                throw new FreeBalanceException(query.PlayerCode, query.GameProviderCode, playerBalance.FreeBalance);
+            }
+
             var convertPlatformBalanceResult = await gameCurrencyClient
                 .ConvertPlatformBalanceAsync(
                 gameProviderCode: query.GameProviderCode,
@@ -50,23 +57,6 @@ internal class FundInZeroGetService(
                 outstandingBalance: playerBalance.OutstandingBalance,
                 cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
-
-            if (convertPlatformBalanceResult.FreeBalance <= 0)
-            {
-                logger.LogInformation(
-                    "This player  ({playerCode}) has acquired a game provider ({gameProviderCode}) less than or equal to 0.({gameProviderBalance}->{convertPlatformBalance})",
-                    query.PlayerCode,
-                    query.GameProviderCode,
-                    playerBalance.FreeBalance,
-                    convertPlatformBalanceResult.FreeBalance);
-
-                return new FundResult(
-                    state: StateCode.Success,
-                    message: $"This player  ({query.PlayerCode}) has acquired a game provider ({query.GameProviderCode}) less than or equal to 0.({playerBalance.FreeBalance}->{convertPlatformBalanceResult.Balance})",
-                    fundTransactionId: Guid.Empty,
-                    transactionId: Guid.Empty,
-                    externalTransactionId: string.Empty);
-            }
 
             var fundTransactionId = await repository
                 .AddFundInAsync(

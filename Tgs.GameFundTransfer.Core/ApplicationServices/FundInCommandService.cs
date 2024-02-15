@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
 using Tgs.CashService.Client;
 using Tgs.GameCurrency.Client;
+using Tgs.GameFundTransfer.Core.Exceptions;
 using Tgs.GameProviders.Client;
 using Tgs.ServiceUtility;
 
@@ -20,7 +22,7 @@ internal class FundInCommandService(
     {
         if (query.Amount < 0)
         {
-            throw new ValidationException($"The field Amount must be between 0 and 79228162514264337593543950335.({query.Amount})");
+            throw new AmountFormatException(query.Amount);
         }
 
         var exchangeRateFundResult = await gameCurrencyClient
@@ -33,29 +35,35 @@ internal class FundInCommandService(
 
         var gameProviderAmount = exchangeRateFundResult.Amount;
 
-        if (!await fundsLocked
-            .LockingAsync(
+        if (!await fundsLocked.LockingAsync(
             gameProviderCode: query.GameProviderCode,
             playerCode: query.PlayerCode)
             .ConfigureAwait(false))
 
         {
-            logger.LogWarning("Player ({playerCode}) funds transfer game provider ({gameProviderCode}) has been locked.", query.PlayerCode, query.GameProviderCode);
+            logger.LogWarning("LogOn:{logOn} Mesaage:Player ({playerCode}) funds transfer game provider ({gameProviderCode}) has been locked.",
+                DateTime.Now.ToString("o"),
+                query.PlayerCode,
+                query.GameProviderCode);
             return;
         }
 
         try
         {
-            var playerBalance = await gameProvidersClient
-                .PlayerBalanceAsync(
+            var playerBalance = await gameProvidersClient.PlayerBalanceAsync(
                 gameProviderCode: query.GameProviderCode,
                 playerCode: query.PlayerCode,
                 cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
+            if (playerBalance.FreeBalance <= 0)
+            {
+                throw new FreeBalanceException(query.PlayerCode, query.GameProviderCode, playerBalance.FreeBalance);
+            }
+
             if (playerBalance.FreeBalance - gameProviderAmount < 0)
             {
-                throw new Exception($"Insufficient game wallet balance.({playerBalance.FreeBalance})");
+                throw new FreeBalanceInsufficientException(query.PlayerCode, query.GameProviderCode, gameProviderAmount, playerBalance.FreeBalance);
             }
 
             var gameProviderFundTransferTransactionId = await fundTransferTransactionRepository

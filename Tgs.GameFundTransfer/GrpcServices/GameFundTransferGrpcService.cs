@@ -69,7 +69,6 @@ public class GameFundTransferGrpcService(
             {
                 Core.StateCode.Success => Protos.StateCode.Success,
                 Core.StateCode.TransactionLock => Protos.StateCode.TransactionLock,
-                Core.StateCode.InsufficientBalance => Protos.StateCode.InsufficientBalance,
                 Core.StateCode.ExternalTransactionIdEmpty => Protos.StateCode.ExternalTransactionIdEmpty,
                 _ => Protos.StateCode.Exception
             },
@@ -102,7 +101,6 @@ public class GameFundTransferGrpcService(
             {
                 Core.StateCode.Success => Protos.StateCode.Success,
                 Core.StateCode.TransactionLock => Protos.StateCode.TransactionLock,
-                Core.StateCode.InsufficientBalance => Protos.StateCode.InsufficientBalance,
                 Core.StateCode.ExternalTransactionIdEmpty => Protos.StateCode.ExternalTransactionIdEmpty,
                 _ => Protos.StateCode.Exception
             },
