@@ -30,10 +30,10 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.0.0-rc9.3" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.7.1" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.7.0" />
-		<PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.6" />
-		<PackageReference Include="StackExchange.Redis" Version="2.7.17" />
+		<PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.7" />
+		<PackageReference Include="StackExchange.Redis" Version="2.7.33" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-		<PackageReference Include="Grpc.AspNetCore" Version="2.60.0" />
+		<PackageReference Include="Grpc.AspNetCore" Version="2.61.0" />
 		<PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
 	</ItemGroup>
 
