@@ -9,22 +9,22 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddGameTransferCore(
-        this IServiceCollection services,
-        Action<FundsLockedOptions, IServiceProvider> fundsLockedOptions,
-        Action<CashServiceClientOptions, IServiceProvider> cashServiceClientOptions,
-        Action<GameProvidersClientOptions, IServiceProvider> gameProvidersClientOptions,
-        Action<GameCurrencyClientOptions, IServiceProvider> gameCurrencyClientOptions,
-        Action<GameInterfaceSabaClientOptions, IServiceProvider> gameInterfaceSabaClientOptions)
-        => services
-        .AddOptions<FundsLockedOptions>()
-        .Configure(fundsLockedOptions)
-        .Services
-        .RegisterAllServiceUtilityTypes(
-            Assembly.GetExecutingAssembly(),
-            ServiceLifetime.Transient)
-        .AddCashServiceClient(cashServiceClientOptions)
-        .AddGameProvidersClient(gameProvidersClientOptions)
-        .AddGameCurrencyClient(gameCurrencyClientOptions)
-        .AddGameInterfaceSabaServiceClient(gameInterfaceSabaClientOptions);
+	public static IServiceCollection AddGameTransferCore(
+		this IServiceCollection services,
+		Action<FundsLockedOptions, IServiceProvider> fundsLockedOptions,
+		Action<CashServiceClientOptions, IServiceProvider> cashServiceClientOptions,
+		Action<GameProvidersClientOptions, IServiceProvider> gameProvidersClientOptions,
+		Action<GameCurrencyClientOptions, IServiceProvider> gameCurrencyClientOptions,
+		Action<GameInterfaceSabaClientOptions, IServiceProvider> gameInterfaceSabaClientOptions)
+		=> services
+		.AddOptions<FundsLockedOptions>()
+		.Configure(fundsLockedOptions)
+		.Services
+		.RegisterAllServiceUtilityTypes(
+			Assembly.GetExecutingAssembly(),
+			ServiceLifetime.Transient)
+		.AddCashServiceClient(cashServiceClientOptions)
+		.AddGameProvidersClient(gameProvidersClientOptions)
+		.AddGameCurrencyClient(gameCurrencyClientOptions)
+		.AddGameInterfaceSabaServiceClient(gameInterfaceSabaClientOptions);
 }

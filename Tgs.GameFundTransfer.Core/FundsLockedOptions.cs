@@ -2,5 +2,5 @@
 
 public class FundsLockedOptions
 {
-    public int LockSeconds { get; init; } = 60;
+	public int LockSeconds { get; init; } = 60;
 }

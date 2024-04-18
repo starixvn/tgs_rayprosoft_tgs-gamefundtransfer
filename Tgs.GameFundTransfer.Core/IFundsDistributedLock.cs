@@ -2,7 +2,7 @@
 
 public interface IFundsDistributedLock
 {
-    Task<bool> LockingAsync(string gameProviderCode, string playerCode);
+	Task<bool> LockingAsync(string gameProviderCode, string playerCode);
 
-    Task UnlockAsync(string gameProviderCode, string playerCode);
+	Task UnlockAsync(string gameProviderCode, string playerCode);
 }

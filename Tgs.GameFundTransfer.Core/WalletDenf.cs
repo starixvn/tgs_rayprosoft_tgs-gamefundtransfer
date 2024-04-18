@@ -2,5 +2,5 @@
 
 public class WalletDef
 {
-    public const string MainWallet = "Default";
+	public const string MainWallet = "Default";
 }

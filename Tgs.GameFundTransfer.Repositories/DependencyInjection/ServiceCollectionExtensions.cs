@@ -8,13 +8,13 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddGameTransferRepository(
-        this IServiceCollection services,
-        Action<IServiceProvider, DbContextOptionsBuilder> efConfigure,
-        Func<IServiceProvider, IDatabase> redisDatabaseResolver)
-        => services
-            .AddSerialNumberGenerator()
-            .AddDbContext<TgsContext>(efConfigure)
-            .AddTransient<IFundsDistributedLock>(sp => ActivatorUtilities.CreateInstance<FundsDistributedLock>(sp, redisDatabaseResolver(sp)))
-            .AddTransient<IFundTransferTransactionRepository, FundTransferTransactionRepository>();
+	public static IServiceCollection AddGameTransferRepository(
+		this IServiceCollection services,
+		Action<IServiceProvider, DbContextOptionsBuilder> efConfigure,
+		Func<IServiceProvider, IDatabase> redisDatabaseResolver)
+		=> services
+			.AddSerialNumberGenerator()
+			.AddDbContext<TgsContext>(efConfigure)
+			.AddTransient<IFundsDistributedLock>(sp => ActivatorUtilities.CreateInstance<FundsDistributedLock>(sp, redisDatabaseResolver(sp)))
+			.AddTransient<IFundTransferTransactionRepository, FundTransferTransactionRepository>();
 }
