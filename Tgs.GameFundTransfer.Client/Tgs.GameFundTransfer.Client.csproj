@@ -30,9 +30,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Protobuf Include="..\Tgs.GameFundTransfer\Potos\gamefundtransfer.proto" GrpcServices="Client">
-			<Link>gamefundtransfer.proto</Link>
-		</Protobuf>
+	  <Protobuf Include="..\Tgs.GameFundTransfer\Potos\GameFundTransfer.proto">
+	    <Link>GameFundTransfer.proto</Link>
+	  </Protobuf>
 	</ItemGroup>
 
 </Project>
