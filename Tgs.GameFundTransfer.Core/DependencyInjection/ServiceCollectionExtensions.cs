@@ -1,9 +1,7 @@
 ﻿using System.Reflection;
 using Tgs.CashService.Client;
-using Tgs.GameCurrency.Client;
 using Tgs.GameFundTransfer.Core;
 using Tgs.GameInterface.SabaService.Client;
-using Tgs.GameProviders.Client;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -13,8 +11,6 @@ public static class ServiceCollectionExtensions
 		this IServiceCollection services,
 		Action<FundsLockedOptions, IServiceProvider> fundsLockedOptions,
 		Action<CashServiceClientOptions, IServiceProvider> cashServiceClientOptions,
-		Action<GameProvidersClientOptions, IServiceProvider> gameProvidersClientOptions,
-		Action<GameCurrencyClientOptions, IServiceProvider> gameCurrencyClientOptions,
 		Action<GameInterfaceSabaClientOptions, IServiceProvider> gameInterfaceSabaClientOptions)
 		=> services
 		.AddOptions<FundsLockedOptions>()
@@ -23,8 +19,10 @@ public static class ServiceCollectionExtensions
 		.RegisterAllServiceUtilityTypes(
 			Assembly.GetExecutingAssembly(),
 			ServiceLifetime.Transient)
+		.AddSerialNumberGenerator()
 		.AddCashServiceClient(cashServiceClientOptions)
-		.AddGameProvidersClient(gameProvidersClientOptions)
-		.AddGameCurrencyClient(gameCurrencyClientOptions)
-		.AddGameInterfaceSabaServiceClient(gameInterfaceSabaClientOptions);
+		.AddGameInterfaceSabaServiceClient(gameInterfaceSabaClientOptions)
+		.AddSingleton(TimeProvider.System)
+		.AddSingleton<ISnowflakeWorkUtensil, SnowflakeWorkUtensil>()
+		.AddSingleton<IGameProviderTransactionIdUtensil, GameProviderTransactionIdUtensil>();
 }

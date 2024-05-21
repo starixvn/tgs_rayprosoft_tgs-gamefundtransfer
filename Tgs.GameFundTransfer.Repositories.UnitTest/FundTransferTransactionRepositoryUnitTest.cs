@@ -1,118 +1,114 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSubstitute;
+using Tgs.GameFundTransfer.Common.Enums;
 using Tgs.GameFundTransfer.Core;
-using Tgs.GameFundTransfer.Repositories.Entities;
+using Tgs.GameFundTransfer.Entities;
 using Tgs.SerialNumberGenerator;
 
 namespace Tgs.GameFundTransfer.Repositories.UnitTest;
 
-[TestClass]
 public class FundTransferTransactionRepositoryUnitTest
 {
-	[TestMethod]
-	public async Task Add_FundIn()
+	[Fact]
+	public async Task Add_Processing_Fund_Out()
 	{
 		var options = new DbContextOptionsBuilder<TgsContext>()
-		   .UseInMemoryDatabase(databaseName: "tgs-fund-in")
+		   .UseInMemoryDatabase(databaseName: "game_provider_fund_transfer_transactions.fund_out")
 		   .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
 		   .Options;
 		var context = new TgsContext(options);
 		_ = context.Database.EnsureDeleted();
 
-		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
-
-		var repository = new FundTransferTransactionRepository(
-			context,
-			fakeSerialNumberGenerator);
-
 		var gameProviderFundTransferTransactionId = Guid.NewGuid();
 		var gameProviderId = Guid.NewGuid();
-		var gameProviderCode = "GP";
-		var playerCode = "test";
 		var walletId = Guid.NewGuid();
+		var gameProviderTransactionId = "72412202405200607050004ucmqplxb029";
+		var playerCode = "test";
+		var fundSource = FundSource.FundOut;
+		var fromWallet = WalletDef.MainWallet;
+		var toWallet = GameProviders.Domains.GameProviderType.Kaiyuan;
 		var amount = 10.0m;
 
-		_ = fakeSerialNumberGenerator
-			.GenerateAsync(
-			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderFundTransferTransactionId);
+		var sut = new FundTransferTransactionRepository(context);
 
-		var actual = await repository
-			.AddFundInAsync(
+		await sut.AddProcessingAsync(
+			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
 			gameProviderId: gameProviderId,
-			gameProviderCode: gameProviderCode,
-			playerCode: playerCode,
 			walletId: walletId,
-			amount: amount)
-			.ConfigureAwait(false);
-
-		Assert.AreEqual(gameProviderFundTransferTransactionId, actual);
+			gameProviderTransactionId: gameProviderTransactionId,
+			playerCode: playerCode,
+			fundSource: fundSource,
+			fromWallet: fromWallet,
+			toWallet: toWallet,
+			amount: amount);
 
 		var data = await context.GameProviderFundTransferTransactions
-			.AsQueryable()
-			.SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-			.ConfigureAwait(false);
+			.SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId);
 
-		Assert.AreEqual(gameProviderCode, data.FromWallet);
-		Assert.AreEqual(WalletDef.MainWallet, data.ToWallet);
-		Assert.AreEqual((short)FundSource.FundIn, data.FundSource);
-		Assert.AreEqual((short)FundTransferTransactionStatus.GameProviderFundFailed, data.Status);
-		Assert.AreEqual(amount, data.Amount);
+		Assert.Equal(gameProviderFundTransferTransactionId, data.GameProviderFundTransferTransactionId);
+		Assert.Equal(gameProviderId, data.GameProviderId);
+		Assert.Null(data.TransactionId);
+		Assert.Equal(gameProviderTransactionId, data.GameProviderTransactionId);
+		Assert.Equal(playerCode, data.PlayerCode);
+		Assert.Equal(walletId, data.WalletId);
+		Assert.Equal((short)FundStatus.Processing, data.Status);
+		Assert.Equal((short)FundSource.FundOut, data.FundSource);
+		Assert.Equal(WalletDef.MainWallet, data.FromWallet);
+		Assert.Equal(GameProviders.Domains.GameProviderType.Kaiyuan, data.ToWallet);
+		Assert.Equal(amount, data.Amount);
 	}
 
-	[TestMethod]
-	public async Task Add_FundOut()
+	[Fact]
+	public async Task Add_Processing_Fund_In()
 	{
 		var options = new DbContextOptionsBuilder<TgsContext>()
-		   .UseInMemoryDatabase(databaseName: "tgs-fund-out")
+		   .UseInMemoryDatabase(databaseName: "game_provider_fund_transfer_transactions.fund_in")
 		   .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
 		   .Options;
 		var context = new TgsContext(options);
 		_ = context.Database.EnsureDeleted();
 
-		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
-
-		var repository = new FundTransferTransactionRepository(
-			context,
-			fakeSerialNumberGenerator);
-
 		var gameProviderFundTransferTransactionId = Guid.NewGuid();
 		var gameProviderId = Guid.NewGuid();
-		var gameProviderCode = "GP";
-		var playerCode = "test";
 		var walletId = Guid.NewGuid();
+		var gameProviderTransactionId = "72412202405200607050004ucmqplxb029";
+		var playerCode = "test";
+		var fundSource = FundSource.FundIn;
+		var fromWallet = GameProviders.Domains.GameProviderType.Kaiyuan;
+		var toWallet = WalletDef.MainWallet;
 		var amount = 10.0m;
 
-		_ = fakeSerialNumberGenerator
-			.GenerateAsync(
-			 cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderFundTransferTransactionId);
+		var sut = new FundTransferTransactionRepository(context);
 
-		var actual = await repository
-			.AddFundOutAsync(
+		await sut.AddProcessingAsync(
+			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
 			gameProviderId: gameProviderId,
-			gameProviderCode: gameProviderCode,
-			playerCode: playerCode,
 			walletId: walletId,
-			amount: amount)
-			.ConfigureAwait(false);
-
-		Assert.AreEqual(actual, gameProviderFundTransferTransactionId);
+			gameProviderTransactionId: gameProviderTransactionId,
+			playerCode: playerCode,
+			fundSource: fundSource,
+			fromWallet: fromWallet,
+			toWallet: toWallet,
+			amount: amount);
 
 		var data = await context.GameProviderFundTransferTransactions
-			.AsQueryable()
-			.SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-			.ConfigureAwait(false);
+			.SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId);
 
-		Assert.AreEqual(WalletDef.MainWallet, data.FromWallet);
-		Assert.AreEqual(gameProviderCode, data.ToWallet);
-		Assert.AreEqual((short)FundSource.FundOut, data.FundSource);
-		Assert.AreEqual((short)FundTransferTransactionStatus.MainWalletFundFailed, data.Status);
-		Assert.AreEqual(-amount, data.Amount);
+		Assert.Equal(gameProviderFundTransferTransactionId, data.GameProviderFundTransferTransactionId);
+		Assert.Equal(gameProviderId, data.GameProviderId);
+		Assert.Null(data.TransactionId);
+		Assert.Equal(gameProviderTransactionId, data.GameProviderTransactionId);
+		Assert.Equal(playerCode, data.PlayerCode);
+		Assert.Equal(walletId, data.WalletId);
+		Assert.Equal((short)FundStatus.Processing, data.Status);
+		Assert.Equal((short)FundSource.FundIn, data.FundSource);
+		Assert.Equal(WalletDef.MainWallet, data.ToWallet);
+		Assert.Equal(GameProviders.Domains.GameProviderType.Kaiyuan, data.FromWallet);
+		Assert.Equal(amount, data.Amount);
 	}
 
-	[TestMethod]
+	[Fact]
 	public async Task Update_By_GameProvider_FundFailed()
 	{
 		var options = new DbContextOptionsBuilder<TgsContext>()
@@ -139,35 +135,26 @@ public class FundTransferTransactionRepositoryUnitTest
 			FromWallet = WalletDef.MainWallet,
 			ToWallet = gameProviderCode,
 			Amount = -amount,
-			Status = (short)FundTransferTransactionStatus.MainWalletFundFailed,
+			Status = (short)FundStatus.MainWalletFundFailed,
 			CreatedOn = DateTime.Now,
 			UpdatedOn = DateTime.Now
 		};
 
-		_ = await context.GameProviderFundTransferTransactions.AddAsync(fundTransferTransaction).ConfigureAwait(false);
+		_ = await context.GameProviderFundTransferTransactions.AddAsync(fundTransferTransaction);
+		_ = await context.SaveChangesAsync();
 
-		_ = await context.SaveChangesAsync().ConfigureAwait(false);
+		var sut = new FundTransferTransactionRepository(context);
 
-		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
-
-		var repository = new FundTransferTransactionRepository(
-			context,
-			fakeSerialNumberGenerator);
-
-		await repository
-			.UpdateByGameProviderFundFailedAsync(
-			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId)
-			.ConfigureAwait(false);
+		await sut.UpdateByGameProviderFundFailedAsync(
+			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId);
 
 		var data = await context.GameProviderFundTransferTransactions
-			.AsQueryable()
-			.SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-			.ConfigureAwait(false);
+			.SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId);
 
-		Assert.AreEqual((short)FundTransferTransactionStatus.GameProviderFundFailed, data.Status);
+		Assert.Equal((short)FundStatus.GameProviderFundFailed, data.Status);
 	}
 
-	[TestMethod]
+	[Fact]
 	public async Task Update_By_MainWallet_FundFailed()
 	{
 		var options = new DbContextOptionsBuilder<TgsContext>()
@@ -194,39 +181,33 @@ public class FundTransferTransactionRepositoryUnitTest
 			FromWallet = gameProviderCode,
 			ToWallet = WalletDef.MainWallet,
 			Amount = amount,
-			Status = (short)FundTransferTransactionStatus.GameProviderFundFailed,
+			Status = (short)FundStatus.GameProviderFundFailed,
 			CreatedOn = DateTime.Now,
 			UpdatedOn = DateTime.Now
 		};
 
-		_ = await context.GameProviderFundTransferTransactions.AddAsync(fundTransferTransaction).ConfigureAwait(false);
+		_ = await context.GameProviderFundTransferTransactions.AddAsync(fundTransferTransaction);
 
-		_ = await context.SaveChangesAsync().ConfigureAwait(false);
+		_ = await context.SaveChangesAsync();
 
 		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 
 		var gameProviderTransactionId = Guid.NewGuid().ToString("N");
 
-		var repository = new FundTransferTransactionRepository(
-			context,
-			fakeSerialNumberGenerator);
+		var sut = new FundTransferTransactionRepository(context);
 
-		await repository
-			.UpdateByMainWalletFundFailedAsync(
+		await sut.UpdateByMainWalletFundFailedAsync(
 			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-			gameProviderTransactionId: gameProviderTransactionId)
-			.ConfigureAwait(false);
+			gameProviderTransactionId: gameProviderTransactionId);
 
 		var data = await context.GameProviderFundTransferTransactions
-			.AsQueryable()
-			.SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-			.ConfigureAwait(false);
+			.SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId);
 
-		Assert.AreEqual((short)FundTransferTransactionStatus.MainWalletFundFailed, data.Status);
-		Assert.AreEqual(gameProviderTransactionId, data.GameProviderTransactionId);
+		Assert.Equal((short)FundStatus.MainWalletFundFailed, data.Status);
+		Assert.Equal(gameProviderTransactionId, data.GameProviderTransactionId);
 	}
 
-	[TestMethod]
+	[Fact]
 	public async Task Update_By_MainWallet_FundRefund_Failed()
 	{
 		var options = new DbContextOptionsBuilder<TgsContext>()
@@ -253,36 +234,28 @@ public class FundTransferTransactionRepositoryUnitTest
 			FromWallet = WalletDef.MainWallet,
 			ToWallet = gameProviderCode,
 			Amount = -amount,
-			Status = (short)FundTransferTransactionStatus.MainWalletFundFailed,
+			Status = (short)FundStatus.MainWalletFundFailed,
 			CreatedOn = DateTime.Now,
 			UpdatedOn = DateTime.Now
 		};
 
-		_ = await context.GameProviderFundTransferTransactions.AddAsync(fundTransferTransaction).ConfigureAwait(false);
+		_ = await context.GameProviderFundTransferTransactions.AddAsync(fundTransferTransaction);
 
-		_ = await context.SaveChangesAsync().ConfigureAwait(false);
+		_ = await context.SaveChangesAsync();
 
-		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
+		var sut = new FundTransferTransactionRepository(context);
 
-		var repository = new FundTransferTransactionRepository(
-			context,
-			fakeSerialNumberGenerator);
-
-		await repository
-			.UpdateByMainWalletFundRefundFailedAsync(
+		await sut.UpdateByMainWalletFundRefundFailedAsync(
 			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-			description: Arg.Any<string>())
-			.ConfigureAwait(false);
+			description: Arg.Any<string>());
 
 		var data = await context.GameProviderFundTransferTransactions
-			.AsQueryable()
-			.SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-			.ConfigureAwait(false);
+			.SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId);
 
-		Assert.AreEqual((short)FundTransferTransactionStatus.MainWalletFundRefundFailed, data.Status);
+		Assert.Equal((short)FundStatus.MainWalletFundRefundFailed, data.Status);
 	}
 
-	[TestMethod]
+	[Fact]
 	public async Task Update_By_MainWallet_FundRefund_Success()
 	{
 		var options = new DbContextOptionsBuilder<TgsContext>()
@@ -309,43 +282,35 @@ public class FundTransferTransactionRepositoryUnitTest
 			FromWallet = WalletDef.MainWallet,
 			ToWallet = gameProviderCode,
 			Amount = -amount,
-			Status = (short)FundTransferTransactionStatus.MainWalletFundFailed,
+			Status = (short)FundStatus.MainWalletFundFailed,
 			CreatedOn = DateTime.Now,
 			UpdatedOn = DateTime.Now
 		};
 
-		_ = await context.GameProviderFundTransferTransactions.AddAsync(fundTransferTransaction).ConfigureAwait(false);
+		_ = await context.GameProviderFundTransferTransactions.AddAsync(fundTransferTransaction);
 
-		_ = await context.SaveChangesAsync().ConfigureAwait(false);
+		_ = await context.SaveChangesAsync();
 
-		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
-
-		var repository = new FundTransferTransactionRepository(
-			context,
-			fakeSerialNumberGenerator);
+		var sut = new FundTransferTransactionRepository(context);
 
 		var transactionId = Guid.NewGuid();
 		var balance = 0m;
 
-		await repository
-			.UpdateByMainWalletFundRefundSuccessAsync(
+		await sut.UpdateByMainWalletFundRefundSuccessAsync(
 			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
 			transactionId: transactionId,
 			balance: balance,
-			description: Arg.Any<string>())
-			.ConfigureAwait(false);
+			description: Arg.Any<string>());
 
 		var data = await context.GameProviderFundTransferTransactions
-			.AsQueryable()
-			.SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-			.ConfigureAwait(false);
+			.SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId);
 
-		Assert.AreEqual((short)FundTransferTransactionStatus.MainWalletFundRefundSuccess, data.Status);
-		Assert.AreEqual(transactionId, data.TransactionId);
-		Assert.AreEqual(balance, data.Balance);
+		Assert.Equal((short)FundStatus.MainWalletFundRefundSuccess, data.Status);
+		Assert.Equal(transactionId, data.TransactionId);
+		Assert.Equal(balance, data.Balance);
 	}
 
-	[TestMethod]
+	[Fact]
 	public async Task Update_By_Success()
 	{
 		var options = new DbContextOptionsBuilder<TgsContext>()
@@ -372,41 +337,33 @@ public class FundTransferTransactionRepositoryUnitTest
 			FromWallet = WalletDef.MainWallet,
 			ToWallet = gameProviderCode,
 			Amount = -amount,
-			Status = (short)FundTransferTransactionStatus.MainWalletFundFailed,
+			Status = (short)FundStatus.MainWalletFundFailed,
 			CreatedOn = DateTime.Now,
 			UpdatedOn = DateTime.Now
 		};
 
-		_ = await context.GameProviderFundTransferTransactions.AddAsync(fundTransferTransaction).ConfigureAwait(false);
+		_ = await context.GameProviderFundTransferTransactions.AddAsync(fundTransferTransaction);
 
-		_ = await context.SaveChangesAsync().ConfigureAwait(false);
+		_ = await context.SaveChangesAsync();
 
-		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
-
-		var repository = new FundTransferTransactionRepository(
-			context,
-			fakeSerialNumberGenerator);
+		var sut = new FundTransferTransactionRepository(context);
 
 		var transactionId = Guid.NewGuid();
 		var gameProviderTransactionId = Guid.NewGuid().ToString("N");
 		var balance = 0m;
 
-		await repository
-			.UpdateBySuccessAsync(
+		await sut.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
 			transactionId: transactionId,
 			gameProviderTransactionId: gameProviderTransactionId,
-			balance: balance)
-			.ConfigureAwait(false);
+			balance: balance);
 
 		var data = await context.GameProviderFundTransferTransactions
-			.AsQueryable()
-			.SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
-			.ConfigureAwait(false);
+			.SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId);
 
-		Assert.AreEqual((short)FundTransferTransactionStatus.Success, data.Status);
-		Assert.AreEqual(transactionId, data.TransactionId);
-		Assert.AreEqual(gameProviderTransactionId, data.GameProviderTransactionId);
-		Assert.AreEqual(balance, data.Balance);
+		Assert.Equal((short)FundStatus.Success, data.Status);
+		Assert.Equal(transactionId, data.TransactionId);
+		Assert.Equal(gameProviderTransactionId, data.GameProviderTransactionId);
+		Assert.Equal(balance, data.Balance);
 	}
 }

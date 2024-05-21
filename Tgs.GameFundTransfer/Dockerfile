@@ -5,16 +5,15 @@ USER app
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
-EXPOSE 9090
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["nuget.config", "."]
 COPY ["Tgs.GameFundTransfer/Tgs.GameFundTransfer.csproj", "Tgs.GameFundTransfer/"]
+COPY ["Tgs.GameFundTransfer.Common/Tgs.GameFundTransfer.Common.csproj", "Tgs.GameFundTransfer.Common/"]
 COPY ["Tgs.GameFundTransfer.Core/Tgs.GameFundTransfer.Core.csproj", "Tgs.GameFundTransfer.Core/"]
 COPY ["Tgs.GameFundTransfer.Repositories/Tgs.GameFundTransfer.Repositories.csproj", "Tgs.GameFundTransfer.Repositories/"]
-RUN dotnet restore "./Tgs.GameFundTransfer/./Tgs.GameFundTransfer.csproj"
+RUN dotnet restore "./Tgs.GameFundTransfer/Tgs.GameFundTransfer.csproj"
 COPY . .
 WORKDIR "/src/Tgs.GameFundTransfer"
 RUN dotnet build "./Tgs.GameFundTransfer.csproj" -c $BUILD_CONFIGURATION -o /app/build

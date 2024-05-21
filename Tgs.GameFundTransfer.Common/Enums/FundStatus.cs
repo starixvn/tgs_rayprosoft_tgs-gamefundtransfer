@@ -1,12 +1,12 @@
-﻿namespace Tgs.GameFundTransfer.Core;
+﻿namespace Tgs.GameFundTransfer.Common.Enums;
 
-public enum FundTransferTransactionStatus
+public enum FundStatus
 {
 	/// <summary>
-	/// The wait for response
-	/// 建立訂單等待
+	/// The processing
+	/// 轉帳處理中
 	/// </summary>
-	WaitForResponse = 1,
+	Processing = 1,
 
 	/// <summary>
 	/// The game provider fund failed

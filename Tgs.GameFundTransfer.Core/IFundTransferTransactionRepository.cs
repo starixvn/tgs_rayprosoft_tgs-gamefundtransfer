@@ -1,10 +1,10 @@
-﻿namespace Tgs.GameFundTransfer.Core;
+﻿using Tgs.GameFundTransfer.Common.Enums;
+
+namespace Tgs.GameFundTransfer.Core;
 
 public interface IFundTransferTransactionRepository
 {
-	ValueTask<Guid> AddFundInAsync(Guid gameProviderId, string gameProviderCode, string playerCode, Guid walletId, decimal amount, CancellationToken cancellationToken = default);
-
-	ValueTask<Guid> AddFundOutAsync(Guid gameProviderId, string gameProviderCode, string playerCode, Guid walletId, decimal amount, CancellationToken cancellationToken = default);
+	ValueTask AddProcessingAsync(Guid gameProviderFundTransferTransactionId, Guid gameProviderId, Guid walletId, string gameProviderTransactionId, string playerCode, FundSource fundSource, string fromWallet, string toWallet, decimal amount, CancellationToken cancellationToken = default);
 
 	ValueTask UpdateByGameProviderFundFailedAsync(Guid gameProviderFundTransferTransactionId, CancellationToken cancellationToken = default);
 

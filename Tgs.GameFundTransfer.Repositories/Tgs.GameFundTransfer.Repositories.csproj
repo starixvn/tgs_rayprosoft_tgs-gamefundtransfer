@@ -7,11 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
+    <PackageReference Include="Scrutor" Version="4.2.2" />
     <PackageReference Include="Tgs.SerialNumberGenerator" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Tgs.GameFundTransfer.Common\Tgs.GameFundTransfer.Common.csproj" />
     <ProjectReference Include="..\Tgs.GameFundTransfer.Core\Tgs.GameFundTransfer.Core.csproj" />
   </ItemGroup>
 

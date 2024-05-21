@@ -7,7 +7,6 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameFundTransfer.Controllers;
 
-[HiddenApi]
 [ApiController]
 [Route("[controller]")]
 public class FundController : ControllerBase
@@ -18,14 +17,13 @@ public class FundController : ControllerBase
 	/// <param name="service">The service.</param>
 	/// <param name="model">The model.</param>
 	/// <returns></returns>
+	[HiddenApi]
 	[HttpPost(template: "in", Name = "FundIn")]
 	public ValueTask FundInAsync(
 		[FromServices] ICommandService<FundInCommand> service,
 		FundRequestViewModel model)
 		=> service.ExecuteAsync(new FundInCommand(
-			GameProviderId: model.GameProviderId,
 			GameProviderCode: model.GameProviderCode,
-			BrandCode: model.BrandCode,
 			PlayerCode: model.PlayerCode,
 			WalletId: model.WalletId,
 			CurrencyCode: model.CurrencyCode,
@@ -37,15 +35,14 @@ public class FundController : ControllerBase
 	/// <param name="service">The service.</param>
 	/// <param name="model">The model.</param>
 	/// <returns></returns>
+	[HiddenApi]
 	[HttpPost(template: "in-result", Name = "FundInResult")]
 	public async ValueTask<FundResultViewModel> FundInResultAsync(
 		[FromServices] IGetService<FundInQuery, FundResult> service,
 		FundRequestViewModel model)
 	{
 		var query = new FundInQuery(
-			GameProviderId: model.GameProviderId,
 			GameProviderCode: model.GameProviderCode,
-			BrandCode: model.BrandCode,
 			PlayerCode: model.PlayerCode,
 			WalletId: model.WalletId,
 			CurrencyCode: model.CurrencyCode,
@@ -76,9 +73,7 @@ public class FundController : ControllerBase
 		FundZeroRequestViewModel model)
 	{
 		var query = new FundInZeroQuery(
-			GameProviderId: model.GameProviderId,
 			GameProviderCode: model.GameProviderCode,
-			BrandCode: model.BrandCode,
 			PlayerCode: model.PlayerCode,
 			WalletId: model.WalletId,
 			CurrencyCode: model.CurrencyCode);
@@ -102,16 +97,39 @@ public class FundController : ControllerBase
 	/// <param name="service">The service.</param>
 	/// <param name="model">The model.</param>
 	/// <returns></returns>
+	[HiddenApi]
 	[HttpPost(template: "out", Name = "FundOut")]
 	public ValueTask FundOutAsync(
 		[FromServices] ICommandService<FundOutCommand> service,
-		FundRequestViewModel model)
+		FundOutRequestViewModel model)
 		=> service.ExecuteAsync(new FundOutCommand(
-			GameProviderId: model.GameProviderId,
 			GameProviderCode: model.GameProviderCode,
-			BrandCode: model.BrandCode,
 			PlayerCode: model.PlayerCode,
 			WalletId: model.WalletId,
 			CurrencyCode: model.CurrencyCode,
 			Amount: model.Amount));
+
+	/// <summary>
+	/// Funds the balance asynchronous.
+	/// </summary>
+	/// <param name="service">The service.</param>
+	/// <param name="gameProviderCode">The game provider code.</param>
+	/// <param name="playerCode">The player code.</param>
+	/// <returns></returns>
+	[HttpPost(template: "{gameProviderCode}/{playerCode}", Name = "FundBalance")]
+	public async ValueTask<FundBalanceResultViewModel> FundBalanceAsync(
+		[FromServices] IGetService<FundBalanceQuery, FundBalanceResult> service,
+		string gameProviderCode,
+		string playerCode)
+	{
+		var result = await service.GetAsync(new FundBalanceQuery(
+			GameProviderCode: gameProviderCode,
+			PlayerCode: playerCode))
+			.ConfigureAwait(false);
+
+		return new FundBalanceResultViewModel(
+			result.Balance,
+			result.FreeBalance,
+			result.OutstandingBalance);
+	}
 }

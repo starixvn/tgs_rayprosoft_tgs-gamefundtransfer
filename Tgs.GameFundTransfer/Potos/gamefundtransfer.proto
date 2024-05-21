@@ -5,7 +5,7 @@ import "phoenix/protobuf/decimal.proto";
 
 option csharp_namespace = "Tgs.GameFundTransfer.Protos";
 
-package gamefundtransfer;
+package GameFundTransfer;
 
 // The greeting service definition.
 service GameFundTransferService {
@@ -14,6 +14,7 @@ service GameFundTransferService {
   rpc FundInResult (GameFundTransferFundRequest) returns (GameFundTransferResultReply);
   rpc FundInZeroResult (GameFundTransferFundZeroRequest) returns (GameFundTransferResultReply);
   rpc FundOut (GameFundTransferFundRequest) returns (GameFundTransferReply);
+  rpc FundBalance (FundBalanceRequest) returns (FundBalanceReply);
   rpc CheckingService(CheckingServiceRequest) returns (CheckingServiceReply);
 }
 
@@ -37,11 +38,20 @@ message GameFundTransferFundZeroRequest {
     string currency_code = 6;
 }
 
+message FundBalanceRequest {
+    string game_provider_code = 1;
+    string player_code = 2;
+}
+
 message CheckingServiceRequest{
     string machine_name = 1;
 }
 
 // The response message containing the greetings.
+message CheckingServiceReply{
+    string machine_name = 1;
+}
+
 message GameFundTransferReply {
     bool state = 1;
 }
@@ -54,13 +64,15 @@ message GameFundTransferResultReply {
     string external_transaction_id =5;
 }
 
+message FundBalanceReply {
+    phoenix.protobuf.DecimalValue balance = 1;
+    phoenix.protobuf.DecimalValue free_balance = 2;
+    phoenix.protobuf.DecimalValue outstanding_balance = 3;
+}
+
 enum StateCode {
   STATE_CODE_SUCCESS = 0;
   STATE_CODE_EXCEPTION = 404;
   STATE_CODE_TRANSACTION_LOCK = 423;
   STATE_CODE_EXTERNAL_TRANSACTION_ID_EMPTY = 424;
-}
-
-message CheckingServiceReply{
-    string machine_name = 1;
 }

@@ -11,7 +11,8 @@ public class GameFundTransferGrpcService(
 	IGetService<FundInQuery, FundResult> fundInResultService,
 	IGetService<FundInZeroQuery, FundResult> fundInZeroService,
 	ICommandService<FundInCommand> fundInService,
-	ICommandService<FundOutCommand> fundOutService) : GameFundTransferService.GameFundTransferServiceBase
+	ICommandService<FundOutCommand> fundOutService,
+	IGetService<FundBalanceQuery, FundBalanceResult> fundBalanceService) : GameFundTransferService.GameFundTransferServiceBase
 {
 	public override Task<CheckingServiceReply> CheckingService(CheckingServiceRequest request, ServerCallContext context)
 	{
@@ -23,21 +24,37 @@ public class GameFundTransferGrpcService(
 		});
 	}
 
+	public override async Task<FundBalanceReply> FundBalance(FundBalanceRequest request, ServerCallContext context)
+	{
+		var query = new FundBalanceQuery(
+			GameProviderCode: request.GameProviderCode,
+			PlayerCode: request.PlayerCode);
+
+		var result = await fundBalanceService.GetAsync(
+			query: query,
+			cancellationToken: context.CancellationToken)
+			.ConfigureAwait(false);
+
+		return new FundBalanceReply()
+		{
+			Balance = result.Balance,
+			FreeBalance = result.FreeBalance,
+			OutstandingBalance = result.OutstandingBalance,
+		};
+	}
+
 	public override async Task<GameFundTransferReply> FundIn(GameFundTransferFundRequest request, ServerCallContext context)
 	{
 		var command = new FundInCommand(
-			GameProviderId: request.GameProviderId,
 			GameProviderCode: request.GameProviderCode,
-			BrandCode: request.BrandCode,
 			PlayerCode: request.PlayerCode,
 			WalletId: request.WalletId,
 			CurrencyCode: request.CurrencyCode,
 			Amount: request.Amount);
 
-		await fundInService
-			.ExecuteAsync(
-				command: command,
-				cancellationToken: context.CancellationToken)
+		await fundInService.ExecuteAsync(
+			command: command,
+			cancellationToken: context.CancellationToken)
 			.ConfigureAwait(false);
 
 		return new GameFundTransferReply()
@@ -49,19 +66,16 @@ public class GameFundTransferGrpcService(
 	public override async Task<GameFundTransferResultReply> FundInResult(GameFundTransferFundRequest request, ServerCallContext context)
 	{
 		var query = new FundInQuery(
-					GameProviderId: request.GameProviderId,
-					GameProviderCode: request.GameProviderCode,
-					BrandCode: request.BrandCode,
-					PlayerCode: request.PlayerCode,
-					WalletId: request.WalletId,
-					CurrencyCode: request.CurrencyCode,
-					Amount: request.Amount);
+			GameProviderCode: request.GameProviderCode,
+			PlayerCode: request.PlayerCode,
+			WalletId: request.WalletId,
+			CurrencyCode: request.CurrencyCode,
+			Amount: request.Amount);
 
-		var result = await fundInResultService
-			 .GetAsync(
-				 query: query,
-				 cancellationToken: context.CancellationToken)
-			 .ConfigureAwait(false);
+		var result = await fundInResultService.GetAsync(
+			query: query,
+			cancellationToken: context.CancellationToken)
+			.ConfigureAwait(false);
 
 		return new GameFundTransferResultReply()
 		{
@@ -82,17 +96,14 @@ public class GameFundTransferGrpcService(
 	public override async Task<GameFundTransferResultReply> FundInZeroResult(GameFundTransferFundZeroRequest request, ServerCallContext context)
 	{
 		var query = new FundInZeroQuery(
-					GameProviderId: request.GameProviderId,
-					GameProviderCode: request.GameProviderCode,
-					BrandCode: request.BrandCode,
-					PlayerCode: request.PlayerCode,
-					WalletId: request.WalletId,
-					CurrencyCode: request.CurrencyCode);
+			GameProviderCode: request.GameProviderCode,
+			PlayerCode: request.PlayerCode,
+			WalletId: request.WalletId,
+			CurrencyCode: request.CurrencyCode);
 
-		var result = await fundInZeroService
-			 .GetAsync(
-				 query: query,
-				 cancellationToken: context.CancellationToken)
+		var result = await fundInZeroService.GetAsync(
+			query: query,
+			cancellationToken: context.CancellationToken)
 			 .ConfigureAwait(false);
 
 		return new GameFundTransferResultReply()
@@ -114,18 +125,15 @@ public class GameFundTransferGrpcService(
 	public override async Task<GameFundTransferReply> FundOut(GameFundTransferFundRequest request, ServerCallContext context)
 	{
 		var command = new FundOutCommand(
-			GameProviderId: request.GameProviderId,
 			GameProviderCode: request.GameProviderCode,
-			BrandCode: request.BrandCode,
 			PlayerCode: request.PlayerCode,
 			WalletId: request.WalletId,
 			CurrencyCode: request.CurrencyCode,
 			Amount: request.Amount);
 
-		await fundOutService
-			.ExecuteAsync(
-				command: command,
-				cancellationToken: context.CancellationToken)
+		await fundOutService.ExecuteAsync(
+			command: command,
+			cancellationToken: context.CancellationToken)
 			.ConfigureAwait(false);
 
 		return new GameFundTransferReply()

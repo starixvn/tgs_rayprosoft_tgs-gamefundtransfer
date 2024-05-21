@@ -14,13 +14,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Remove="Potos\gamefundtransfer.proto" />
+		<None Remove="Potos\GameFundTransfer.proto" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.3.8" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
-		<PackageReference Include="Npgsql.OpenTelemetry" Version="8.0.2" />
+		<PackageReference Include="Npgsql.OpenTelemetry" Version="8.0.3" />
 		<PackageReference Include="OpenTelemetry" Version="1.8.1" />
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.8.1" />
 		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.8.1" />
@@ -29,21 +29,22 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.GrpcCore" Version="1.0.0-beta.5" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.0.0-rc9.3" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.8.1" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.8.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.8.1" />
 		<PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.7" />
 		<PackageReference Include="StackExchange.Redis" Version="2.7.33" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.1" />
 		<PackageReference Include="Grpc.AspNetCore" Version="2.62.0" />
 		<PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Tgs.GameFundTransfer.Common\Tgs.GameFundTransfer.Common.csproj" />
 		<ProjectReference Include="..\Tgs.GameFundTransfer.Core\Tgs.GameFundTransfer.Core.csproj" />
 		<ProjectReference Include="..\Tgs.GameFundTransfer.Repositories\Tgs.GameFundTransfer.Repositories.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Protobuf Include="Potos\gamefundtransfer.proto" GrpcServices="Server" />
+		<Protobuf Include="Potos\GameFundTransfer.proto" GrpcServices="Server" />
 	</ItemGroup>
 
 </Project>
