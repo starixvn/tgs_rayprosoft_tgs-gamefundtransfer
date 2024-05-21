@@ -1,12 +1,19 @@
-﻿using System.Net.Mime;
+﻿using System.Net;
+using System.Net.Mime;
+using System.Net.Sockets;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NATS.Client.Core;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Tgs.GameFundTransfer;
+using Tgs.GameFundTransfer.Core;
+using Tgs.GameFundTransfer.DocumentFilters;
 using Tgs.GameFundTransfer.GrpcServices;
+using Tgs.GameFundTransfer.Messages;
+using Tgs.MessageQueue.Nats.Serializers;
 
 var filterInstrumentations = new[] { "html", "ico", "png", "jpg" };
 
@@ -59,7 +66,7 @@ builder.Services.AddSwaggerGen(c =>
 		c.IncludeXmlComments(xmlFileName);
 	}
 
-	c.DocumentFilter<HiddenFilter>();
+	c.DocumentFilter<HiddenDocumentFilter>();
 });
 
 builder.Services.AddGameFundTransfer(
@@ -88,18 +95,36 @@ builder.Services.AddGameFundTransfer(
 	(options, sp) =>
 	{
 		var configuration = sp.GetRequiredService<IConfiguration>();
-		options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:GameProvidersClientBaseUrl")!;
-	},
-	(options, sp) =>
-	{
-		var configuration = sp.GetRequiredService<IConfiguration>();
-		options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:GameCurrencyClientBaseUrl")!;
-	},
-	(options, sp) =>
-	{
-		var configuration = sp.GetRequiredService<IConfiguration>();
 		options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:GameInterfaceSabaClientBaseUrl")!;
-	});
+	})
+	.AddOptions<IPAddressOptions>()
+	.Configure((options) => options.IPAddress = builder.Configuration.GetSection("POD_IP").Value
+	?? Dns.GetHostEntry(Dns.GetHostName()).AddressList.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork).FirstOrDefault()?.ToString()
+	?? "127.0.0.1")
+	.Services
+	.AddGameProvidersClient((options, sp) =>
+	{
+		var configuration = sp.GetRequiredService<IConfiguration>();
+		options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:GameProvidersClientBaseUrl")!;
+	})
+	.AddGameCurrencyClient(httpClientBuilder => httpClientBuilder.ConfigureHttpClient((sp, http) =>
+	{
+		var config = sp.GetRequiredService<IConfiguration>();
+		http.BaseAddress = config.GetValue<Uri>("GameTransfer:GameCurrencyClientBaseUrl");
+	}));
+
+builder.Services
+	.AddKeyedSingleton("Nats", (sp, _) => new NatsConnection(NatsOpts.Default with
+	{
+		Url = builder.Configuration.GetConnectionString("Nats")!,
+		SerializerRegistry = TgsNatsSerializerRegistration.Default
+	}))
+	.AddMessageQueue()
+	.AddNatsMessageQueue(config => config
+	.ConfigureResolveConnection(sp => sp.GetRequiredKeyedService<NatsConnection>("Nats"))
+	.AddHandler<GameFundTransferBalanceCacheMessageHandler>(Tgs.GameFundTransfer.Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest, Tgs.GameFundTransfer.Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest))
+	.ClearAllExchanges()
+	.AddNatsGlobPatternExchange(Tgs.GameFundTransfer.Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest);
 
 builder.Services
 	.AddOpenTelemetry()
@@ -148,5 +173,7 @@ app.MapHealthChecks("/healthz");
 // Configure the HTTP request pipeline.
 app.MapGrpcService<GameFundTransferGrpcService>();
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
+
+_ = app.UseRegisterAsync();
 
 app.Run();

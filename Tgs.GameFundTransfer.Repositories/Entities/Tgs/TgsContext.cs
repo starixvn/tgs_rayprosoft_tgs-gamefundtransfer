@@ -2,10 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using Tgs.GameFundTransfer.Repositories.Entities.Configurations;
+using Tgs.GameFundTransfer.Entities.Configurations;
 #nullable enable
 
-namespace Tgs.GameFundTransfer.Repositories.Entities;
+namespace Tgs.GameFundTransfer.Entities;
 
 public partial class TgsContext : DbContext
 {
@@ -14,18 +14,30 @@ public partial class TgsContext : DbContext
     {
     }
 
+    public virtual DbSet<Brand> Brands { get; set; }
+
+    public virtual DbSet<BrandGameProvider> BrandGameProviders { get; set; }
+
+    public virtual DbSet<GameProvider> GameProviders { get; set; }
+
+    public virtual DbSet<GameProviderConfig> GameProviderConfigs { get; set; }
+
     public virtual DbSet<GameProviderFundTransferTransaction> GameProviderFundTransferTransactions { get; set; }
+
+    public virtual DbSet<Player> Players { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
             .HasPostgresExtension("ltree")
-            .HasPostgresExtension("pageinspect")
-            .HasPostgresExtension("pg_stat_statements")
-            .HasPostgresExtension("pg_trgm")
-            .HasPostgresExtension("uuid-ossp");
+            .HasPostgresExtension("pg_trgm");
 
+        modelBuilder.ApplyConfiguration(new Configurations.BrandConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.BrandGameProviderConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.GameProviderConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.GameProviderConfigConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.GameProviderFundTransferTransactionConfiguration());
+        modelBuilder.ApplyConfiguration(new Configurations.PlayerConfiguration());
         OnModelCreatingPartial(modelBuilder);
     }
 

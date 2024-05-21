@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
-using Tgs.GameFundTransfer.Repositories.Entities;
+using Tgs.GameFundTransfer.Entities;
 
 #nullable disable
 
-namespace Tgs.GameFundTransfer.Repositories.Entities.Configurations
+namespace Tgs.GameFundTransfer.Entities.Configurations
 {
     public partial class GameProviderFundTransferTransactionConfiguration : IEntityTypeConfiguration<GameProviderFundTransferTransaction>
     {
@@ -24,18 +24,18 @@ namespace Tgs.GameFundTransfer.Repositories.Entities.Configurations
             entity.HasIndex(e => e.WalletId, "ix_game_provider_fund_transfer_transactions_wallet_id");
 
             entity.Property(e => e.GameProviderFundTransferTransactionId)
-            .ValueGeneratedNever()
-            .HasColumnName("game_provider_fund_transfer_transaction_id");
+                .ValueGeneratedNever()
+                .HasColumnName("game_provider_fund_transfer_transaction_id");
             entity.Property(e => e.Amount)
-            .HasPrecision(18, 6)
-            .HasColumnName("amount");
+                .HasPrecision(18, 6)
+                .HasColumnName("amount");
             entity.Property(e => e.Balance)
-            .HasPrecision(18, 6)
-            .HasColumnName("balance");
+                .HasPrecision(18, 6)
+                .HasColumnName("balance");
             entity.Property(e => e.CreatedOn).HasColumnName("created_on");
             entity.Property(e => e.Description)
-            .HasMaxLength(256)
-            .HasColumnName("description");
+                .HasMaxLength(256)
+                .HasColumnName("description");
             entity.Property(e => e.FromWallet).HasColumnName("from_wallet");
             entity.Property(e => e.FundSource).HasColumnName("fund_source");
             entity.Property(e => e.GameProviderId).HasColumnName("game_provider_id");

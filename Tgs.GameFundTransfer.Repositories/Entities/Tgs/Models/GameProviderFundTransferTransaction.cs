@@ -3,29 +3,11 @@
 using System;
 using System.Collections.Generic;
 
-namespace Tgs.GameFundTransfer.Repositories.Entities;
+namespace Tgs.GameFundTransfer.Entities;
 
 public partial class GameProviderFundTransferTransaction
 {
     public Guid GameProviderFundTransferTransactionId { get; set; }
-
-    public Guid? TransactionId { get; set; }
-
-    public Guid GameProviderId { get; set; }
-
-    public Guid WalletId { get; set; }
-
-    public string? GameProviderTransactionId { get; set; }
-
-    public string PlayerCode { get; set; } = null!;
-
-    public short FundSource { get; set; }
-
-    public string FromWallet { get; set; } = null!;
-
-    public string ToWallet { get; set; } = null!;
-
-    public short Status { get; set; }
 
     public decimal Amount { get; set; }
 
@@ -33,7 +15,25 @@ public partial class GameProviderFundTransferTransaction
 
     public DateTime CreatedOn { get; set; }
 
+    public string? Description { get; set; }
+
+    public string FromWallet { get; set; } = null!;
+
+    public short FundSource { get; set; }
+
+    public Guid GameProviderId { get; set; }
+
+    public string? GameProviderTransactionId { get; set; }
+
+    public string PlayerCode { get; set; } = null!;
+
+    public short Status { get; set; }
+
+    public string ToWallet { get; set; } = null!;
+
+    public Guid? TransactionId { get; set; }
+
     public DateTime UpdatedOn { get; set; }
 
-    public string? Description { get; set; }
+    public Guid WalletId { get; set; }
 }

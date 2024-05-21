@@ -18,7 +18,9 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "Game-GameFundTransfer(local)",
-        "NODE_IP": "otel.rpgp.cc"
+        "NODE_IP": "otel.rpgp.cc",
+        "RELEASE_NAMESPACE": "dev",
+        "POD_IP": "127.0.0.1"
       }
     },
     "https": {
@@ -30,7 +32,9 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "OTEL_SERVICE_NAME": "Game-GameFundTransfer(local)",
-        "NODE_IP": "otel.rpgp.cc"
+        "NODE_IP": "otel.rpgp.cc",
+        "RELEASE_NAMESPACE": "dev",
+        "POD_IP": "127.0.0.1"
       }
     }
   }

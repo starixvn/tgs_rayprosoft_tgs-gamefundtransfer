@@ -2,14 +2,13 @@
   "CodeGenerationMode": 4,
   "ContextClassName": "TgsContext",
   "ContextNamespace": "Entities",
-  "DefaultDacpacSchema": null,
   "FilterSchemas": true,
   "IncludeConnectionString": false,
   "ModelNamespace": "Entities",
   "OutputContextPath": "Entities\/Tgs",
   "OutputPath": "Entities\/Tgs\/Models",
   "PreserveCasingWithRegex": true,
-  "ProjectRootNamespace": "Tgs.GameFundTransfer.Repositories",
+  "ProjectRootNamespace": "Tgs.GameFundTransfer",
   "Schemas": [
     {
       "Name": "dbo"
@@ -20,11 +19,31 @@
   "T4TemplatePath": null,
   "Tables": [
     {
+      "Name": "dbo.brand_game_providers",
+      "ObjectType": 0
+    },
+    {
+      "Name": "dbo.brands",
+      "ObjectType": 0
+    },
+    {
+      "Name": "dbo.game_provider_configurations",
+      "ObjectType": 0
+    },
+    {
       "Name": "dbo.game_provider_fund_transfer_transactions",
+      "ObjectType": 0
+    },
+    {
+      "Name": "dbo.game_providers",
+      "ObjectType": 0
+    },
+    {
+      "Name": "dbo.players",
       "ObjectType": 0
     }
   ],
-  "UiHint": ".tgs",
+  "UiHint": null,
   "UncountableWords": null,
   "UseBoolPropertiesWithoutDefaultSql": true,
   "UseDatabaseNames": false,
@@ -42,6 +61,7 @@
   "UseNoObjectFilter": false,
   "UseNodaTime": false,
   "UseNullableReferences": true,
+  "UsePrefixNavigationNaming": false,
   "UseSchemaFolders": false,
   "UseSchemaNamespaces": false,
   "UseSpatial": false,

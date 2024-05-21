@@ -1,4 +1,4 @@
-﻿namespace Tgs.GameFundTransfer.Core;
+﻿namespace Tgs.GameFundTransfer.Common.Enums;
 
 public enum FundSource
 {

@@ -4,23 +4,23 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Tgs.GameFundTransfer.Attributes;
 
-namespace Microsoft.Extensions.DependencyInjection;
+namespace Tgs.GameFundTransfer.DocumentFilters;
 
-public class HiddenFilter : IDocumentFilter
+public class HiddenDocumentFilter : IDocumentFilter
 {
 	public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
 	{
-		foreach (ApiDescription apiDescription in context.ApiDescriptions)
+		foreach (var apiDescription in context.ApiDescriptions)
 		{
-			if (apiDescription.TryGetMethodInfo(out MethodInfo method))
+			if (apiDescription.TryGetMethodInfo(out var method))
 			{
 				if (method.ReflectedType!.CustomAttributes.Any(t => t.AttributeType == typeof(HiddenApiAttribute))
 						|| method.CustomAttributes.Any(t => t.AttributeType == typeof(HiddenApiAttribute)))
 				{
-					string key = "/" + apiDescription.RelativePath;
+					var key = "/" + apiDescription.RelativePath;
 					if (key.Contains('?'))
 					{
-						int idx = key.IndexOf('?');
+						var idx = key.IndexOf('?');
 						key = key[..idx];
 					}
 
