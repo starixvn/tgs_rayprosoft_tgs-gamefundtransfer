@@ -155,7 +155,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 
 		var gameProviderTransactionId = "D1716176296";
 		_ = fakeGameProviderTransactionIdUtensil.GetCards365TxnIdAsync(
-			Deposit: Arg.Is(false),
+			Deposit: Arg.Is(true),
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(gameProviderTransactionId);
 
@@ -255,7 +255,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 
 		var gameProviderTransactionId = "D1716176296";
 		_ = fakeGameProviderTransactionIdUtensil.GetFaChaiTxnIdAsync(
-			Deposit: Arg.Is(false),
+			Deposit: Arg.Is(true),
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(gameProviderTransactionId);
 
@@ -655,7 +655,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 
 		var gameProviderTransactionId = "D1716176296";
 		_ = fakeGameProviderTransactionIdUtensil.GetSBOTxnIdAsync(
-			Deposit: Arg.Is(false),
+			Deposit: Arg.Is(true),
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(gameProviderTransactionId);
 
@@ -755,7 +755,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 
 		var gameProviderTransactionId = "D1716176296";
 		_ = fakeGameProviderTransactionIdUtensil.GetTPhereTxnIdAsync(
-			Deposit: Arg.Is(false),
+			Deposit: Arg.Is(true),
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(gameProviderTransactionId);
 

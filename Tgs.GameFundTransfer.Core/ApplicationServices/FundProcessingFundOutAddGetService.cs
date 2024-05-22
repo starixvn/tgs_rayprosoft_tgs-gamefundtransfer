@@ -35,13 +35,13 @@ internal class FundProcessingFundOutAddGetService(
 		{
 			var gameProviderTransactionId = gameProviderInfo.GameProviderCode switch
 			{
-				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.Cards365Transfer => await gameProviderTransactionIdUtensil.GetCards365TxnIdAsync(false, cancellationToken).ConfigureAwait(false),
-				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.FaChai => await gameProviderTransactionIdUtensil.GetFaChaiTxnIdAsync(false, cancellationToken).ConfigureAwait(false),
+				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.Cards365Transfer => await gameProviderTransactionIdUtensil.GetCards365TxnIdAsync(true, cancellationToken).ConfigureAwait(false),
+				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.FaChai => await gameProviderTransactionIdUtensil.GetFaChaiTxnIdAsync(true, cancellationToken).ConfigureAwait(false),
 				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.GKXGaming => await gameProviderTransactionIdUtensil.GetGKXGamingTxnIdAsync(query.PlayerCode, cancellationToken).ConfigureAwait(false),
 				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.Kaiyuan => await gameProviderTransactionIdUtensil.GetKaiyuanTxnIdAsync(query.PlayerCode, cancellationToken).ConfigureAwait(false),
 				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.LEGaming => await gameProviderTransactionIdUtensil.GetLEGamingTxnIdAsync(query.PlayerCode, cancellationToken).ConfigureAwait(false),
-				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.SBOTransfer => await gameProviderTransactionIdUtensil.GetSBOTxnIdAsync(false, cancellationToken).ConfigureAwait(false),
-				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.TPhere => await gameProviderTransactionIdUtensil.GetTPhereTxnIdAsync(false, cancellationToken).ConfigureAwait(false),
+				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.SBOTransfer => await gameProviderTransactionIdUtensil.GetSBOTxnIdAsync(true, cancellationToken).ConfigureAwait(false),
+				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.TPhere => await gameProviderTransactionIdUtensil.GetTPhereTxnIdAsync(true, cancellationToken).ConfigureAwait(false),
 				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.V8Poker => await gameProviderTransactionIdUtensil.GetV8PokerTxnIdAsync(query.PlayerCode, cancellationToken).ConfigureAwait(false),
 				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.YeeBet => (await gameProviderTransactionIdUtensil.GetYeeBetTxnIdAsync(cancellationToken).ConfigureAwait(false)).ToString(),
 				_ => await gameProviderTransactionIdUtensil.GetTxnIdAsync(gameProviderFundTransferTransactionId, cancellationToken).ConfigureAwait(false),
