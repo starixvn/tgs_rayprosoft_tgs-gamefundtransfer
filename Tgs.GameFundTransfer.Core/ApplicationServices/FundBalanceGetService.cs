@@ -4,6 +4,7 @@ using Tgs.ServiceUtility;
 using Valhalla.MessageQueue;
 
 namespace Tgs.GameFundTransfer.Core.ApplicationServices;
+
 internal class FundBalanceGetService(
 	IPlayerRepository playerRepository,
 	IFundBalanceRepository fundBalanceRepository,

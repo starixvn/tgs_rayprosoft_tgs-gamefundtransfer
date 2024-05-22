@@ -2,15 +2,8 @@
 
 namespace Tgs.GameFundTransfer.Client;
 
-internal class GameFundTransferClient : IGameFundTransferClient
+internal class GameFundTransferClient(GameFundTransferService.GameFundTransferServiceClient client) : IGameFundTransferClient
 {
-	private readonly GameFundTransferService.GameFundTransferServiceClient _client;
-
-	public GameFundTransferClient(GameFundTransferService.GameFundTransferServiceClient client)
-	{
-		_client = client ?? throw new ArgumentNullException(nameof(client));
-	}
-
 	public async ValueTask<string> CheckingServiceAsync(string machineName, CancellationToken cancellationToken = default)
 	{
 		var request = new CheckingServiceRequest
@@ -18,7 +11,7 @@ internal class GameFundTransferClient : IGameFundTransferClient
 			MachineName = machineName,
 		};
 
-		var reply = await _client.CheckingServiceAsync(
+		var reply = await client.CheckingServiceAsync(
 			request: request,
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
@@ -34,7 +27,7 @@ internal class GameFundTransferClient : IGameFundTransferClient
 			PlayerCode = playerCode,
 		};
 
-		return await _client.FundBalanceAsync(
+		return await client.FundBalanceAsync(
 			request: request,
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
@@ -53,7 +46,7 @@ internal class GameFundTransferClient : IGameFundTransferClient
 			Amount = amount,
 		};
 
-		var reply = await _client.FundInAsync(
+		var reply = await client.FundInAsync(
 			request: request,
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
@@ -74,7 +67,7 @@ internal class GameFundTransferClient : IGameFundTransferClient
 			Amount = amount,
 		};
 
-		return await _client.FundInResultAsync(
+		return await client.FundInResultAsync(
 			request: request,
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
@@ -92,7 +85,7 @@ internal class GameFundTransferClient : IGameFundTransferClient
 			CurrencyCode = currencyCode,
 		};
 
-		return await _client.FundInZeroResultAsync(
+		return await client.FundInZeroResultAsync(
 			request: request,
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
@@ -111,7 +104,7 @@ internal class GameFundTransferClient : IGameFundTransferClient
 			Amount = amount,
 		};
 
-		var reply = await _client.FundOutAsync(
+		var reply = await client.FundOutAsync(
 			request: request,
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);

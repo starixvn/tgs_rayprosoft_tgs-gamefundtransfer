@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Tgs.CashService.Client;
 using Tgs.GameCurrency.Client;
-using Tgs.GameFundTransfer.Core.Exceptions;
 using Tgs.GameFundTransfer.Core.Extensions;
 using Tgs.GameProviders.Client;
 using Tgs.ServiceUtility;
@@ -44,10 +43,7 @@ internal class FundInZeroGetService(
 				cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
-			if (playerBalance.FreeBalance <= 0)
-			{
-				throw new FreeBalanceException(query.PlayerCode, query.GameProviderCode, playerBalance.FreeBalance);
-			}
+			ArgumentOutOfRangeException.ThrowIfNegativeOrZero(playerBalance.FreeBalance);
 
 			var convertPlatformBalanceResult = await gameCurrencyClient.ConvertPlatformBalanceAsync(
 				gameProviderCode: query.GameProviderCode,
