@@ -47,7 +47,6 @@ public class FundInGetServiceUnitTest
 			.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
 			transactionId: Arg.Any<Guid>(),
-			gameProviderTransactionId: Arg.Any<string>(),
 			balance: Arg.Any<decimal>());
 
 		_ = fakeFundsDistributedLock
@@ -93,7 +92,6 @@ public class FundInGetServiceUnitTest
 			.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
 			transactionId: Arg.Any<Guid>(),
-			gameProviderTransactionId: Arg.Any<string>(),
 			balance: Arg.Any<decimal>());
 
 		_ = fakeFundsDistributedLock
@@ -139,7 +137,6 @@ public class FundInGetServiceUnitTest
 			.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
 			transactionId: Arg.Any<Guid>(),
-			gameProviderTransactionId: Arg.Any<string>(),
 			balance: Arg.Any<decimal>());
 
 		_ = fakeFundsDistributedLock
@@ -185,7 +182,6 @@ public class FundInGetServiceUnitTest
 			.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
 			transactionId: Arg.Any<Guid>(),
-			gameProviderTransactionId: Arg.Any<string>(),
 			balance: Arg.Any<decimal>());
 
 		_ = fakeFundsDistributedLock
@@ -253,17 +249,6 @@ public class FundInGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(fundProcessingResult);
 
-		_ = fakeGameProviderFundInService.GetAsync(
-			query: new GameProviderFundInQuery(
-				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
-				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: query.CurrencyCode,
-				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
-				Amount: exchangeRateFundResult.Amount),
-			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(new GameProviderFundInResult(fundProcessingResult.GameProviderTransactionId));
-
 		var transactionResponse = new TransactionResponse()
 		{
 			TransactionId = Guid.NewGuid(),
@@ -275,12 +260,6 @@ public class FundInGetServiceUnitTest
 			 Arg.Is($"【{query.GameProviderCode}】->【Default】"),
 			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId.ToString()))
 			.Returns(ValueTask.FromResult(transactionResponse));
-
-		await fakeGameProviderFundTransferTransactionRepository.UpdateBySuccessAsync(
-			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId),
-			 Arg.Is(transactionResponse.TransactionId),
-			 Arg.Is(fundProcessingResult.GameProviderTransactionId),
-			 Arg.Is(transactionResponse.Balance));
 
 		var sut = new FundInGetService(
 			faceLogger,
@@ -296,6 +275,25 @@ public class FundInGetServiceUnitTest
 
 		Assert.NotNull(actual);
 		Assert.Equal(StateCode.Success, actual.State);
+
+		_ = fakeGameProviderFundInService
+			.Received(1)
+			.GetAsync(
+			query: new GameProviderFundInQuery(
+				GameProviderCode: fundProcessingResult.GameProviderCode,
+				BrandCode: fundProcessingResult.BrandCode,
+				PlayerCode: fundProcessingResult.PlayerCode,
+				CurrencyCode: query.CurrencyCode,
+				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
+				Amount: exchangeRateFundResult.Amount),
+			cancellationToken: Arg.Any<CancellationToken>());
+
+		_ = fakeGameProviderFundTransferTransactionRepository
+			.Received(1)
+			.UpdateBySuccessAsync(
+			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId),
+			 Arg.Is(transactionResponse.TransactionId),
+			 Arg.Is(transactionResponse.Balance));
 
 		_ = fakeFundsDistributedLock
 			.Received(1)
@@ -336,61 +334,6 @@ public class FundInGetServiceUnitTest
 			Arg.Is(query.GameProviderCode),
 			Arg.Is(query.PlayerCode)).Returns(Task.FromResult(false));
 
-		var gameProviderBalance = new PlayerBalanceResponse(
-			Balance: 100m,
-			FreeBalance: 10m,
-			OutstandingBalance: 90m);
-		_ = fakeGameProvidersClient.PlayerBalanceAsync(
-			Arg.Is(query.GameProviderCode),
-			Arg.Is(query.PlayerCode))
-			.Returns(ValueTask.FromResult(gameProviderBalance));
-
-		var fundProcessingResult = new FundProcessingResult(
-			BrandId: Guid.NewGuid(),
-			BrandCode: "GPI",
-			PlayerCode: query.PlayerCode,
-			Username: query.PlayerCode,
-			GameProviderId: Guid.NewGuid(),
-			GameProviderCode: GameProviderType.Kaiyuan,
-			GameProviderFundTransferTransactionId: Guid.NewGuid(),
-			GameProviderTransactionId: "72412202405200607050004ucmqplxb029");
-		_ = fakeService.GetAsync(
-			query: Arg.Is(new FundProcessingFundInAddQuery(
-				GameProviderCode: query.GameProviderCode,
-				PlayerCode: query.PlayerCode,
-				Amount: query.Amount)),
-			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(fundProcessingResult);
-
-		_ = fakeGameProviderFundInService.GetAsync(
-			query: new GameProviderFundInQuery(
-				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
-				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: query.CurrencyCode,
-				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
-				Amount: exchangeRateFundResult.Amount),
-			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(new GameProviderFundInResult(fundProcessingResult.GameProviderTransactionId));
-
-		var transactionResponse = new TransactionResponse()
-		{
-			TransactionId = Guid.NewGuid(),
-			Balance = 10
-		};
-		_ = fakeCashServiceClient.GameProviderFundInAsync(
-			 Arg.Is(query.WalletId),
-			 Arg.Is(query.Amount),
-			 Arg.Is($"【{query.GameProviderCode}】->【Default】"),
-			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId.ToString()))
-			.Returns(ValueTask.FromResult(transactionResponse));
-
-		await fakeGameProviderFundTransferTransactionRepository.UpdateBySuccessAsync(
-			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId),
-			 Arg.Is(transactionResponse.TransactionId),
-			 Arg.Is(fundProcessingResult.GameProviderTransactionId),
-			 Arg.Is(transactionResponse.Balance));
-
 		var sut = new FundInGetService(
 			faceLogger,
 			fakeGameCurrencyClient,
@@ -406,11 +349,18 @@ public class FundInGetServiceUnitTest
 		Assert.NotNull(actual);
 		Assert.Equal(StateCode.TransactionLock, actual.State);
 
+		_ = fakeGameProviderFundTransferTransactionRepository
+			.Received(0)
+			.UpdateBySuccessAsync(
+			 Arg.Any<Guid>(),
+			 Arg.Any<Guid>(),
+			 Arg.Any<decimal>());
+
 		_ = fakeFundsDistributedLock
 			.Received(0)
 			.UnlockAsync(
-			Arg.Is(query.GameProviderCode),
-			Arg.Is(query.PlayerCode));
+			 Arg.Any<string>(),
+			 Arg.Any<string>());
 	}
 
 	[Fact]
@@ -533,17 +483,6 @@ public class FundInGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(fundProcessingResult);
 
-		_ = fakeGameProviderFundInService.GetAsync(
-			query: new GameProviderFundInQuery(
-				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
-				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: query.CurrencyCode,
-				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
-				Amount: exchangeRateFundResult.Amount),
-			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(new GameProviderFundInResult(fundProcessingResult.GameProviderTransactionId));
-
 		var transactionResponse = new TransactionResponse()
 		{
 			TransactionId = Guid.NewGuid(),
@@ -555,12 +494,6 @@ public class FundInGetServiceUnitTest
 			 Arg.Is($"【{query.GameProviderCode}】->【Default】"),
 			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId.ToString()))
 			.Returns(ValueTask.FromResult(transactionResponse));
-
-		await fakeGameProviderFundTransferTransactionRepository.UpdateBySuccessAsync(
-			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId),
-			 Arg.Is(transactionResponse.TransactionId),
-			 Arg.Is(fundProcessingResult.GameProviderTransactionId),
-			 Arg.Is(transactionResponse.Balance));
 
 		var sut = new FundInGetService(
 			faceLogger,
@@ -576,6 +509,25 @@ public class FundInGetServiceUnitTest
 
 		Assert.NotNull(actual);
 		Assert.Equal(StateCode.Success, actual.State);
+
+		_ = fakeGameProviderFundInService
+			.Received(1)
+			.GetAsync(
+			query: new GameProviderFundInQuery(
+				GameProviderCode: fundProcessingResult.GameProviderCode,
+				BrandCode: fundProcessingResult.BrandCode,
+				PlayerCode: fundProcessingResult.PlayerCode,
+				CurrencyCode: query.CurrencyCode,
+				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
+				Amount: exchangeRateFundResult.Amount),
+			cancellationToken: Arg.Any<CancellationToken>());
+
+		_ = fakeGameProviderFundTransferTransactionRepository
+			.Received(1)
+			.UpdateBySuccessAsync(
+			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId),
+			 Arg.Is(transactionResponse.TransactionId),
+			 Arg.Is(transactionResponse.Balance));
 
 		_ = fakeFundsDistributedLock
 			.Received(1)
@@ -643,17 +595,6 @@ public class FundInGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(fundProcessingResult);
 
-		_ = fakeGameProviderFundInService.GetAsync(
-			query: new GameProviderFundInQuery(
-				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
-				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: query.CurrencyCode,
-				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
-				Amount: exchangeRateFundResult.Amount),
-			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(new GameProviderFundInResult(fundProcessingResult.GameProviderTransactionId));
-
 		var transactionResponse = new TransactionResponse()
 		{
 			TransactionId = Guid.NewGuid(),
@@ -665,12 +606,6 @@ public class FundInGetServiceUnitTest
 			 Arg.Is($"【{query.GameProviderCode}】->【Default】"),
 			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId.ToString()))
 			.Returns(ValueTask.FromResult(transactionResponse));
-
-		await fakeGameProviderFundTransferTransactionRepository.UpdateBySuccessAsync(
-			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId),
-			 Arg.Is(transactionResponse.TransactionId),
-			 Arg.Is(fundProcessingResult.GameProviderTransactionId),
-			 Arg.Is(transactionResponse.Balance));
 
 		var sut = new FundInGetService(
 			faceLogger,
@@ -686,6 +621,25 @@ public class FundInGetServiceUnitTest
 
 		Assert.NotNull(actual);
 		Assert.Equal(StateCode.Success, actual.State);
+
+		_ = fakeGameProviderFundInService
+			.Received(1)
+			.GetAsync(
+			query: new GameProviderFundInQuery(
+				GameProviderCode: fundProcessingResult.GameProviderCode,
+				BrandCode: fundProcessingResult.BrandCode,
+				PlayerCode: fundProcessingResult.PlayerCode,
+				CurrencyCode: query.CurrencyCode,
+				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
+				Amount: exchangeRateFundResult.Amount),
+			cancellationToken: Arg.Any<CancellationToken>());
+
+		_ = fakeGameProviderFundTransferTransactionRepository
+			.Received(1)
+			.UpdateBySuccessAsync(
+			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId),
+			 Arg.Is(transactionResponse.TransactionId),
+			 Arg.Is(transactionResponse.Balance));
 
 		_ = fakeFundsDistributedLock
 			.Received(1)
@@ -755,17 +709,6 @@ public class FundInGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(fundProcessingResult);
 
-		_ = fakeGameProviderFundInService.GetAsync(
-			query: new GameProviderFundInQuery(
-				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
-				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: query.CurrencyCode,
-				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
-				Amount: exchangeRateFundResult.Amount),
-			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(new GameProviderFundInResult(fundProcessingResult.GameProviderTransactionId));
-
 		var transactionResponse = new TransactionResponse()
 		{
 			TransactionId = Guid.NewGuid(),
@@ -777,12 +720,6 @@ public class FundInGetServiceUnitTest
 			 Arg.Is($"【{query.GameProviderCode}】->【Default】"),
 			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId.ToString()))
 			.Returns(ValueTask.FromResult(transactionResponse));
-
-		await fakeGameProviderFundTransferTransactionRepository.UpdateBySuccessAsync(
-			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId),
-			 Arg.Is(transactionResponse.TransactionId),
-			 Arg.Is(fundProcessingResult.GameProviderTransactionId),
-			 Arg.Is(transactionResponse.Balance));
 
 		var sut = new FundInGetService(
 			faceLogger,
@@ -798,6 +735,25 @@ public class FundInGetServiceUnitTest
 
 		Assert.NotNull(actual);
 		Assert.Equal(StateCode.Success, actual.State);
+
+		_ = fakeGameProviderFundInService
+			.Received(1)
+			.GetAsync(
+			query: new GameProviderFundInQuery(
+				GameProviderCode: fundProcessingResult.GameProviderCode,
+				BrandCode: fundProcessingResult.BrandCode,
+				PlayerCode: fundProcessingResult.PlayerCode,
+				CurrencyCode: query.CurrencyCode,
+				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
+				Amount: exchangeRateFundResult.Amount),
+			cancellationToken: Arg.Any<CancellationToken>());
+
+		_ = fakeGameProviderFundTransferTransactionRepository
+			.Received(1)
+			.UpdateBySuccessAsync(
+			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId),
+			 Arg.Is(transactionResponse.TransactionId),
+			 Arg.Is(transactionResponse.Balance));
 
 		_ = fakeFundsDistributedLock
 			.Received(1)

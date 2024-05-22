@@ -47,7 +47,6 @@ public class FundOutCommandServiceUnitTest
 			.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
 			transactionId: Arg.Any<Guid>(),
-			gameProviderTransactionId: Arg.Any<string>(),
 			balance: Arg.Any<decimal>());
 
 		_ = fakeFundsDistributedLock
@@ -93,7 +92,6 @@ public class FundOutCommandServiceUnitTest
 			.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
 			transactionId: Arg.Any<Guid>(),
-			gameProviderTransactionId: Arg.Any<string>(),
 			balance: Arg.Any<decimal>());
 
 		_ = fakeFundsDistributedLock
@@ -139,7 +137,6 @@ public class FundOutCommandServiceUnitTest
 			.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
 			transactionId: Arg.Any<Guid>(),
-			gameProviderTransactionId: Arg.Any<string>(),
 			balance: Arg.Any<decimal>());
 
 		_ = fakeFundsDistributedLock
@@ -194,7 +191,6 @@ public class FundOutCommandServiceUnitTest
 			.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
 			transactionId: Arg.Any<Guid>(),
-			gameProviderTransactionId: Arg.Any<string>(),
 			balance: Arg.Any<decimal>());
 
 		_ = fakeFundsDistributedLock
@@ -280,17 +276,6 @@ public class FundOutCommandServiceUnitTest
 			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId.ToString()))
 			.Returns(ValueTask.FromResult(transactionResponse));
 
-		_ = fakeGameProviderFundOutService.GetAsync(
-			query: new GameProviderFundOutQuery(
-				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
-				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: query.CurrencyCode,
-				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
-				Amount: exchangeRateFundResult.Amount),
-			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(new GameProviderFundOutResult(fundProcessingResult.GameProviderTransactionId));
-
 		var sut = new FundOutCommandService(
 			faceLogger,
 			fakeGameCurrencyClient,
@@ -303,12 +288,23 @@ public class FundOutCommandServiceUnitTest
 
 		await sut.ExecuteAsync(query);
 
+		_ = fakeGameProviderFundOutService
+			.Received(1)
+			.GetAsync(
+			query: new GameProviderFundOutQuery(
+				GameProviderCode: fundProcessingResult.GameProviderCode,
+				BrandCode: fundProcessingResult.BrandCode,
+				PlayerCode: fundProcessingResult.PlayerCode,
+				CurrencyCode: query.CurrencyCode,
+				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
+				Amount: exchangeRateFundResult.Amount),
+			cancellationToken: Arg.Any<CancellationToken>());
+
 		_ = fakeGameProviderFundTransferTransactionRepository
 			.Received(1)
 			.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId),
 			transactionId: Arg.Is(transactionResponse.TransactionId),
-			gameProviderTransactionId: Arg.Is(fundProcessingResult.GameProviderTransactionId),
 			balance: Arg.Is(transactionResponse.Balance));
 
 		_ = fakeFundsDistributedLock
@@ -382,7 +378,6 @@ public class FundOutCommandServiceUnitTest
 			.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
 			transactionId: Arg.Any<Guid>(),
-			gameProviderTransactionId: Arg.Any<string>(),
 			balance: Arg.Any<decimal>());
 
 		_ = fakeFundsDistributedLock
@@ -457,7 +452,6 @@ public class FundOutCommandServiceUnitTest
 			.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
 			transactionId: Arg.Any<Guid>(),
-			gameProviderTransactionId: Arg.Any<string>(),
 			balance: Arg.Any<decimal>());
 
 		_ = fakeFundsDistributedLock
@@ -567,7 +561,6 @@ public class FundOutCommandServiceUnitTest
 			.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
 			transactionId: Arg.Any<Guid>(),
-			gameProviderTransactionId: Arg.Any<string>(),
 			balance: Arg.Any<decimal>());
 
 		_ = fakeGameProviderFundTransferTransactionRepository
@@ -781,17 +774,6 @@ public class FundOutCommandServiceUnitTest
 			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId.ToString()))
 			.Returns(ValueTask.FromResult(transactionResponse));
 
-		_ = fakeGameProviderFundOutService.GetAsync(
-			query: new GameProviderFundOutQuery(
-				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
-				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: query.CurrencyCode,
-				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
-				Amount: exchangeRateFundResult.Amount),
-			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(new GameProviderFundOutResult(fundProcessingResult.GameProviderTransactionId));
-
 		var sut = new FundOutCommandService(
 			faceLogger,
 			fakeGameCurrencyClient,
@@ -804,20 +786,30 @@ public class FundOutCommandServiceUnitTest
 
 		await sut.ExecuteAsync(query);
 
+		_ = fakeGameProviderFundOutService
+			.Received(1)
+			.GetAsync(
+			query: new GameProviderFundOutQuery(
+				GameProviderCode: fundProcessingResult.GameProviderCode,
+				BrandCode: fundProcessingResult.BrandCode,
+				PlayerCode: fundProcessingResult.PlayerCode,
+				CurrencyCode: query.CurrencyCode,
+				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
+				Amount: exchangeRateFundResult.Amount),
+			cancellationToken: Arg.Any<CancellationToken>());
+
 		_ = fakeGameProviderFundTransferTransactionRepository
 			.Received(1)
 			.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId),
 			transactionId: Arg.Is(transactionResponse.TransactionId),
-			gameProviderTransactionId: Arg.Is(fundProcessingResult.GameProviderTransactionId),
-			balance: Arg.Is(transactionResponse.Balance),
-			cancellationToken: Arg.Any<CancellationToken>());
+			balance: Arg.Is(transactionResponse.Balance));
 
 		_ = fakeFundsDistributedLock
 			.Received(1)
 			.UnlockAsync(
-			Arg.Is(query.GameProviderCode),
-			Arg.Is(query.PlayerCode));
+			gameProviderCode: Arg.Is(query.GameProviderCode),
+			playerCode: Arg.Is(query.PlayerCode));
 	}
 
 	[Fact]
@@ -896,17 +888,6 @@ public class FundOutCommandServiceUnitTest
 			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId.ToString()))
 			.Returns(ValueTask.FromResult(transactionResponse));
 
-		_ = fakeGameProviderFundOutService.GetAsync(
-			query: new GameProviderFundOutQuery(
-				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
-				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: query.CurrencyCode,
-				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
-				Amount: exchangeRateFundResult.Amount),
-			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(new GameProviderFundOutResult(fundProcessingResult.GameProviderTransactionId));
-
 		var sut = new FundOutCommandService(
 			faceLogger,
 			fakeGameCurrencyClient,
@@ -919,20 +900,30 @@ public class FundOutCommandServiceUnitTest
 
 		await sut.ExecuteAsync(query);
 
+		_ = fakeGameProviderFundOutService
+			.Received(1)
+			.GetAsync(
+			query: new GameProviderFundOutQuery(
+				GameProviderCode: fundProcessingResult.GameProviderCode,
+				BrandCode: fundProcessingResult.BrandCode,
+				PlayerCode: fundProcessingResult.PlayerCode,
+				CurrencyCode: query.CurrencyCode,
+				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
+				Amount: exchangeRateFundResult.Amount),
+			cancellationToken: Arg.Any<CancellationToken>());
+
 		_ = fakeGameProviderFundTransferTransactionRepository
 			.Received(1)
 			.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId),
 			transactionId: Arg.Is(transactionResponse.TransactionId),
-			gameProviderTransactionId: Arg.Is(fundProcessingResult.GameProviderTransactionId),
-			balance: Arg.Is(transactionResponse.Balance),
-			cancellationToken: Arg.Any<CancellationToken>());
+			balance: Arg.Is(transactionResponse.Balance));
 
 		_ = fakeFundsDistributedLock
 			.Received(1)
 			.UnlockAsync(
-			Arg.Is(query.GameProviderCode),
-			Arg.Is(query.PlayerCode));
+			gameProviderCode: Arg.Is(query.GameProviderCode),
+			playerCode: Arg.Is(query.PlayerCode));
 	}
 
 	[Fact]
@@ -995,7 +986,6 @@ public class FundOutCommandServiceUnitTest
 			.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
 			transactionId: Arg.Any<Guid>(),
-			gameProviderTransactionId: Arg.Any<string>(),
 			balance: Arg.Any<decimal>());
 
 		_ = fakeFundsDistributedLock

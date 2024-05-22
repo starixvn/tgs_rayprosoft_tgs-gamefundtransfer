@@ -62,10 +62,9 @@ internal class FundInZeroGetService(
 				cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
-			var gameProviderTransactionId = string.Empty;
 			try
 			{
-				var gameProviderFundInResult = await gameProviderFundInService.GetAsync(
+				_ = await gameProviderFundInService.GetAsync(
 					query: new GameProviderFundInQuery(
 						GameProviderCode: fundProcessingResult.GameProviderCode,
 						BrandCode: fundProcessingResult.BrandCode,
@@ -75,8 +74,6 @@ internal class FundInZeroGetService(
 						Amount: playerBalance.FreeBalance),
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
-
-				gameProviderTransactionId = gameProviderFundInResult.GameProviderTransactionId;
 			}
 			catch (ArgumentException ex)
 			{
@@ -120,7 +117,6 @@ internal class FundInZeroGetService(
 				await fundTransferTransactionRepository.UpdateBySuccessAsync(
 					gameProviderFundTransferTransactionId: fundProcessingResult.GameProviderFundTransferTransactionId,
 					transactionId: transactionResponse.TransactionId,
-					gameProviderTransactionId: gameProviderTransactionId,
 					balance: transactionResponse.Balance,
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
@@ -130,13 +126,12 @@ internal class FundInZeroGetService(
 					message: StateCode.Success.GetDescription(),
 					fundTransactionId: fundProcessingResult.GameProviderFundTransferTransactionId,
 					transactionId: transactionResponse.TransactionId,
-					externalTransactionId: gameProviderTransactionId);
+					externalTransactionId: fundProcessingResult.GameProviderTransactionId);
 			}
 			catch (Exception ex)
 			{
 				await fundTransferTransactionRepository.UpdateByMainWalletFundFailedAsync(
 					gameProviderFundTransferTransactionId: fundProcessingResult.GameProviderFundTransferTransactionId,
-					gameProviderTransactionId: gameProviderTransactionId,
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
 
@@ -147,7 +142,7 @@ internal class FundInZeroGetService(
 					message: $"The main wallet transfer failed.({fundProcessingResult.GameProviderFundTransferTransactionId})",
 					fundTransactionId: fundProcessingResult.GameProviderFundTransferTransactionId,
 					transactionId: Guid.Empty,
-					externalTransactionId: gameProviderTransactionId);
+					externalTransactionId: fundProcessingResult.GameProviderTransactionId);
 			}
 		}
 		finally

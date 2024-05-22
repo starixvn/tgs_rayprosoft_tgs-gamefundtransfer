@@ -1,14 +1,16 @@
-﻿using Tgs.GameProviders.Client;
+﻿using Microsoft.Extensions.Logging;
+using Tgs.GameProviders.Client;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameFundTransfer.Core.ApplicationServices;
 
 internal class GameProviderFundInGetService(
+	ILogger<GameProviderFundInGetService> logger,
 	IGameProvidersClient gameProvidersClient) : IGetService<GameProviderFundInQuery, GameProviderFundInResult>
 {
 	public async ValueTask<GameProviderFundInResult> GetAsync(GameProviderFundInQuery query, CancellationToken cancellationToken = default)
 	{
-		var gameProviderTransactionId = await gameProvidersClient.PlayerFundInAsync(
+		var response = await gameProvidersClient.PlayerFundInAsync(
 			gameProviderCode: query.GameProviderCode,
 			brandCode: query.BrandCode,
 			playerCode: query.PlayerCode,
@@ -18,8 +20,19 @@ internal class GameProviderFundInGetService(
 			cancellationToken: cancellationToken)
 		.ConfigureAwait(false);
 
-		ArgumentException.ThrowIfNullOrWhiteSpace(gameProviderTransactionId);
+		ArgumentException.ThrowIfNullOrWhiteSpace(response.OrderId);
+		ArgumentException.ThrowIfNullOrWhiteSpace(response.GameProviderTransactionId);
 
-		return new GameProviderFundInResult(gameProviderTransactionId);
+		logger.LogInformation("LogOn:{logOn} GameProviderCode:{gameProviderCode} PlayerCode:{playerCode} OrderId:{orderId} GameProviderTransactionId:{gameProviderTransactionId} ExternalGameProviderTransactionId:{externalGameProviderTransactionId} Message:This game provider funds transfer was successful.",
+			DateTime.Now.ToString("o"),
+			query.GameProviderCode,
+			query.PlayerCode,
+			response.OrderId,
+			response.GameProviderTransactionId,
+			response.ExternalGameProviderTransactionId);
+
+		return new GameProviderFundInResult(
+			response.OrderId,
+			response.GameProviderTransactionId);
 	}
 }

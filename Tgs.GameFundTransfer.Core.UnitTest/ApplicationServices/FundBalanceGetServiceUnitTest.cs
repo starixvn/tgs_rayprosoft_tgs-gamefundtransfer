@@ -7,6 +7,7 @@ using Tgs.GameProviders.Domains;
 using Valhalla.MessageQueue;
 
 namespace Tgs.GameFundTransfer.Core.UnitTest.ApplicationServices;
+
 public class FundBalanceGetServiceUnitTest
 {
 	[Fact]

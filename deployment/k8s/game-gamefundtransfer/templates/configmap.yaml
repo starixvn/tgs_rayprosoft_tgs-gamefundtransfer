@@ -9,7 +9,9 @@ data:
     {
       "Logging": {
         "LogLevel": {
-          "Default": "Warning"
+          "Default": "Warning",
+          "Tgs.GameFundTransfer.Core.ApplicationServices.GameProviderFundInGetService": "Information",
+          "Tgs.GameFundTransfer.Core.ApplicationServices.GameProviderFundOutGetService": "Information"
         }
       },
       "Kestrel": {
