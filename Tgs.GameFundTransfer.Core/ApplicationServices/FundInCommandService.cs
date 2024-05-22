@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Tgs.CashService.Client;
 using Tgs.GameCurrency.Client;
-using Tgs.GameFundTransfer.Core.Exceptions;
 using Tgs.GameProviders.Client;
 using Tgs.ServiceUtility;
 
@@ -19,10 +18,9 @@ internal class FundInCommandService(
 {
 	public async ValueTask ExecuteAsync(FundInCommand query, CancellationToken cancellationToken = default)
 	{
-		if (query.Amount < 0)
-		{
-			throw new AmountFormatException(query.Amount);
-		}
+		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(query.Amount);
+		ArgumentOutOfRangeException.ThrowIfLessThan(query.Amount, 0.01m);
+		ArgumentOutOfRangeException.ThrowIfGreaterThan(query.Amount, 9999999.99m);
 
 		var exchangeRateFundResult = await gameCurrencyClient.ConvertGameProviderFundsAsync(
 			query.GameProviderCode,
@@ -54,15 +52,8 @@ internal class FundInCommandService(
 				cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
-			if (playerBalance.FreeBalance <= 0)
-			{
-				throw new FreeBalanceException(query.PlayerCode, query.GameProviderCode, playerBalance.FreeBalance);
-			}
-
-			if (playerBalance.FreeBalance - gameProviderAmount < 0)
-			{
-				throw new FreeBalanceInsufficientException(query.PlayerCode, query.GameProviderCode, gameProviderAmount, playerBalance.FreeBalance);
-			}
+			ArgumentOutOfRangeException.ThrowIfNegativeOrZero(playerBalance.FreeBalance);
+			ArgumentOutOfRangeException.ThrowIfLessThan(playerBalance.FreeBalance - gameProviderAmount, 0.0m);
 
 			var fundProcessingResult = await service.GetAsync(
 				query: new FundProcessingFundInAddQuery(

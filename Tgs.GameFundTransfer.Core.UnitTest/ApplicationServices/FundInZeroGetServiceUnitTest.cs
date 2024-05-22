@@ -3,7 +3,6 @@ using NSubstitute;
 using Tgs.CashService.Client;
 using Tgs.GameCurrency.Client;
 using Tgs.GameFundTransfer.Core.ApplicationServices;
-using Tgs.GameFundTransfer.Core.Exceptions;
 using Tgs.GameProviders.Client;
 using Tgs.GameProviders.Domains;
 using Tgs.ServiceUtility;
@@ -465,7 +464,7 @@ public class FundInZeroGetServiceUnitTest
 			fakeGameProviderFundInService,
 			fakeRepository);
 
-		_ = await Assert.ThrowsAsync<FreeBalanceException>(() => sut.GetAsync(query).AsTask());
+		_ = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => sut.GetAsync(query).AsTask());
 
 		_ = fakeService
 			.Received(0)
