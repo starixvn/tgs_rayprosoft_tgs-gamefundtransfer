@@ -94,7 +94,6 @@ internal class FundOutCommandService(
 
 				await fundTransferTransactionRepository.UpdateByMainWalletFundFailedAsync(
 					gameProviderFundTransferTransactionId: fundProcessingResult.GameProviderFundTransferTransactionId,
-					gameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
 				throw;
@@ -141,10 +140,9 @@ internal class FundOutCommandService(
 				return;
 			}
 
-			var gameProviderTransactionId = string.Empty;
 			try
 			{
-				var gameProviderFundOutResult = await gameProviderFundOutService.GetAsync(
+				_ = await gameProviderFundOutService.GetAsync(
 					query: new GameProviderFundOutQuery(
 						GameProviderCode: fundProcessingResult.GameProviderCode,
 						BrandCode: fundProcessingResult.BrandCode,
@@ -154,8 +152,6 @@ internal class FundOutCommandService(
 						Amount: gameProviderAmount),
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
-
-				gameProviderTransactionId = gameProviderFundOutResult.GameProviderTransactionId;
 			}
 			catch (ArgumentException ex)
 			{
@@ -189,7 +185,6 @@ internal class FundOutCommandService(
 			await fundTransferTransactionRepository.UpdateBySuccessAsync(
 				gameProviderFundTransferTransactionId: fundProcessingResult.GameProviderFundTransferTransactionId,
 				transactionId: transactionResponse.TransactionId,
-				gameProviderTransactionId: gameProviderTransactionId,
 				balance: transactionResponse.Balance,
 				cancellationToken: cancellationToken)
 				.ConfigureAwait(false);

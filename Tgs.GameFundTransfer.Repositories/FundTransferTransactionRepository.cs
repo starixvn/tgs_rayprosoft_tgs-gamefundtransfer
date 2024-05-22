@@ -56,13 +56,12 @@ internal class FundTransferTransactionRepository(
 			 .ConfigureAwait(false);
 	}
 
-	public async ValueTask UpdateByMainWalletFundFailedAsync(Guid gameProviderFundTransferTransactionId, string gameProviderTransactionId, CancellationToken cancellationToken = default)
+	public async ValueTask UpdateByMainWalletFundFailedAsync(Guid gameProviderFundTransferTransactionId, CancellationToken cancellationToken = default)
 	{
 		var fundTransferTransaction = await context.GameProviderFundTransferTransactions
 			.Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
 			.FirstAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
-		fundTransferTransaction.GameProviderTransactionId = gameProviderTransactionId;
 		fundTransferTransaction.Status = (short)FundStatus.MainWalletFundFailed;
 		fundTransferTransaction.UpdatedOn = DateTime.UtcNow;
 
@@ -115,14 +114,13 @@ internal class FundTransferTransactionRepository(
 			 .ConfigureAwait(false);
 	}
 
-	public async ValueTask UpdateBySuccessAsync(Guid gameProviderFundTransferTransactionId, Guid transactionId, string gameProviderTransactionId, decimal balance, CancellationToken cancellationToken = default)
+	public async ValueTask UpdateBySuccessAsync(Guid gameProviderFundTransferTransactionId, Guid transactionId, decimal balance, CancellationToken cancellationToken = default)
 	{
 		var fundTransferTransaction = await context.GameProviderFundTransferTransactions
 			.Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
 			.FirstAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
 		fundTransferTransaction.TransactionId = transactionId;
-		fundTransferTransaction.GameProviderTransactionId = gameProviderTransactionId;
 		fundTransferTransaction.Status = (short)FundStatus.Success;
 		fundTransferTransaction.Balance = balance;
 		fundTransferTransaction.UpdatedOn = DateTime.UtcNow;

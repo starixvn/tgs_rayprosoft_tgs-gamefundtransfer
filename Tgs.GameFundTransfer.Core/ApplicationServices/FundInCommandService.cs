@@ -63,10 +63,9 @@ internal class FundInCommandService(
 				cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
-			var gameProviderTransactionId = string.Empty;
 			try
 			{
-				var gameProviderFundInResult = await gameProviderFundInService.GetAsync(
+				_ = await gameProviderFundInService.GetAsync(
 					query: new GameProviderFundInQuery(
 						GameProviderCode: fundProcessingResult.GameProviderCode,
 						BrandCode: fundProcessingResult.BrandCode,
@@ -76,8 +75,6 @@ internal class FundInCommandService(
 						Amount: gameProviderAmount),
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
-
-				gameProviderTransactionId = gameProviderFundInResult.GameProviderTransactionId;
 			}
 			catch (ArgumentException ex)
 			{
@@ -121,7 +118,6 @@ internal class FundInCommandService(
 				await fundTransferTransactionRepository.UpdateBySuccessAsync(
 					gameProviderFundTransferTransactionId: fundProcessingResult.GameProviderFundTransferTransactionId,
 					transactionId: transactionResponse.TransactionId,
-					gameProviderTransactionId: gameProviderTransactionId,
 					balance: transactionResponse.Balance,
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
@@ -130,7 +126,6 @@ internal class FundInCommandService(
 			{
 				await fundTransferTransactionRepository.UpdateByMainWalletFundFailedAsync(
 					gameProviderFundTransferTransactionId: fundProcessingResult.GameProviderFundTransferTransactionId,
-					gameProviderTransactionId: gameProviderTransactionId,
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
 				logger.LogError(exception: ex, "The main wallet transfer failed.({gameProviderFundTransferTransactionId})", fundProcessingResult.GameProviderFundTransferTransactionId);

@@ -170,10 +170,12 @@ public class FundTransferTransactionRepositoryUnitTest
 		var playerCode = "test";
 		var walletId = Guid.NewGuid();
 		var amount = 10.0m;
+		var gameProviderTransactionId = Guid.NewGuid().ToString("N");
 
 		var fundTransferTransaction = new GameProviderFundTransferTransaction()
 		{
 			GameProviderFundTransferTransactionId = gameProviderFundTransferTransactionId,
+			GameProviderTransactionId = gameProviderTransactionId,
 			GameProviderId = gameProviderId,
 			WalletId = walletId,
 			PlayerCode = playerCode,
@@ -192,19 +194,15 @@ public class FundTransferTransactionRepositoryUnitTest
 
 		var fakeSerialNumberGenerator = Substitute.For<ISerialNumberGenerator>();
 
-		var gameProviderTransactionId = Guid.NewGuid().ToString("N");
-
 		var sut = new FundTransferTransactionRepository(context);
 
 		await sut.UpdateByMainWalletFundFailedAsync(
-			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-			gameProviderTransactionId: gameProviderTransactionId);
+			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId);
 
 		var data = await context.GameProviderFundTransferTransactions
 			.SingleAsync(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId);
 
 		Assert.Equal((short)FundStatus.MainWalletFundFailed, data.Status);
-		Assert.Equal(gameProviderTransactionId, data.GameProviderTransactionId);
 	}
 
 	[Fact]
@@ -323,6 +321,7 @@ public class FundTransferTransactionRepositoryUnitTest
 		var gameProviderFundTransferTransactionId = Guid.NewGuid();
 		var gameProviderId = Guid.NewGuid();
 		var gameProviderCode = "GP";
+		var gameProviderTransactionId = Guid.NewGuid().ToString("N");
 		var playerCode = "test";
 		var walletId = Guid.NewGuid();
 		var amount = 10.0m;
@@ -331,6 +330,7 @@ public class FundTransferTransactionRepositoryUnitTest
 		{
 			GameProviderFundTransferTransactionId = gameProviderFundTransferTransactionId,
 			GameProviderId = gameProviderId,
+			GameProviderTransactionId = gameProviderTransactionId,
 			WalletId = walletId,
 			PlayerCode = playerCode,
 			FundSource = (short)FundSource.FundOut,
@@ -349,13 +349,12 @@ public class FundTransferTransactionRepositoryUnitTest
 		var sut = new FundTransferTransactionRepository(context);
 
 		var transactionId = Guid.NewGuid();
-		var gameProviderTransactionId = Guid.NewGuid().ToString("N");
+
 		var balance = 0m;
 
 		await sut.UpdateBySuccessAsync(
 			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
 			transactionId: transactionId,
-			gameProviderTransactionId: gameProviderTransactionId,
 			balance: balance);
 
 		var data = await context.GameProviderFundTransferTransactions
