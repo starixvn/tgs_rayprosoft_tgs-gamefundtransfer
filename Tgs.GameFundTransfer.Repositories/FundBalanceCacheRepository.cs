@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using Tgs.GameFundTransfer.Core;
+using Tgs.GameFundTransfer.Core.ApplicationServices;
 using Tgs.GameFundTransfer.Core.Models;
 
 namespace Tgs.GameFundTransfer.Repositories;
@@ -8,21 +10,32 @@ namespace Tgs.GameFundTransfer.Repositories;
 internal class FundBalanceCacheRepository(
 	IFundBalanceRepository fundBalanceRepository,
 	IDatabase database,
-	TimeSpan expiry) : IFundBalanceRepository
+	TimeSpan expiry,
+	ILogger<FundBalanceCacheRepository> logger) : IFundBalanceRepository
 {
 	public async ValueTask<FundBalanceInfo> GetAsync(string gameProviderCode, string playerCode, CancellationToken cancellationToken = default)
 	{
 		var key = GetKey(gameProviderCode, playerCode);
 
-		if (await database.KeyExistsAsync(
-			key: key)
-			.ConfigureAwait(false))
+		try
 		{
-			var redisValue = await database.StringGetAsync(key).ConfigureAwait(false);
-			if (redisValue.HasValue)
+			if (await database.KeyExistsAsync(
+				key: key)
+				.ConfigureAwait(false))
 			{
-				return JsonSerializer.Deserialize<FundBalanceInfo>(redisValue!)!;
+				var redisValue = await database.StringGetAsync(key).ConfigureAwait(false);
+				if (redisValue.HasValue)
+				{
+					return JsonSerializer.Deserialize<FundBalanceInfo>(redisValue!)!;
+				}
 			}
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "LogOn:{logOn} Mesaage:This player's({playerCode}) query to the game provider's({gameProviderCode}) balance cache failed.",
+				DateTime.Now.ToString("o"),
+				playerCode,
+				gameProviderCode);
 		}
 
 		return await fundBalanceRepository.GetAsync(
