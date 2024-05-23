@@ -18,7 +18,7 @@ public class FundBalanceCacheRepositoryUnitTest
 		var gameProviderCode = GameProviderType.Kaiyuan;
 		var playerCode = "4ucmqplxb029";
 
-		var key = string.Concat(typeof(FundBalanceCacheRepository).Namespace!.Replace(".", "-").ToLower(), ":", "balance", ":", gameProviderCode, ":", playerCode);
+		var key = string.Concat(typeof(FundBalanceCacheRepository).Namespace!.Replace(".", "-").ToLower(), ":", "balance", ":", playerCode, ":", gameProviderCode);
 
 		_ = fakeDatabase.KeyExistsAsync(
 			key: Arg.Is<RedisKey>(key))
@@ -57,7 +57,7 @@ public class FundBalanceCacheRepositoryUnitTest
 		var gameProviderCode = GameProviderType.Kaiyuan;
 		var playerCode = "4ucmqplxb029";
 
-		var key = string.Concat(typeof(FundBalanceCacheRepository).Namespace!.Replace(".", "-").ToLower(), ":", "balance", ":", gameProviderCode, ":", playerCode);
+		var key = string.Concat(typeof(FundBalanceCacheRepository).Namespace!.Replace(".", "-").ToLower(), ":", "balance", ":", playerCode, ":", gameProviderCode);
 
 		_ = fakeDatabase.KeyExistsAsync(
 			key: Arg.Is<RedisKey>(key))

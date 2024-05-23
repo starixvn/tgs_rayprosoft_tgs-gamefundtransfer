@@ -56,5 +56,5 @@ internal class FundBalanceCacheRepository(
 	}
 
 	private static string GetKey(string gameProviderCode, string playerCode)
-		=> string.Concat(typeof(FundBalanceCacheRepository).Namespace!.Replace(".", "-").ToLower(), ":", "balance", ":", gameProviderCode, ":", playerCode);
+		=> string.Concat(typeof(FundBalanceCacheRepository).Namespace!.Replace(".", "-").ToLower(), ":", "balance", ":", playerCode, ":", gameProviderCode);
 }
