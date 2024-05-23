@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using StackExchange.Redis;
 using Tgs.GameFundTransfer.Core;
@@ -11,6 +12,7 @@ public class FundBalanceCacheRepositoryUnitTest
 	[Fact]
 	public async Task Get_Is_Not_Cache()
 	{
+		var faceLogger = NullLogger<FundBalanceCacheRepository>.Instance;
 		var fakeFundBalanceRepository = Substitute.For<IFundBalanceRepository>();
 		var fakeDatabase = Substitute.For<IDatabase>();
 		var timeSpan = TimeSpan.FromSeconds(30);
@@ -37,7 +39,8 @@ public class FundBalanceCacheRepositoryUnitTest
 		var sut = new FundBalanceCacheRepository(
 			fakeFundBalanceRepository,
 			fakeDatabase,
-			timeSpan);
+			timeSpan,
+			faceLogger);
 
 		var actual = await sut.GetAsync(gameProviderCode, playerCode);
 
@@ -50,6 +53,7 @@ public class FundBalanceCacheRepositoryUnitTest
 	[Fact]
 	public async Task Get_Is_Cache()
 	{
+		var faceLogger = NullLogger<FundBalanceCacheRepository>.Instance;
 		var fakeFundBalanceRepository = Substitute.For<IFundBalanceRepository>();
 		var fakeDatabase = Substitute.For<IDatabase>();
 		var timeSpan = TimeSpan.FromSeconds(30);
@@ -74,7 +78,8 @@ public class FundBalanceCacheRepositoryUnitTest
 		var sut = new FundBalanceCacheRepository(
 			fakeFundBalanceRepository,
 			fakeDatabase,
-			timeSpan);
+			timeSpan,
+			faceLogger);
 
 		var actual = await sut.GetAsync(gameProviderCode, playerCode);
 
@@ -89,5 +94,46 @@ public class FundBalanceCacheRepositoryUnitTest
 		   gameProviderCode: Arg.Is(gameProviderCode),
 		   playerCode: Arg.Is(playerCode),
 		   cancellationToken: Arg.Any<CancellationToken>());
+	}
+
+	[Fact]
+	public async Task This_player_query_to_the_game_provider_balance_cache_failed()
+	{
+		var faceLogger = NullLogger<FundBalanceCacheRepository>.Instance;
+		var fakeFundBalanceRepository = Substitute.For<IFundBalanceRepository>();
+		var fakeDatabase = Substitute.For<IDatabase>();
+		var timeSpan = TimeSpan.FromSeconds(30);
+
+		var gameProviderCode = GameProviderType.Kaiyuan;
+		var playerCode = "4ucmqplxb029";
+
+		var key = string.Concat(typeof(FundBalanceCacheRepository).Namespace!.Replace(".", "-").ToLower(), ":", "balance", ":", playerCode, ":", gameProviderCode);
+
+		_ = fakeDatabase.KeyExistsAsync(
+			key: Arg.Is<RedisKey>(key))
+			.Returns(Task.FromException<bool>(new RedisException("test")));
+
+		var fundBalanceInfo = new Core.Models.FundBalanceInfo(
+			Balance: 100,
+			FreeBalance: 90,
+			OutstandingBalance: 10);
+		_ = fakeFundBalanceRepository.GetAsync(
+			gameProviderCode: Arg.Is(gameProviderCode),
+			playerCode: Arg.Is(playerCode),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(fundBalanceInfo);
+
+		var sut = new FundBalanceCacheRepository(
+			fakeFundBalanceRepository,
+			fakeDatabase,
+			timeSpan,
+			faceLogger);
+
+		var actual = await sut.GetAsync(gameProviderCode, playerCode);
+
+		Assert.NotNull(actual);
+		Assert.Equal(fundBalanceInfo.Balance, actual.Balance);
+		Assert.Equal(fundBalanceInfo.FreeBalance, actual.FreeBalance);
+		Assert.Equal(fundBalanceInfo.OutstandingBalance, actual.OutstandingBalance);
 	}
 }
