@@ -76,7 +76,7 @@ internal class FundProcessingFundOutAddGetService(
 					["ExternalTransactionId"] = gameProviderFundTransferTransactionId.ToString(),
 					["GameProviderTransactionId"] = gameProviderTransactionId,
 					["Mesaage"] = "This fund transaction order was created successfully.",
-				});
+				}.ToJsonString());
 
 			return new FundProcessingResult(
 				BrandId: playerInfo.BrandId,
@@ -105,7 +105,7 @@ internal class FundProcessingFundOutAddGetService(
 					["ExternalTransactionId"] = gameProviderFundTransferTransactionId.ToString(),
 					["GameProviderTransactionId"] = gameProviderTransactionId,
 					["Mesaage"] = "An exception occurred when creating this funds transaction order.",
-				});
+				}.ToJsonString());
 			throw;
 		}
 		finally
