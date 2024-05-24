@@ -20,7 +20,7 @@ internal class FundInCommandService(
 	{
 		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(query.Amount);
 		ArgumentOutOfRangeException.ThrowIfLessThan(query.Amount, 0.01m);
-		ArgumentOutOfRangeException.ThrowIfGreaterThan(query.Amount, 9999999.99m);
+		ArgumentOutOfRangeException.ThrowIfGreaterThan(query.Amount, 10000000.00m);
 
 		var exchangeRateFundResult = await gameCurrencyClient.ConvertGameProviderFundsAsync(
 			query.GameProviderCode,
@@ -111,7 +111,7 @@ internal class FundInCommandService(
 					walletId: query.WalletId,
 					amount: query.Amount,
 					description: $"【{fundProcessingResult.GameProviderCode}】->【Default】",
-					externalId: fundProcessingResult.GameProviderFundTransferTransactionId.ToString(),
+					externalId: fundProcessingResult.ExternalTransactionId,
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
 

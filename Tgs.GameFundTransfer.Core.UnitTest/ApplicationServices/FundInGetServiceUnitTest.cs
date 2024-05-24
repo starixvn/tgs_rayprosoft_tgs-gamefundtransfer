@@ -11,8 +11,10 @@ namespace Tgs.GameFundTransfer.Core.UnitTest.ApplicationServices;
 
 public class FundInGetServiceUnitTest
 {
-	[Fact]
-	public async Task ArgumentOutOfRangeException_ThrowIfNegativeOrZero_0_0m()
+	[Theory]
+	[InlineData(0.0)]
+	[InlineData(-1.0)]
+	public async Task ArgumentOutOfRangeException_ThrowIfNegativeOrZero(decimal amount)
 	{
 		var faceLogger = NullLogger<FundInGetService>.Instance;
 		var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
@@ -28,7 +30,7 @@ public class FundInGetServiceUnitTest
 			PlayerCode: "4ucmqplxb029",
 			WalletId: Guid.NewGuid(),
 			CurrencyCode: "CNY",
-			Amount: 0.0m);
+			Amount: amount);
 
 		var sut = new FundInGetService(
 			faceLogger,
@@ -56,8 +58,9 @@ public class FundInGetServiceUnitTest
 			playerCode: Arg.Any<string>());
 	}
 
-	[Fact]
-	public async Task ArgumentOutOfRangeException_ThrowIfNegativeOrZero_Negative_1_0m()
+	[Theory]
+	[InlineData(0.0099)]
+	public async Task ArgumentOutOfRangeException_ThrowIfLessThan_0_0099m(decimal amount)
 	{
 		var faceLogger = NullLogger<FundInGetService>.Instance;
 		var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
@@ -73,7 +76,7 @@ public class FundInGetServiceUnitTest
 			PlayerCode: "4ucmqplxb029",
 			WalletId: Guid.NewGuid(),
 			CurrencyCode: "CNY",
-			Amount: -1.0m);
+			Amount: amount);
 
 		var sut = new FundInGetService(
 			faceLogger,
@@ -101,8 +104,9 @@ public class FundInGetServiceUnitTest
 			playerCode: Arg.Any<string>());
 	}
 
-	[Fact]
-	public async Task ArgumentOutOfRangeException_ThrowIfLessThan_0_0099m()
+	[Theory]
+	[InlineData(10000000.01)]
+	public async Task ArgumentOutOfRangeException_ThrowIfGreaterThan_10000000_01m(decimal amount)
 	{
 		var faceLogger = NullLogger<FundInGetService>.Instance;
 		var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
@@ -118,52 +122,7 @@ public class FundInGetServiceUnitTest
 			PlayerCode: "4ucmqplxb029",
 			WalletId: Guid.NewGuid(),
 			CurrencyCode: "CNY",
-			Amount: 0.0099m);
-
-		var sut = new FundInGetService(
-			faceLogger,
-			fakeGameCurrencyClient,
-			fakeFundsDistributedLock,
-			fakeGameProvidersClient,
-			fakeCashServiceClient,
-			fakeService,
-			fakeGameProviderFundInService,
-			fakeGameProviderFundTransferTransactionRepository);
-
-		_ = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => sut.GetAsync(query).AsTask());
-
-		_ = fakeGameProviderFundTransferTransactionRepository
-			.Received(0)
-			.UpdateBySuccessAsync(
-			gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
-			transactionId: Arg.Any<Guid>(),
-			balance: Arg.Any<decimal>());
-
-		_ = fakeFundsDistributedLock
-			.Received(0)
-			.UnlockAsync(
-			gameProviderCode: Arg.Any<string>(),
-			playerCode: Arg.Any<string>());
-	}
-
-	[Fact]
-	public async Task ArgumentOutOfRangeException_ThrowIfGreaterThan_10000000_00m()
-	{
-		var faceLogger = NullLogger<FundInGetService>.Instance;
-		var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
-		var fakeFundsDistributedLock = Substitute.For<IFundsDistributedLock>();
-		var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
-		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
-		var fakeService = Substitute.For<IGetService<FundProcessingFundInAddQuery, FundProcessingResult>>();
-		var fakeGameProviderFundInService = Substitute.For<IGetService<GameProviderFundInQuery, GameProviderFundInResult>>();
-		var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
-
-		var query = new FundInQuery(
-			GameProviderCode: GameProviderType.Kaiyuan,
-			PlayerCode: "4ucmqplxb029",
-			WalletId: Guid.NewGuid(),
-			CurrencyCode: "CNY",
-			Amount: 10000000.00m);
+			Amount: amount);
 
 		var sut = new FundInGetService(
 			faceLogger,
@@ -232,14 +191,16 @@ public class FundInGetServiceUnitTest
 			Arg.Is(query.PlayerCode))
 			.Returns(ValueTask.FromResult(gameProviderBalance));
 
+		var gameProviderFundTransferTransactionId = Guid.NewGuid();
 		var fundProcessingResult = new FundProcessingResult(
 			BrandId: Guid.NewGuid(),
 			BrandCode: "GPI",
 			PlayerCode: query.PlayerCode,
 			Username: query.PlayerCode,
 			GameProviderId: Guid.NewGuid(),
-			GameProviderCode: GameProviderType.Kaiyuan,
+			GameProviderCode: query.GameProviderCode,
 			GameProviderFundTransferTransactionId: Guid.NewGuid(),
+			ExternalTransactionId: gameProviderFundTransferTransactionId.ToString("N"),
 			GameProviderTransactionId: "72412202405200607050004ucmqplxb029");
 		_ = fakeService.GetAsync(
 			query: Arg.Is(new FundProcessingFundInAddQuery(
@@ -255,10 +216,10 @@ public class FundInGetServiceUnitTest
 			Balance = 10
 		};
 		_ = fakeCashServiceClient.GameProviderFundInAsync(
-			 Arg.Is(query.WalletId),
-			 Arg.Is(query.Amount),
-			 Arg.Is($"【{query.GameProviderCode}】->【Default】"),
-			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId.ToString()))
+			Arg.Is(query.WalletId),
+			Arg.Is(query.Amount),
+			Arg.Is($"【{query.GameProviderCode}】->【Default】"),
+			Arg.Is(fundProcessingResult.ExternalTransactionId.ToString()))
 			.Returns(ValueTask.FromResult(transactionResponse));
 
 		var sut = new FundInGetService(
@@ -466,14 +427,16 @@ public class FundInGetServiceUnitTest
 			Arg.Is(query.PlayerCode))
 			.Returns(ValueTask.FromResult(gameProviderBalance));
 
+		var gameProviderFundTransferTransactionId = Guid.NewGuid();
 		var fundProcessingResult = new FundProcessingResult(
 			BrandId: Guid.NewGuid(),
 			BrandCode: "GPI",
 			PlayerCode: query.PlayerCode,
 			Username: query.PlayerCode,
 			GameProviderId: Guid.NewGuid(),
-			GameProviderCode: GameProviderType.Kaiyuan,
+			GameProviderCode: query.GameProviderCode,
 			GameProviderFundTransferTransactionId: Guid.NewGuid(),
+			ExternalTransactionId: gameProviderFundTransferTransactionId.ToString("N"),
 			GameProviderTransactionId: "72412202405200607050004ucmqplxb029");
 		_ = fakeService.GetAsync(
 			query: Arg.Is(new FundProcessingFundInAddQuery(
@@ -489,10 +452,10 @@ public class FundInGetServiceUnitTest
 			Balance = 1m
 		};
 		_ = fakeCashServiceClient.GameProviderFundInAsync(
-			 Arg.Is(query.WalletId),
-			 Arg.Is(query.Amount),
-			 Arg.Is($"【{query.GameProviderCode}】->【Default】"),
-			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId.ToString()))
+			Arg.Is(query.WalletId),
+			Arg.Is(query.Amount),
+			Arg.Is($"【{query.GameProviderCode}】->【Default】"),
+			Arg.Is(fundProcessingResult.ExternalTransactionId.ToString()))
 			.Returns(ValueTask.FromResult(transactionResponse));
 
 		var sut = new FundInGetService(
@@ -578,14 +541,16 @@ public class FundInGetServiceUnitTest
 			Arg.Is(query.PlayerCode))
 			.Returns(ValueTask.FromResult(gameProviderBalance));
 
+		var gameProviderFundTransferTransactionId = Guid.NewGuid();
 		var fundProcessingResult = new FundProcessingResult(
 			BrandId: Guid.NewGuid(),
 			BrandCode: "GPI",
 			PlayerCode: query.PlayerCode,
 			Username: query.PlayerCode,
 			GameProviderId: Guid.NewGuid(),
-			GameProviderCode: GameProviderType.Kaiyuan,
+			GameProviderCode: query.GameProviderCode,
 			GameProviderFundTransferTransactionId: Guid.NewGuid(),
+			ExternalTransactionId: gameProviderFundTransferTransactionId.ToString("N"),
 			GameProviderTransactionId: "72412202405200607050004ucmqplxb029");
 		_ = fakeService.GetAsync(
 			query: Arg.Is(new FundProcessingFundInAddQuery(
@@ -601,10 +566,10 @@ public class FundInGetServiceUnitTest
 			Balance = 1m
 		};
 		_ = fakeCashServiceClient.GameProviderFundInAsync(
-			 Arg.Is(query.WalletId),
-			 Arg.Is(query.Amount),
-			 Arg.Is($"【{query.GameProviderCode}】->【Default】"),
-			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId.ToString()))
+			Arg.Is(query.WalletId),
+			Arg.Is(query.Amount),
+			Arg.Is($"【{query.GameProviderCode}】->【Default】"),
+			Arg.Is(fundProcessingResult.ExternalTransactionId.ToString()))
 			.Returns(ValueTask.FromResult(transactionResponse));
 
 		var sut = new FundInGetService(
@@ -692,14 +657,16 @@ public class FundInGetServiceUnitTest
 			Arg.Is(query.PlayerCode))
 			.Returns(ValueTask.FromResult(gameProviderBalance));
 
+		var gameProviderFundTransferTransactionId = Guid.NewGuid();
 		var fundProcessingResult = new FundProcessingResult(
 			BrandId: Guid.NewGuid(),
 			BrandCode: "GPI",
 			PlayerCode: query.PlayerCode,
 			Username: query.PlayerCode,
 			GameProviderId: Guid.NewGuid(),
-			GameProviderCode: GameProviderType.Kaiyuan,
+			GameProviderCode: query.GameProviderCode,
 			GameProviderFundTransferTransactionId: Guid.NewGuid(),
+			ExternalTransactionId: gameProviderFundTransferTransactionId.ToString("N"),
 			GameProviderTransactionId: "72412202405200607050004ucmqplxb029");
 		_ = fakeService.GetAsync(
 			query: Arg.Is(new FundProcessingFundInAddQuery(
@@ -715,10 +682,10 @@ public class FundInGetServiceUnitTest
 			Balance = 1m
 		};
 		_ = fakeCashServiceClient.GameProviderFundInAsync(
-			 Arg.Is(query.WalletId),
-			 Arg.Is(query.Amount),
-			 Arg.Is($"【{query.GameProviderCode}】->【Default】"),
-			 Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId.ToString()))
+			Arg.Is(query.WalletId),
+			Arg.Is(query.Amount),
+			Arg.Is($"【{query.GameProviderCode}】->【Default】"),
+			Arg.Is(fundProcessingResult.ExternalTransactionId.ToString()))
 			.Returns(ValueTask.FromResult(transactionResponse));
 
 		var sut = new FundInGetService(

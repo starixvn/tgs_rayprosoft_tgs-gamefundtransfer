@@ -110,7 +110,7 @@ internal class FundInZeroGetService(
 					walletId: query.WalletId,
 					amount: convertPlatformBalanceResult.Balance,
 					description: $"【{query.GameProviderCode}】->【Default】",
-					externalId: fundProcessingResult.GameProviderFundTransferTransactionId.ToString(),
+					externalId: fundProcessingResult.ExternalTransactionId,
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
 

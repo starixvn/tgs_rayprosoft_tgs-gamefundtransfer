@@ -16,6 +16,8 @@ public record FundOutRequestViewModel
 	[Required]
 	public string CurrencyCode { get; init; } = default!;
 
-	[Range(typeof(decimal), "0", "79228162514264337593543950335")]
+	[Required]
+	[Range(minimum: 0, maximum: 10000000.00)]
+
 	public decimal Amount { get; init; }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text.Json.Nodes;
+using Microsoft.Extensions.Logging;
 using Tgs.GameFundTransfer.Common.Enums;
 
 using Tgs.SerialNumberGenerator;
@@ -31,22 +32,23 @@ internal class FundProcessingFundInAddGetService(
 			gameProviderCode: query.GameProviderCode,
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
+
+		var gameProviderTransactionId = gameProviderInfo.GameProviderCode switch
+		{
+			var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.Cards365Transfer => await gameProviderTransactionIdUtensil.GetCards365TxnIdAsync(false, cancellationToken).ConfigureAwait(false),
+			var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.FaChai => await gameProviderTransactionIdUtensil.GetFaChaiTxnIdAsync(false, cancellationToken).ConfigureAwait(false),
+			var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.GKXGaming => await gameProviderTransactionIdUtensil.GetGKXGamingTxnIdAsync(query.PlayerCode, cancellationToken).ConfigureAwait(false),
+			var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.Kaiyuan => await gameProviderTransactionIdUtensil.GetKaiyuanTxnIdAsync(query.PlayerCode, cancellationToken).ConfigureAwait(false),
+			var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.LEGaming => await gameProviderTransactionIdUtensil.GetLEGamingTxnIdAsync(query.PlayerCode, cancellationToken).ConfigureAwait(false),
+			var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.SBOTransfer => await gameProviderTransactionIdUtensil.GetSBOTxnIdAsync(false, cancellationToken).ConfigureAwait(false),
+			var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.TPhere => await gameProviderTransactionIdUtensil.GetTPhereTxnIdAsync(false, cancellationToken).ConfigureAwait(false),
+			var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.V8Poker => await gameProviderTransactionIdUtensil.GetV8PokerTxnIdAsync(query.PlayerCode, cancellationToken).ConfigureAwait(false),
+			var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.YeeBet => (await gameProviderTransactionIdUtensil.GetYeeBetTxnIdAsync(cancellationToken).ConfigureAwait(false)).ToString(),
+			_ => await gameProviderTransactionIdUtensil.GetTxnIdAsync(gameProviderFundTransferTransactionId, cancellationToken).ConfigureAwait(false),
+		};
+
 		try
 		{
-			var gameProviderTransactionId = gameProviderInfo.GameProviderCode switch
-			{
-				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.Cards365Transfer => await gameProviderTransactionIdUtensil.GetCards365TxnIdAsync(false, cancellationToken).ConfigureAwait(false),
-				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.FaChai => await gameProviderTransactionIdUtensil.GetFaChaiTxnIdAsync(false, cancellationToken).ConfigureAwait(false),
-				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.GKXGaming => await gameProviderTransactionIdUtensil.GetGKXGamingTxnIdAsync(query.PlayerCode, cancellationToken).ConfigureAwait(false),
-				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.Kaiyuan => await gameProviderTransactionIdUtensil.GetKaiyuanTxnIdAsync(query.PlayerCode, cancellationToken).ConfigureAwait(false),
-				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.LEGaming => await gameProviderTransactionIdUtensil.GetLEGamingTxnIdAsync(query.PlayerCode, cancellationToken).ConfigureAwait(false),
-				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.SBOTransfer => await gameProviderTransactionIdUtensil.GetSBOTxnIdAsync(false, cancellationToken).ConfigureAwait(false),
-				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.TPhere => await gameProviderTransactionIdUtensil.GetTPhereTxnIdAsync(false, cancellationToken).ConfigureAwait(false),
-				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.V8Poker => await gameProviderTransactionIdUtensil.GetV8PokerTxnIdAsync(query.PlayerCode, cancellationToken).ConfigureAwait(false),
-				var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.YeeBet => (await gameProviderTransactionIdUtensil.GetYeeBetTxnIdAsync(cancellationToken).ConfigureAwait(false)).ToString(),
-				_ => await gameProviderTransactionIdUtensil.GetTxnIdAsync(gameProviderFundTransferTransactionId, cancellationToken).ConfigureAwait(false),
-			};
-
 			await fundTransferTransactionRepository.AddProcessingAsync(
 				gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
 				gameProviderId: gameProviderInfo.GameProviderId,
@@ -60,6 +62,22 @@ internal class FundProcessingFundInAddGetService(
 				cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
+			logger.LogInformation("{info}",
+				new JsonObject
+				{
+					["LogOn"] = DateTime.Now.ToString("o"),
+					["BrandId"] = playerInfo.BrandId,
+					["BrandCode"] = playerInfo.BrandCode,
+					["PlayerCode"] = playerInfo.PlayerCode,
+					["Username"] = playerInfo.Username,
+					["GameProviderId"] = gameProviderInfo.GameProviderId,
+					["GameProviderCode"] = gameProviderInfo.GameProviderCode,
+					["GameProviderFundTransferTransactionId"] = gameProviderFundTransferTransactionId,
+					["ExternalTransactionId"] = gameProviderFundTransferTransactionId.ToString(),
+					["GameProviderTransactionId"] = gameProviderTransactionId,
+					["Mesaage"] = "This fund transaction order was created successfully.",
+				});
+
 			return new FundProcessingResult(
 				BrandId: playerInfo.BrandId,
 				BrandCode: playerInfo.BrandCode,
@@ -68,14 +86,26 @@ internal class FundProcessingFundInAddGetService(
 				GameProviderId: gameProviderInfo.GameProviderId,
 				GameProviderCode: gameProviderInfo.GameProviderCode,
 				GameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
+				ExternalTransactionId: gameProviderFundTransferTransactionId.ToString(),
 				GameProviderTransactionId: gameProviderTransactionId);
 		}
 		catch (Exception ex)
 		{
-			logger.LogInformation(ex, "LogOn:{logOn} QueryInfo:{query} Mesaage:The transfer of funds to create an order failed.",
-				DateTime.Now.ToString("o"),
-				query);
-
+			logger.LogError(ex, "{info}",
+				new JsonObject
+				{
+					["LogOn"] = DateTime.Now.ToString("o"),
+					["BrandId"] = playerInfo.BrandId,
+					["BrandCode"] = playerInfo.BrandCode,
+					["PlayerCode"] = playerInfo.PlayerCode,
+					["Username"] = playerInfo.Username,
+					["GameProviderId"] = gameProviderInfo.GameProviderId,
+					["GameProviderCode"] = gameProviderInfo.GameProviderCode,
+					["GameProviderFundTransferTransactionId"] = gameProviderFundTransferTransactionId,
+					["ExternalTransactionId"] = gameProviderFundTransferTransactionId.ToString(),
+					["GameProviderTransactionId"] = gameProviderTransactionId,
+					["Mesaage"] = "An exception occurred when creating this funds transaction order.",
+				});
 			throw;
 		}
 		finally

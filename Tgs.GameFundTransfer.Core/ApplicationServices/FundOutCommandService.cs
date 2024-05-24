@@ -19,7 +19,7 @@ internal class FundOutCommandService(
 	public async ValueTask ExecuteAsync(FundOutCommand query, CancellationToken cancellationToken = default)
 	{
 		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(query.Amount);
-		ArgumentOutOfRangeException.ThrowIfGreaterThan(query.Amount, 9999999.99m);
+		ArgumentOutOfRangeException.ThrowIfGreaterThan(query.Amount, 10000000.00m);
 
 		var exchangeRateFundResult = await gameCurrencyClient.ConvertGameProviderFundsAsync(
 			gameProviderCode: query.GameProviderCode,
@@ -77,7 +77,7 @@ internal class FundOutCommandService(
 				   walletId: query.WalletId,
 				   amount: query.Amount,
 				   description: $"【Default】->【{query.GameProviderCode}】",
-				   externalId: fundProcessingResult.GameProviderFundTransferTransactionId.ToString(),
+				   externalId: fundProcessingResult.ExternalTransactionId,
 				   cancellationToken: cancellationToken)
 				   .ConfigureAwait(false);
 
@@ -109,7 +109,7 @@ internal class FundOutCommandService(
 						walletId: query.WalletId,
 						amount: query.Amount,
 						description: transactionResponse.TransactionId.ToString(),
-						externalId: fundProcessingResult.GameProviderFundTransferTransactionId.ToString(),
+						externalId: fundProcessingResult.ExternalTransactionId,
 						cancellationToken: cancellationToken)
 						.ConfigureAwait(false);
 

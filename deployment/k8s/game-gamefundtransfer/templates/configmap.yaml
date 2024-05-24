@@ -10,6 +10,8 @@ data:
       "Logging": {
         "LogLevel": {
           "Default": "Warning",
+          "Tgs.GameFundTransfer.Core.ApplicationServices.FundProcessingFundInAddGetService": "Information",
+          "Tgs.GameFundTransfer.Core.ApplicationServices.FundProcessingFundOutAddGetService": "Information",
           "Tgs.GameFundTransfer.Core.ApplicationServices.GameProviderFundInGetService": "Information",
           "Tgs.GameFundTransfer.Core.ApplicationServices.GameProviderFundOutGetService": "Information"
         }
