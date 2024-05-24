@@ -35,7 +35,7 @@ internal class GameProviderFundInGetService(
 			["GameProviderTransactionId"] = response.GameProviderTransactionId,
 			["ExternalGameProviderTransactionId"] = response.ExternalGameProviderTransactionId,
 			["Mesaage"] = "This game provider funds transfer was successful.",
-		});
+		}.ToJsonString());
 
 		return new GameProviderFundInResult(
 			response.OrderId,
