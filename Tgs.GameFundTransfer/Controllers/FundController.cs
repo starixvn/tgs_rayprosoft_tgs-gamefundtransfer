@@ -21,13 +21,13 @@ public class FundController : ControllerBase
 	[HttpPost(template: "in", Name = "FundIn")]
 	public ValueTask FundInAsync(
 		[FromServices] ICommandService<FundInCommand> service,
-		FundRequestViewModel model)
+		FundInRequestViewModel source)
 		=> service.ExecuteAsync(new FundInCommand(
-			GameProviderCode: model.GameProviderCode,
-			PlayerCode: model.PlayerCode,
-			WalletId: model.WalletId,
-			CurrencyCode: model.CurrencyCode,
-			Amount: model.Amount));
+			GameProviderCode: source.GameProviderCode,
+			PlayerCode: source.PlayerCode,
+			WalletId: source.WalletId,
+			CurrencyCode: source.CurrencyCode,
+			Amount: source.Amount));
 
 	/// <summary>
 	/// Funds the in result asynchronous.
@@ -39,14 +39,14 @@ public class FundController : ControllerBase
 	[HttpPost(template: "in-result", Name = "FundInResult")]
 	public async ValueTask<FundResultViewModel> FundInResultAsync(
 		[FromServices] IGetService<FundInQuery, FundResult> service,
-		FundRequestViewModel model)
+		FundInRequestViewModel source)
 	{
 		var query = new FundInQuery(
-			GameProviderCode: model.GameProviderCode,
-			PlayerCode: model.PlayerCode,
-			WalletId: model.WalletId,
-			CurrencyCode: model.CurrencyCode,
-			Amount: model.Amount);
+			GameProviderCode: source.GameProviderCode,
+			PlayerCode: source.PlayerCode,
+			WalletId: source.WalletId,
+			CurrencyCode: source.CurrencyCode,
+			Amount: source.Amount);
 		var result = await service
 			 .GetAsync(
 				 query: query,
@@ -70,13 +70,13 @@ public class FundController : ControllerBase
 	[HttpPost(template: "in-result-zero", Name = "FundInZeroResult")]
 	public async ValueTask<FundResultViewModel> FundInZeroResultAsync(
 		[FromServices] IGetService<FundInZeroQuery, FundResult> service,
-		FundZeroRequestViewModel model)
+		FundZeroRequestViewModel source)
 	{
 		var query = new FundInZeroQuery(
-			GameProviderCode: model.GameProviderCode,
-			PlayerCode: model.PlayerCode,
-			WalletId: model.WalletId,
-			CurrencyCode: model.CurrencyCode);
+			GameProviderCode: source.GameProviderCode,
+			PlayerCode: source.PlayerCode,
+			WalletId: source.WalletId,
+			CurrencyCode: source.CurrencyCode);
 		var result = await service
 			 .GetAsync(
 				 query: query,
@@ -101,13 +101,13 @@ public class FundController : ControllerBase
 	[HttpPost(template: "out", Name = "FundOut")]
 	public ValueTask FundOutAsync(
 		[FromServices] ICommandService<FundOutCommand> service,
-		FundOutRequestViewModel model)
+		FundOutRequestViewModel source)
 		=> service.ExecuteAsync(new FundOutCommand(
-			GameProviderCode: model.GameProviderCode,
-			PlayerCode: model.PlayerCode,
-			WalletId: model.WalletId,
-			CurrencyCode: model.CurrencyCode,
-			Amount: model.Amount));
+			GameProviderCode: source.GameProviderCode,
+			PlayerCode: source.PlayerCode,
+			WalletId: source.WalletId,
+			CurrencyCode: source.CurrencyCode,
+			Amount: source.Amount));
 
 	/// <summary>
 	/// Funds the balance asynchronous.

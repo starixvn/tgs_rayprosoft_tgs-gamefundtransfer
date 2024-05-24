@@ -7,4 +7,5 @@ public record FundProcessingResult(
 	Guid GameProviderId,
 	string GameProviderCode,
 	Guid GameProviderFundTransferTransactionId,
+	string ExternalTransactionId,
 	string GameProviderTransactionId);

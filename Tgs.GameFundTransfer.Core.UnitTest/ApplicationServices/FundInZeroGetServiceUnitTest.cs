@@ -57,6 +57,7 @@ public class FundInZeroGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(convertPlatformBalanceResult);
 
+		var gameProviderFundTransferTransactionId = Guid.NewGuid();
 		var fundProcessingResult = new FundProcessingResult(
 			BrandId: Guid.NewGuid(),
 			BrandCode: "GPI",
@@ -65,6 +66,7 @@ public class FundInZeroGetServiceUnitTest
 			GameProviderId: Guid.NewGuid(),
 			GameProviderCode: GameProviderType.Kaiyuan,
 			GameProviderFundTransferTransactionId: Guid.NewGuid(),
+			ExternalTransactionId: gameProviderFundTransferTransactionId.ToString("N"),
 			GameProviderTransactionId: "72412202405200607050004ucmqplxb029");
 		_ = fakeService.GetAsync(
 			query: Arg.Is(new FundProcessingFundInAddQuery(
@@ -83,7 +85,7 @@ public class FundInZeroGetServiceUnitTest
 			walletId: Arg.Is(query.WalletId),
 			amount: Arg.Is(convertPlatformBalanceResult.Balance),
 			description: Arg.Is($"【{query.GameProviderCode}】->【Default】"),
-			externalId: Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId.ToString()),
+			externalId: Arg.Is(fundProcessingResult.ExternalTransactionId.ToString()),
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(ValueTask.FromResult(transactionResponse));
 
@@ -220,6 +222,7 @@ public class FundInZeroGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(convertPlatformBalanceResult);
 
+		var gameProviderFundTransferTransactionId = Guid.NewGuid();
 		var fundProcessingResult = new FundProcessingResult(
 			BrandId: Guid.NewGuid(),
 			BrandCode: "GPI",
@@ -228,6 +231,7 @@ public class FundInZeroGetServiceUnitTest
 			GameProviderId: Guid.NewGuid(),
 			GameProviderCode: GameProviderType.Kaiyuan,
 			GameProviderFundTransferTransactionId: Guid.NewGuid(),
+			ExternalTransactionId: gameProviderFundTransferTransactionId.ToString("N"),
 			GameProviderTransactionId: "72412202405200607050004ucmqplxb029");
 		_ = fakeService.GetAsync(
 			query: Arg.Is(new FundProcessingFundInAddQuery(
@@ -246,7 +250,7 @@ public class FundInZeroGetServiceUnitTest
 			walletId: Arg.Is(query.WalletId),
 			amount: Arg.Is(convertPlatformBalanceResult.Balance),
 			description: Arg.Is($"【{query.GameProviderCode}】->【Default】"),
-			externalId: Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId.ToString()),
+			externalId: Arg.Is(fundProcessingResult.ExternalTransactionId.ToString()),
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(ValueTask.FromResult(transactionResponse));
 
@@ -339,6 +343,7 @@ public class FundInZeroGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(convertPlatformBalanceResult);
 
+		var gameProviderFundTransferTransactionId = Guid.NewGuid();
 		var fundProcessingResult = new FundProcessingResult(
 			BrandId: Guid.NewGuid(),
 			BrandCode: "GPI",
@@ -347,6 +352,7 @@ public class FundInZeroGetServiceUnitTest
 			GameProviderId: Guid.NewGuid(),
 			GameProviderCode: GameProviderType.Kaiyuan,
 			GameProviderFundTransferTransactionId: Guid.NewGuid(),
+			ExternalTransactionId: gameProviderFundTransferTransactionId.ToString("N"),
 			GameProviderTransactionId: "72412202405200607050004ucmqplxb029");
 		_ = fakeService.GetAsync(
 			query: Arg.Is(new FundProcessingFundInAddQuery(
@@ -362,10 +368,10 @@ public class FundInZeroGetServiceUnitTest
 			Balance = 1000
 		};
 		_ = fakeCashServiceClient.GameProviderFundInAsync(
-			Arg.Is(query.WalletId),
-			Arg.Is(convertPlatformBalanceResult.Balance),
-			Arg.Is($"【{query.GameProviderCode}】->【Default】"),
-			Arg.Is(fundProcessingResult.GameProviderFundTransferTransactionId.ToString()),
+			walletId: Arg.Is(query.WalletId),
+			amount: Arg.Is(convertPlatformBalanceResult.Balance),
+			description: Arg.Is($"【{query.GameProviderCode}】->【Default】"),
+			externalId: Arg.Is(fundProcessingResult.ExternalTransactionId.ToString()),
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(ValueTask.FromResult(transactionResponse));
 

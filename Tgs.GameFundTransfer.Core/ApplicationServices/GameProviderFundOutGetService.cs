@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text.Json.Nodes;
+using Microsoft.Extensions.Logging;
 using Tgs.GameProviders.Client;
 using Tgs.ServiceUtility;
 
@@ -23,13 +24,17 @@ internal class GameProviderFundOutGetService(
 		ArgumentException.ThrowIfNullOrWhiteSpace(response.OrderId);
 		ArgumentException.ThrowIfNullOrWhiteSpace(response.GameProviderTransactionId);
 
-		logger.LogInformation("LogOn:{logOn} GameProviderCode:{gameProviderCode} PlayerCode:{playerCode} OrderId:{orderId} GameProviderTransactionId:{gameProviderTransactionId} ExternalGameProviderTransactionId:{externalGameProviderTransactionId} Message:This game provider funds transfer was successful.",
-			DateTime.Now.ToString("o"),
-			query.GameProviderCode,
-			query.PlayerCode,
-			response.OrderId,
-			response.GameProviderTransactionId,
-			response.ExternalGameProviderTransactionId);
+		logger.LogInformation("{info}",
+		new JsonObject
+		{
+			["LogOn"] = DateTime.Now.ToString("o"),
+			["GameProviderCode"] = query.GameProviderCode,
+			["PlayerCode"] = query.PlayerCode,
+			["OrderId"] = response.OrderId.ToString(),
+			["GameProviderTransactionId"] = response.GameProviderTransactionId,
+			["ExternalGameProviderTransactionId"] = response.ExternalGameProviderTransactionId,
+			["Mesaage"] = "This game provider funds transfer was successful.",
+		});
 
 		return new GameProviderFundOutResult(
 			response.OrderId,
