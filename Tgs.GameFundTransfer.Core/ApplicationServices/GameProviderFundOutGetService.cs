@@ -13,16 +13,13 @@ internal class GameProviderFundOutGetService(
 	{
 		var response = await gameProvidersClient.PlayerFundOutAsync(
 			gameProviderCode: query.GameProviderCode,
-			brandCode: query.BrandCode,
 			playerCode: query.PlayerCode,
-			currencyCode: query.CurrencyCode,
 			orderId: query.GameProviderTransactionId,
 			amount: query.Amount,
 			cancellationToken: cancellationToken)
 		.ConfigureAwait(false);
 
 		ArgumentException.ThrowIfNullOrWhiteSpace(response.OrderId);
-		ArgumentException.ThrowIfNullOrWhiteSpace(response.GameProviderTransactionId);
 
 		logger.LogInformation("{info}",
 		new JsonObject
@@ -31,13 +28,12 @@ internal class GameProviderFundOutGetService(
 			["GameProviderCode"] = query.GameProviderCode,
 			["PlayerCode"] = query.PlayerCode,
 			["OrderId"] = response.OrderId.ToString(),
-			["GameProviderTransactionId"] = response.GameProviderTransactionId,
-			["ExternalGameProviderTransactionId"] = response.ExternalGameProviderTransactionId,
+			["ExternalOrderId"] = response.ExternalOrderId,
 			["Mesaage"] = "This game provider funds transfer was successful.",
 		}.ToJsonString());
 
 		return new GameProviderFundOutResult(
 			response.OrderId,
-			response.GameProviderTransactionId);
+			response.ExternalOrderId);
 	}
 }

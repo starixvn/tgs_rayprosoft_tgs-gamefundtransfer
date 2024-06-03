@@ -145,9 +145,7 @@ internal class FundOutCommandService(
 				_ = await gameProviderFundOutService.GetAsync(
 					query: new GameProviderFundOutQuery(
 						GameProviderCode: fundProcessingResult.GameProviderCode,
-						BrandCode: fundProcessingResult.BrandCode,
 						PlayerCode: fundProcessingResult.PlayerCode,
-						CurrencyCode: query.CurrencyCode,
 						GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
 						Amount: gameProviderAmount),
 					cancellationToken: cancellationToken)

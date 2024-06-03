@@ -10,7 +10,6 @@ public class GameFundTransferGrpcService(
 	ILogger<GameFundTransferGrpcService> logger,
 	IGetService<FundInQuery, FundResult> fundInResultService,
 	IGetService<FundInZeroQuery, FundResult> fundInZeroService,
-	ICommandService<FundInCommand> fundInService,
 	ICommandService<FundOutCommand> fundOutService,
 	IGetService<FundBalanceQuery, FundBalanceResult> fundBalanceService) : GameFundTransferService.GameFundTransferServiceBase
 {
@@ -40,26 +39,6 @@ public class GameFundTransferGrpcService(
 			Balance = result.Balance,
 			FreeBalance = result.FreeBalance,
 			OutstandingBalance = result.OutstandingBalance,
-		};
-	}
-
-	public override async Task<GameFundTransferReply> FundIn(GameFundTransferFundRequest request, ServerCallContext context)
-	{
-		var command = new FundInCommand(
-			GameProviderCode: request.GameProviderCode,
-			PlayerCode: request.PlayerCode,
-			WalletId: request.WalletId,
-			CurrencyCode: request.CurrencyCode,
-			Amount: request.Amount);
-
-		await fundInService.ExecuteAsync(
-			command: command,
-			cancellationToken: context.CancellationToken)
-			.ConfigureAwait(false);
-
-		return new GameFundTransferReply()
-		{
-			State = true
 		};
 	}
 

@@ -60,7 +60,6 @@ public class FundOutCommandServiceUnitTest
 
 	[Theory]
 	[InlineData(10000000.01)]
-
 	public async Task ArgumentOutOfRangeException_ThrowIfGreaterThan(decimal amount)
 	{
 		var faceLogger = NullLogger<FundOutCommandService>.Instance;
@@ -255,9 +254,7 @@ public class FundOutCommandServiceUnitTest
 			.GetAsync(
 			query: new GameProviderFundOutQuery(
 				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: query.CurrencyCode,
 				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
 				Amount: exchangeRateFundResult.Amount),
 			cancellationToken: Arg.Any<CancellationToken>());
@@ -762,9 +759,7 @@ public class FundOutCommandServiceUnitTest
 			.GetAsync(
 			query: new GameProviderFundOutQuery(
 				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: query.CurrencyCode,
 				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
 				Amount: exchangeRateFundResult.Amount),
 			cancellationToken: Arg.Any<CancellationToken>());
@@ -879,9 +874,7 @@ public class FundOutCommandServiceUnitTest
 			.GetAsync(
 			query: new GameProviderFundOutQuery(
 				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: query.CurrencyCode,
 				GameProviderTransactionId: fundProcessingResult.GameProviderTransactionId,
 				Amount: exchangeRateFundResult.Amount),
 			cancellationToken: Arg.Any<CancellationToken>());

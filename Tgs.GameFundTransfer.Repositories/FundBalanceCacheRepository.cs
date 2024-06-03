@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using Tgs.GameFundTransfer.Core;
-using Tgs.GameFundTransfer.Core.ApplicationServices;
 using Tgs.GameFundTransfer.Core.Models;
 
 namespace Tgs.GameFundTransfer.Repositories;
