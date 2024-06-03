@@ -12,28 +12,10 @@ namespace Tgs.GameFundTransfer.Controllers;
 public class FundController : ControllerBase
 {
 	/// <summary>
-	/// Funds the in asynchronous.
-	/// </summary>
-	/// <param name="service">The service.</param>
-	/// <param name="model">The model.</param>
-	/// <returns></returns>
-	[HiddenApi]
-	[HttpPost(template: "in", Name = "FundIn")]
-	public ValueTask FundInAsync(
-		[FromServices] ICommandService<FundInCommand> service,
-		FundInRequestViewModel source)
-		=> service.ExecuteAsync(new FundInCommand(
-			GameProviderCode: source.GameProviderCode,
-			PlayerCode: source.PlayerCode,
-			WalletId: source.WalletId,
-			CurrencyCode: source.CurrencyCode,
-			Amount: source.Amount));
-
-	/// <summary>
 	/// Funds the in result asynchronous.
 	/// </summary>
 	/// <param name="service">The service.</param>
-	/// <param name="model">The model.</param>
+	/// <param name="source">The source.</param>
 	/// <returns></returns>
 	[HiddenApi]
 	[HttpPost(template: "in-result", Name = "FundInResult")]
@@ -65,7 +47,7 @@ public class FundController : ControllerBase
 	/// Funds the in zero result asynchronous.
 	/// </summary>
 	/// <param name="service">The service.</param>
-	/// <param name="model">The model.</param>
+	/// <param name="source">The source.</param>
 	/// <returns></returns>
 	[HttpPost(template: "in-result-zero", Name = "FundInZeroResult")]
 	public async ValueTask<FundResultViewModel> FundInZeroResultAsync(
@@ -95,7 +77,7 @@ public class FundController : ControllerBase
 	/// Funds the out asynchronous.
 	/// </summary>
 	/// <param name="service">The service.</param>
-	/// <param name="model">The model.</param>
+	/// <param name="source">The source.</param>
 	/// <returns></returns>
 	[HiddenApi]
 	[HttpPost(template: "out", Name = "FundOut")]

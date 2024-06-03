@@ -33,34 +33,11 @@ internal class GameFundTransferClient(GameFundTransferService.GameFundTransferSe
 			.ConfigureAwait(false);
 	}
 
-	public async ValueTask<bool> FundInAsync(string gameProviderCode, string playerCode, Guid walletId, string currencyCode, decimal amount, CancellationToken cancellationToken = default)
-	{
-		var request = new GameFundTransferFundRequest
-		{
-			GameProviderId = Guid.Empty,
-			GameProviderCode = gameProviderCode,
-			BrandCode = string.Empty,
-			PlayerCode = playerCode,
-			WalletId = walletId,
-			CurrencyCode = currencyCode,
-			Amount = amount,
-		};
-
-		var reply = await client.FundInAsync(
-			request: request,
-			cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
-
-		return reply.State;
-	}
-
 	public async ValueTask<GameFundTransferResultReply> FundInResultAsync(string gameProviderCode, string playerCode, Guid walletId, string currencyCode, decimal amount, CancellationToken cancellationToken = default)
 	{
 		var request = new GameFundTransferFundRequest
 		{
-			GameProviderId = Guid.Empty,
 			GameProviderCode = gameProviderCode,
-			BrandCode = string.Empty,
 			PlayerCode = playerCode,
 			WalletId = walletId,
 			CurrencyCode = currencyCode,
@@ -77,9 +54,7 @@ internal class GameFundTransferClient(GameFundTransferService.GameFundTransferSe
 	{
 		var request = new GameFundTransferFundZeroRequest
 		{
-			GameProviderId = Guid.Empty,
 			GameProviderCode = gameProviderCode,
-			BrandCode = string.Empty,
 			PlayerCode = playerCode,
 			WalletId = walletId,
 			CurrencyCode = currencyCode,
@@ -95,9 +70,7 @@ internal class GameFundTransferClient(GameFundTransferService.GameFundTransferSe
 	{
 		var request = new GameFundTransferFundRequest
 		{
-			GameProviderId = Guid.Empty,
 			GameProviderCode = gameProviderCode,
-			BrandCode = string.Empty,
 			PlayerCode = playerCode,
 			WalletId = walletId,
 			CurrencyCode = currencyCode,

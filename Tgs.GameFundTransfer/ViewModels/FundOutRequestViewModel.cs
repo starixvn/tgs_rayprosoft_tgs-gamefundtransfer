@@ -18,6 +18,5 @@ public record FundOutRequestViewModel
 
 	[Required]
 	[Range(minimum: 0, maximum: 10000000.00)]
-
 	public decimal Amount { get; init; }
 }

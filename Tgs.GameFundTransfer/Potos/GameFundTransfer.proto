@@ -20,22 +20,18 @@ service GameFundTransferService {
 
 // The request message containing the user's name.
 message GameFundTransferFundRequest {
-    phoenix.protobuf.GuidValue game_provider_id = 1;
-    string game_provider_code = 2;
-    string brand_code = 3;
-    string player_code = 4;
-    phoenix.protobuf.GuidValue wallet_id = 5;
-    string currency_code = 6;
-    phoenix.protobuf.DecimalValue amount = 7;
+    string game_provider_code = 1;
+    string player_code = 2;
+    phoenix.protobuf.GuidValue wallet_id = 3;
+    string currency_code = 4;
+    phoenix.protobuf.DecimalValue amount = 5;
 }
 
 message GameFundTransferFundZeroRequest {
-    phoenix.protobuf.GuidValue game_provider_id = 1;
-    string game_provider_code = 2;
-    string brand_code = 3;
-    string player_code = 4;
-    phoenix.protobuf.GuidValue wallet_id = 5;
-    string currency_code = 6;
+    string game_provider_code = 1;
+    string player_code = 2;
+    phoenix.protobuf.GuidValue wallet_id = 3;
+    string currency_code = 4;
 }
 
 message FundBalanceRequest {
