@@ -14,7 +14,7 @@
     <PackageReference Include="Tgs.CashService.Client" Version="0.2.9" />
     <PackageReference Include="Tgs.GameCurrency.Client" Version="1.0.2" />
     <PackageReference Include="Tgs.GameInterface.SabaService.Client" Version="1.0.0" />
-    <PackageReference Include="TGS.GameProviders.Client" Version="1.0.4" />
+    <PackageReference Include="TGS.GameProviders.Client" Version="1.0.5" />
     <PackageReference Include="Tgs.MessageQueue.Nats.Serializers" Version="0.0.2" />
     <PackageReference Include="Tgs.SerialNumberGenerator" Version="1.0.1" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.2.0" />
