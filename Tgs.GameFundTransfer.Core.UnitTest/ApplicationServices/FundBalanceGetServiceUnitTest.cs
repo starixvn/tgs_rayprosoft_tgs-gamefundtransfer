@@ -73,6 +73,64 @@ public class FundBalanceGetServiceUnitTest
 	}
 
 	[Fact]
+	public async Task Balance_Is_0()
+	{
+		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+		var fakeFundBalanceRepository = Substitute.For<IFundBalanceRepository>();
+		var fakeMessageSender = Substitute.For<IMessageSender>();
+		var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
+
+		var query = new FundBalanceQuery(
+			 GameProviderCode: GameProviderType.Kaiyuan,
+			 PlayerCode: "4ucmqplxb029");
+
+		var playerInfo = new Models.PlayerInfo(
+			BrandId: Guid.NewGuid(),
+			BrandCode: "GPI",
+			PlayerCode: query.PlayerCode,
+			Username: query.PlayerCode,
+			WalletId: Guid.NewGuid(),
+			CurrencyCode: "CNY");
+		_ = fakePlayerRepository.GetAsync(
+			playerCode: Arg.Is(query.PlayerCode),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(playerInfo);
+
+		var fundBalanceInfo = new Models.FundBalanceInfo(
+			Balance: 0.0m,
+			FreeBalance: 0.0m,
+			OutstandingBalance: 0.0m);
+		_ = fakeFundBalanceRepository.GetAsync(
+			gameProviderCode: Arg.Is(query.GameProviderCode),
+			playerCode: Arg.Is(query.PlayerCode),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(fundBalanceInfo);
+
+		var sut = new FundBalanceGetService(
+			fakePlayerRepository,
+			fakeFundBalanceRepository,
+			fakeMessageSender,
+			fakeGameCurrencyClient);
+
+		var actual = await sut.GetAsync(query);
+
+		Assert.NotNull(actual);
+		Assert.Equal(0.0m, actual.Balance);
+		Assert.Equal(0.0m, actual.FreeBalance);
+		Assert.Equal(0.0m, actual.OutstandingBalance);
+
+		_ = fakeGameCurrencyClient
+			.Received(0)
+			.ConvertPlatformBalanceAsync(
+			gameProviderCode: Arg.Is(query.GameProviderCode),
+			currencyCode: Arg.Is(playerInfo.CurrencyCode),
+			balance: Arg.Is(fundBalanceInfo.Balance),
+			freeBalance: Arg.Is(fundBalanceInfo.FreeBalance),
+			outstandingBalance: Arg.Is(fundBalanceInfo.OutstandingBalance),
+			cancellationToken: Arg.Any<CancellationToken>());
+	}
+
+	[Fact]
 	public async Task Platform_Currency_IDR_1000_Amount_Game_Provider_IDR()
 	{
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();

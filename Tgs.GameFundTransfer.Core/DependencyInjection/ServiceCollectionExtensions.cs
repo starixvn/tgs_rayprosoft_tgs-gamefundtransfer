@@ -24,5 +24,6 @@ public static class ServiceCollectionExtensions
 		.AddGameInterfaceSabaServiceClient(gameInterfaceSabaClientOptions)
 		.AddSingleton(TimeProvider.System)
 		.AddSingleton<ISnowflakeWorkUtensil, SnowflakeWorkUtensil>()
-		.AddSingleton<IGameProviderTransactionIdUtensil, GameProviderTransactionIdUtensil>();
+		.AddSingleton<IGameProviderTransactionIdUtensil, GameProviderTransactionIdUtensil>()
+		.AddSingleton<IFundBalanceCacheDispatcher, FundBalanceCacheDispatcher>();
 }
