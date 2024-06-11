@@ -24,14 +24,6 @@ internal class FundBalanceGetService(
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
-		if (fundBalanceInfo.Balance == 0)
-		{
-			return new FundBalanceResult(
-				Balance: 0.0m,
-				FreeBalance: 0.0m,
-				OutstandingBalance: 0.0m);
-		}
-
 		var gameFundTransferCacheRequest = new Common.Protos.GameFundTransferCacheRequest
 		{
 			Action = Common.Protos.Action.Cache,
@@ -45,6 +37,14 @@ internal class FundBalanceGetService(
 			subject: Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest,
 			data: gameFundTransferCacheRequest,
 			cancellationToken: cancellationToken).ConfigureAwait(false);
+
+		if (fundBalanceInfo.Balance == 0)
+		{
+			return new FundBalanceResult(
+				Balance: 0.0m,
+				FreeBalance: 0.0m,
+				OutstandingBalance: 0.0m);
+		}
 
 		var result = await gameCurrencyClient.ConvertPlatformBalanceAsync(
 			query.GameProviderCode,

@@ -1,12 +1,13 @@
-﻿using Tgs.GameFundTransfer.Core.ApplicationServices;
-using Tgs.ServiceUtility;
+﻿using System.Text.Json;
+using Tgs.GameFundTransfer.Core;
+using Tgs.GameFundTransfer.Core.ApplicationServices;
 using Valhalla.MessageQueue;
 
 namespace Tgs.GameFundTransfer.Messages;
 
 public class GameFundTransferBalanceCacheMessageHandler(
 	ILogger<GameFundTransferBalanceCacheMessageHandler> logger,
-	ICommandService<FundBalanceCacheCommand> service) : IMessageHandler<Common.Protos.GameFundTransferCacheRequest>
+	IFundBalanceCacheDispatcher dispatcher) : IMessageHandler<Common.Protos.GameFundTransferCacheRequest>
 {
 	public ValueTask HandleAsync(string subject, Common.Protos.GameFundTransferCacheRequest data, IEnumerable<MessageHeaderValue>? headerValues, CancellationToken cancellationToken = default)
 	{
@@ -15,14 +16,31 @@ public class GameFundTransferBalanceCacheMessageHandler(
 			subject,
 			data);
 
-		return service.ExecuteAsync(
+		logger.LogInformation("{logInformation}",
+			JsonSerializer.Serialize(new
+			{
+				LogOn = DateTime.Now.ToString("u"),
+				Subject = subject,
+				Data = new
+				{
+					data.Action,
+					data.GameProviderCode,
+					data.PlayerCode,
+					Balance = data.Balance.ToDecimal().GetValueOrDefault(0.0m),
+					FreeBalance = data.FreeBalance.ToDecimal().GetValueOrDefault(0.0m),
+					OutstandingBalance = data.OutstandingBalance.ToDecimal().GetValueOrDefault(0.0m)
+				},
+				Message = "This receive message handler."
+			}));
+
+		return dispatcher.PushCommandAsync(
 			command: new FundBalanceCacheCommand(
 				Action: data.Action,
 				GameProviderCode: data.GameProviderCode,
 				PlayerCode: data.PlayerCode,
-				Balance: data.Balance,
-				FreeBalance: data.FreeBalance,
-				OutstandingBalance: data.OutstandingBalance),
+				Balance: data.Balance.ToDecimal().GetValueOrDefault(0.0m),
+				FreeBalance: data.FreeBalance.ToDecimal().GetValueOrDefault(0.0m),
+				OutstandingBalance: data.OutstandingBalance.ToDecimal().GetValueOrDefault(0.0m)),
 			cancellationToken: cancellationToken);
 	}
 }
