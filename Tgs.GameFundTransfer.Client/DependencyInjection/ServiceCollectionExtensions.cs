@@ -1,9 +1,10 @@
 ﻿using Grpc.Core;
 using Grpc.Net.Client.Balancer;
 using Grpc.Net.Client.Configuration;
+using Grpc.Net.ClientFactory;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Tgs.GameFundTransfer.Client;
-using Tgs.GameFundTransfer.Protos;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -18,7 +19,7 @@ public static class ServiceCollectionExtensions
 			.AddOptions<GameFundTransferClientOptions>()
 			.Configure(configure)
 			.Services
-			.AddGrpcClient<GameFundTransferService.GameFundTransferServiceClient>((sp, configureClient) =>
+			.AddGrpcClient<Tgs.GameFundTransfer.Protos.GameFundTransfer.GameFundTransferClient>((sp, configureClient) =>
 			{
 				var options = sp.GetRequiredService<IOptions<GameFundTransferClientOptions>>().Value;
 				isDns = options.BaseUrl.Scheme.Equals("dns", StringComparison.OrdinalIgnoreCase);
@@ -61,12 +62,15 @@ public static class ServiceCollectionExtensions
 					}
 				};
 				configureChannel.HttpHandler = handler;
-				configureChannel.ServiceConfig = new ServiceConfig { MethodConfigs = { defaultMethodConfig } };
+				configureChannel.ServiceConfig = new ServiceConfig
+				{
+					MethodConfigs = { defaultMethodConfig }
+				};
 				configureChannel.Credentials = isDns
 				? ChannelCredentials.Insecure
 				: null;
 			})
-			.AddInterceptor<LoggingInterceptor>()
+			.AddInterceptor<LoggingInterceptor>(InterceptorScope.Client)
 			.Services
 			.AddSingleton<DiagnosticsInterceptorOptions>()
 			.AddSingleton<LoggingInterceptor>()
@@ -75,7 +79,7 @@ public static class ServiceCollectionExtensions
 		if (isDns)
 		{
 			//負載平衡時，效能很重要。 藉由快取位址，解析位址的延遲會從 gRPC 呼叫中排除。 進行第一個 gRPC 呼叫時，將會叫用解析程式，而後續的呼叫會使用快取。
-			_ = services.AddSingleton<ResolverFactory>(sp => new DnsResolverFactory(refreshInterval: TimeSpan.FromSeconds(30)));
+			services.TryAddSingleton<ResolverFactory>(sp => new DnsResolverFactory(refreshInterval: TimeSpan.FromSeconds(30)));
 		}
 
 		return services;

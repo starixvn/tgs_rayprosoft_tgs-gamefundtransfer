@@ -8,6 +8,8 @@ internal class RedisConnectionManager : IDisposable
 	private readonly ConnectionMultiplexer _connectionMultiplexer;
 	private bool _disposedValue;
 
+	public IConnectionMultiplexer Connection { get; }
+
 	public IDatabase Database { get; }
 
 	public RedisConnectionManager(IOptions<RedisOptions> optionsAccessor)
@@ -16,9 +18,12 @@ internal class RedisConnectionManager : IDisposable
 
 		var options = optionsAccessor.Value;
 
-		_connectionMultiplexer = ConnectionMultiplexer.Connect(options.ConnectionString);
+		var connectionOptions = ConfigurationOptions.Parse(options.ConnectionString);
 
+		_connectionMultiplexer = ConnectionMultiplexer.Connect(connectionOptions);
+		Connection = _connectionMultiplexer;
 		Database = _connectionMultiplexer.GetDatabase();
+
 	}
 
 	public void Dispose()
@@ -37,7 +42,8 @@ internal class RedisConnectionManager : IDisposable
 				_connectionMultiplexer.Close();
 				_connectionMultiplexer.Dispose();
 			}
-
+			// TODO: free unmanaged resources (unmanaged objects) and override finalizer
+			// TODO: set large fields to null
 			_disposedValue = true;
 		}
 	}

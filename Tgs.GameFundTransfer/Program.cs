@@ -133,6 +133,7 @@ builder.Services
 			.AddEnvironmentVariableDetector())
 		.AddSource("Tgs.*")
 		.AddSource("TGS.*")
+		.AddSource("Valhalla.*")
 		.AddAspNetCoreInstrumentation(options => options.Filter =
 			httpContext => !httpContext.Request.Path.HasValue
 			|| !httpContext.Request.Path.StartsWithSegments("/swagger")
@@ -161,8 +162,8 @@ builder.Services.AddHealthChecks();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-app.UseSwagger();
-app.UseSwaggerUI();
+_ = app.UseSwagger();
+_ = app.UseSwaggerUI();
 
 _ = app.UseAuthorization();
 
