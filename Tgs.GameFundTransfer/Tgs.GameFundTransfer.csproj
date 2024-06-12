@@ -6,16 +6,13 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UserSecretsId>bdc85ead-1f9e-4194-8843-d5fd265b491d</UserSecretsId>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<ServerGarbageCollection>true</ServerGarbageCollection>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 		<NoWarn>$(NoWarn);1591;0063</NoWarn>
 	</PropertyGroup>
-
-	<ItemGroup>
-	  <None Remove="Potos\GameFundTransfer.proto" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="FluentdForward.OpenTelemetry.MessagePack" Version="0.3.8" />
@@ -40,11 +37,8 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Tgs.GameFundTransfer.Common\Tgs.GameFundTransfer.Common.csproj" />
 		<ProjectReference Include="..\Tgs.GameFundTransfer.Core\Tgs.GameFundTransfer.Core.csproj" />
+		<ProjectReference Include="..\Tgs.GameFundTransfer.Protos\Tgs.GameFundTransfer.Protos.csproj" />
 		<ProjectReference Include="..\Tgs.GameFundTransfer.Repositories\Tgs.GameFundTransfer.Repositories.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Protobuf Include="Potos\GameFundTransfer.proto" />
 	</ItemGroup>
 
 </Project>
