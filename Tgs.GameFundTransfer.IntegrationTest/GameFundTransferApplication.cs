@@ -12,6 +12,7 @@ using StackExchange.Redis;
 using Tgs.GameFundTransfer.Entities;
 
 namespace Tgs.GameFundTransfer.IntegrationTest;
+
 internal class GameFundTransferApplication(Action<IWebHostBuilder>? webHostConfigure = null) : WebApplicationFactory<Program>
 {
 	protected override void ConfigureWebHost(IWebHostBuilder builder)

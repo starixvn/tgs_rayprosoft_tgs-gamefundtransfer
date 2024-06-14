@@ -19,16 +19,16 @@ public class GameProviderFundInGetServiceUnitTest
 			 BrandCode: "GPI",
 			 PlayerCode: "4ucmqplxb029",
 			 CurrencyCode: "CNY",
-			 GameProviderTransactionId: "72412202405200607050004ucmqplxb029",
+			 GameTransactionId: "72412202405200607050004ucmqplxb029",
 			 Amount: 1);
 
 		var response = new PlayerFundResponse(
-			OrderId: query.GameProviderTransactionId,
+			OrderId: query.GameTransactionId,
 			ExternalOrderId: DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString());
 		_ = fakeGameProvidersClient.PlayerFundInAsync(
 			gameProviderCode: Arg.Is(query.GameProviderCode),
 			playerCode: Arg.Is(query.PlayerCode),
-			orderId: Arg.Is(query.GameProviderTransactionId),
+			orderId: Arg.Is(query.GameTransactionId),
 			amount: Arg.Is(query.Amount),
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(response);
@@ -40,8 +40,8 @@ public class GameProviderFundInGetServiceUnitTest
 		var actual = await sut.GetAsync(query);
 
 		Assert.NotNull(actual);
-		Assert.Equal(query.GameProviderTransactionId, actual.OrderId);
-		Assert.Equal(response.ExternalOrderId, actual.ExternalOrderId);
+		Assert.Equal(query.GameTransactionId, actual.GameTransactionId);
+		Assert.Equal(response.ExternalOrderId, actual.GameRespTransactionId);
 	}
 
 	[Fact]
@@ -55,7 +55,7 @@ public class GameProviderFundInGetServiceUnitTest
 			 BrandCode: "GPI",
 			 PlayerCode: "4ucmqplxb029",
 			 CurrencyCode: "CNY",
-			 GameProviderTransactionId: "72412202405200607050004ucmqplxb029",
+			 GameTransactionId: "72412202405200607050004ucmqplxb029",
 			 Amount: 1);
 
 		var response = new PlayerFundResponse(
@@ -64,7 +64,7 @@ public class GameProviderFundInGetServiceUnitTest
 		_ = fakeGameProvidersClient.PlayerFundInAsync(
 			gameProviderCode: Arg.Is(query.GameProviderCode),
 			playerCode: Arg.Is(query.PlayerCode),
-			orderId: Arg.Is(query.GameProviderTransactionId),
+			orderId: Arg.Is(query.GameTransactionId),
 			amount: Arg.Is(query.Amount),
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(response);

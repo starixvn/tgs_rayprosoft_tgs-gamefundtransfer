@@ -77,9 +77,9 @@ public class FundProcessingFundInAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.GameProviderFundTransferTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.ExternalTransactionId);
-		Assert.Equal(gameProviderTransactionId, actual.GameProviderTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeFundTransferTransactionRepository
 			.Received(1)
@@ -178,9 +178,9 @@ public class FundProcessingFundInAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.GameProviderFundTransferTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.ExternalTransactionId);
-		Assert.Equal(gameProviderTransactionId, actual.GameProviderTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeFundTransferTransactionRepository
 			.Received(1)
@@ -279,9 +279,9 @@ public class FundProcessingFundInAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.GameProviderFundTransferTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.ExternalTransactionId);
-		Assert.Equal(gameProviderTransactionId, actual.GameProviderTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeFundTransferTransactionRepository
 			.Received(1)
@@ -380,9 +380,9 @@ public class FundProcessingFundInAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.GameProviderFundTransferTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.ExternalTransactionId);
-		Assert.Equal(gameProviderTransactionId, actual.GameProviderTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeFundTransferTransactionRepository
 			.Received(1)
@@ -481,9 +481,9 @@ public class FundProcessingFundInAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.GameProviderFundTransferTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.ExternalTransactionId);
-		Assert.Equal(gameProviderTransactionId, actual.GameProviderTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeFundTransferTransactionRepository
 			.Received(1)
@@ -582,9 +582,9 @@ public class FundProcessingFundInAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.GameProviderFundTransferTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.ExternalTransactionId);
-		Assert.Equal(gameProviderTransactionId, actual.GameProviderTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeFundTransferTransactionRepository
 			.Received(1)
@@ -683,9 +683,9 @@ public class FundProcessingFundInAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.GameProviderFundTransferTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.ExternalTransactionId);
-		Assert.Equal(gameProviderTransactionId, actual.GameProviderTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeFundTransferTransactionRepository
 			.Received(1)
@@ -784,9 +784,9 @@ public class FundProcessingFundInAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.GameProviderFundTransferTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.ExternalTransactionId);
-		Assert.Equal(gameProviderTransactionId, actual.GameProviderTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeFundTransferTransactionRepository
 			.Received(1)
@@ -885,9 +885,9 @@ public class FundProcessingFundInAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.GameProviderFundTransferTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.ExternalTransactionId);
-		Assert.Equal(gameProviderTransactionId, actual.GameProviderTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeFundTransferTransactionRepository
 			.Received(1)
@@ -985,9 +985,9 @@ public class FundProcessingFundInAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.GameProviderFundTransferTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.ExternalTransactionId);
-		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameProviderTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
+		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeFundTransferTransactionRepository
 			.Received(1)

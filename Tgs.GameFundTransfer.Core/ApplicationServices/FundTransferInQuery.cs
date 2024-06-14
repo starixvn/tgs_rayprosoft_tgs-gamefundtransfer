@@ -1,6 +1,6 @@
 ﻿namespace Tgs.GameFundTransfer.Core.ApplicationServices;
 
-public record FundInQuery(
+public record FundTransferInQuery(
 	string GameProviderCode,
 	string PlayerCode,
 	Guid WalletId,

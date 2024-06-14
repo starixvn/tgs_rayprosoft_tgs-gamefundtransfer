@@ -14,7 +14,7 @@ internal class GameProviderFundInGetService(
 		var response = await gameProvidersClient.PlayerFundInAsync(
 			gameProviderCode: query.GameProviderCode,
 			playerCode: query.PlayerCode,
-			orderId: query.GameProviderTransactionId,
+			orderId: query.GameTransactionId,
 			amount: query.Amount,
 			cancellationToken: cancellationToken)
 		.ConfigureAwait(false);

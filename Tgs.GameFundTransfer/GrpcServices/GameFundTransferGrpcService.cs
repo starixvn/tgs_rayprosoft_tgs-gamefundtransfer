@@ -1,5 +1,4 @@
 ﻿using Grpc.Core;
-using Tgs.GameFundTransfer.Core;
 using Tgs.GameFundTransfer.Core.ApplicationServices;
 using Tgs.GameFundTransfer.Protos;
 using Tgs.ServiceUtility;
@@ -7,9 +6,9 @@ using Tgs.ServiceUtility;
 namespace Tgs.GameFundTransfer.GrpcServices;
 
 public class GameFundTransferGrpcService(
-	IGetService<FundInQuery, FundResult> fundInResultService,
-	IGetService<FundInZeroQuery, FundResult> fundInZeroService,
-	ICommandService<FundOutCommand> fundOutService,
+	IGetService<FundTransferInQuery, FundTransferResult> fundInResultService,
+	IGetService<FundTransferInOneClickQuery, FundTransferResult> fundInZeroService,
+	IGetService<FundTransferOutQuery, FundTransferResult> fundOutService,
 	IGetService<FundBalanceQuery, FundBalanceResult> fundBalanceService) : Protos.GameFundTransfer.GameFundTransferBase
 {
 	public override async Task<FundBalanceReply> FundBalance(FundBalanceRequest request, ServerCallContext context)
@@ -31,88 +30,9 @@ public class GameFundTransferGrpcService(
 		};
 	}
 
-	public override async Task<GameFundTransferResultReply> FundInResult(GameFundTransferFundRequest request, ServerCallContext context)
-	{
-		var query = new FundInQuery(
-			GameProviderCode: request.GameProviderCode,
-			PlayerCode: request.PlayerCode,
-			WalletId: request.WalletId,
-			CurrencyCode: request.CurrencyCode,
-			Amount: request.Amount);
-
-		var result = await fundInResultService.GetAsync(
-			query: query,
-			cancellationToken: context.CancellationToken)
-			.ConfigureAwait(false);
-
-		return new GameFundTransferResultReply()
-		{
-			State = result.State switch
-			{
-				Core.StateCode.Success => Protos.StateCode.Success,
-				Core.StateCode.TransactionLock => Protos.StateCode.TransactionLock,
-				Core.StateCode.ExternalTransactionIdEmpty => Protos.StateCode.ExternalTransactionIdEmpty,
-				_ => Protos.StateCode.Exception
-			},
-			Message = result.Message,
-			FundTransactionId = result.FundTransactionId,
-			TransactionId = result.TransactionId,
-			ExternalTransactionId = result.ExternalTransactionId
-		};
-	}
-
-	public override async Task<GameFundTransferResultReply> FundInZeroResult(GameFundTransferFundZeroRequest request, ServerCallContext context)
-	{
-		var query = new FundInZeroQuery(
-			GameProviderCode: request.GameProviderCode,
-			PlayerCode: request.PlayerCode,
-			WalletId: request.WalletId,
-			CurrencyCode: request.CurrencyCode);
-
-		var result = await fundInZeroService.GetAsync(
-			query: query,
-			cancellationToken: context.CancellationToken)
-			 .ConfigureAwait(false);
-
-		return new GameFundTransferResultReply()
-		{
-			State = result.State switch
-			{
-				Core.StateCode.Success => Protos.StateCode.Success,
-				Core.StateCode.TransactionLock => Protos.StateCode.TransactionLock,
-				Core.StateCode.ExternalTransactionIdEmpty => Protos.StateCode.ExternalTransactionIdEmpty,
-				_ => Protos.StateCode.Exception
-			},
-			Message = result.Message,
-			FundTransactionId = result.FundTransactionId,
-			TransactionId = result.TransactionId,
-			ExternalTransactionId = result.ExternalTransactionId
-		};
-	}
-
-	public override async Task<GameFundTransferReply> FundOut(GameFundTransferFundRequest request, ServerCallContext context)
-	{
-		var command = new FundOutCommand(
-			GameProviderCode: request.GameProviderCode,
-			PlayerCode: request.PlayerCode,
-			WalletId: request.WalletId,
-			CurrencyCode: request.CurrencyCode,
-			Amount: request.Amount);
-
-		await fundOutService.ExecuteAsync(
-			command: command,
-			cancellationToken: context.CancellationToken)
-			.ConfigureAwait(false);
-
-		return new GameFundTransferReply()
-		{
-			State = true
-		};
-	}
-
 	public override async Task<FundTransferReply> FundTransferIn(FundTransferRequest request, ServerCallContext context)
 	{
-		var query = new FundInQuery(
+		var query = new FundTransferInQuery(
 			GameProviderCode: request.GameProviderCode,
 			PlayerCode: request.PlayerCode,
 			WalletId: request.WalletId,
@@ -127,14 +47,16 @@ public class GameFundTransferGrpcService(
 		return new FundTransferReply()
 		{
 			FundTransactionId = result.FundTransactionId,
-			TransactionId = result.TransactionId,
-			OrderId = string.Empty,
-			ExternalOrderId = result.ExternalTransactionId,
+			CashTransactionId = result.CashTransactionId,
+			CashRespTransactionId = result.CashRespTransactionId,
+			GameTransactionId = result.GameTransactionId,
+			GameRespTransactionId = result.GameRespTransactionId,
 		};
 	}
+
 	public override async Task<FundTransferReply> FundTransferInOneClick(FundTransferInOneClickRequest request, ServerCallContext context)
 	{
-		var query = new FundInZeroQuery(
+		var query = new FundTransferInOneClickQuery(
 			GameProviderCode: request.GameProviderCode,
 			PlayerCode: request.PlayerCode,
 			WalletId: request.WalletId,
@@ -148,31 +70,34 @@ public class GameFundTransferGrpcService(
 		return new FundTransferReply()
 		{
 			FundTransactionId = result.FundTransactionId,
-			TransactionId = result.TransactionId,
-			OrderId = string.Empty,
-			ExternalOrderId = result.ExternalTransactionId,
+			CashTransactionId = result.CashTransactionId,
+			CashRespTransactionId = result.CashRespTransactionId,
+			GameTransactionId = result.GameTransactionId,
+			GameRespTransactionId = result.GameRespTransactionId,
 		};
 	}
+
 	public override async Task<FundTransferReply> FundTransferOut(FundTransferRequest request, ServerCallContext context)
 	{
-		var command = new FundOutCommand(
+		var query = new FundTransferOutQuery(
 			GameProviderCode: request.GameProviderCode,
 			PlayerCode: request.PlayerCode,
 			WalletId: request.WalletId,
 			CurrencyCode: request.CurrencyCode,
 			Amount: request.Amount);
 
-		await fundOutService.ExecuteAsync(
-			command: command,
+		var result = await fundOutService.GetAsync(
+			query: query,
 			cancellationToken: context.CancellationToken)
 			.ConfigureAwait(false);
 
 		return new FundTransferReply()
 		{
-			FundTransactionId = Guid.Empty,
-			TransactionId = Guid.Empty,
-			OrderId = string.Empty,
-			ExternalOrderId = string.Empty,
+			FundTransactionId = result.FundTransactionId,
+			CashTransactionId = result.CashTransactionId,
+			CashRespTransactionId = result.CashRespTransactionId,
+			GameTransactionId = result.GameTransactionId,
+			GameRespTransactionId = result.GameRespTransactionId,
 		};
 	}
 }

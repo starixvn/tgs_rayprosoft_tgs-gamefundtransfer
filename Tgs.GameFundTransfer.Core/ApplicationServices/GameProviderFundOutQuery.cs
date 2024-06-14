@@ -2,5 +2,5 @@
 public record GameProviderFundOutQuery(
 	string GameProviderCode,
 	string PlayerCode,
-	string GameProviderTransactionId,
+	string GameTransactionId,
 	decimal Amount);

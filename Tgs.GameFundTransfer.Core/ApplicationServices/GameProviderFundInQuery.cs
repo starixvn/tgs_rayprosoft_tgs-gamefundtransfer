@@ -4,5 +4,5 @@ public record GameProviderFundInQuery(
 	string BrandCode,
 	string PlayerCode,
 	string CurrencyCode,
-	string GameProviderTransactionId,
+	string GameTransactionId,
 	decimal Amount);

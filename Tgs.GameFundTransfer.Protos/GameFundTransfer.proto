@@ -10,10 +10,6 @@ package GameFundTransfer;
 // The greeting service definition.
 service GameFundTransfer {
   // Sends a greeting
-  rpc FundIn (GameFundTransferFundRequest) returns (GameFundTransferReply);
-  rpc FundInResult (GameFundTransferFundRequest) returns (GameFundTransferResultReply);
-  rpc FundInZeroResult (GameFundTransferFundZeroRequest) returns (GameFundTransferResultReply);
-  rpc FundOut (GameFundTransferFundRequest) returns (GameFundTransferReply);
   rpc FundBalance (FundBalanceRequest) returns (FundBalanceReply);
   rpc FundTransferOut (FundTransferRequest) returns (FundTransferReply);
   rpc FundTransferIn (FundTransferRequest) returns (FundTransferReply);
@@ -21,21 +17,6 @@ service GameFundTransfer {
 }
 
 // The request message containing the user's name.
-message GameFundTransferFundRequest {
-    string game_provider_code = 1;
-    string player_code = 2;
-    phoenix.protobuf.GuidValue wallet_id = 3;
-    string currency_code = 4;
-    phoenix.protobuf.DecimalValue amount = 5;
-}
-
-message GameFundTransferFundZeroRequest {
-    string game_provider_code = 1;
-    string player_code = 2;
-    phoenix.protobuf.GuidValue wallet_id = 3;
-    string currency_code = 4;
-}
-
 message FundBalanceRequest {
     string game_provider_code = 1;
     string player_code = 2;
@@ -58,35 +39,16 @@ message FundTransferInOneClickRequest {
 }
 
 // The response message containing the greetings.
-
-message GameFundTransferReply {
-    bool state = 1;
-}
-
-message GameFundTransferResultReply {
-    StateCode State = 1;
-    string message = 2;
-    phoenix.protobuf.GuidValue fund_transaction_id =3;
-    phoenix.protobuf.GuidValue transaction_id =4;
-    string external_transaction_id =5;
-}
-
-message FundTransferReply {
-   phoenix.protobuf.GuidValue fund_transaction_id =1;
-   phoenix.protobuf.GuidValue transaction_id =2;
-   string order_id =3;
-    string external_order_id =4;
-}
-
 message FundBalanceReply {
     phoenix.protobuf.DecimalValue balance = 1;
     phoenix.protobuf.DecimalValue free_balance = 2;
     phoenix.protobuf.DecimalValue outstanding_balance = 3;
 }
 
-enum StateCode {
-  STATE_CODE_SUCCESS = 0;
-  STATE_CODE_EXCEPTION = 404;
-  STATE_CODE_TRANSACTION_LOCK = 423;
-  STATE_CODE_EXTERNAL_TRANSACTION_ID_EMPTY = 424;
+message FundTransferReply {
+   phoenix.protobuf.GuidValue fund_transaction_id =1;
+   string cash_transaction_id =2;
+   phoenix.protobuf.GuidValue cash_resp_transaction_id =3;
+   string game_transaction_id =4;
+   string game_resp_transaction_id =5;
 }
