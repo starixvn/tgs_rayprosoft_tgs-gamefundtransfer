@@ -1,6 +1,6 @@
 ﻿namespace Tgs.GameFundTransfer.Core.ApplicationServices;
 
-public record FundOutCommand(
+public record FundTransferOutQuery(
 	string GameProviderCode,
 	string PlayerCode,
 	Guid WalletId,

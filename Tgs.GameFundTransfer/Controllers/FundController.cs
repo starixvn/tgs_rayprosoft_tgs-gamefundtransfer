@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Tgs.GameFundTransfer.Attributes;
-using Tgs.GameFundTransfer.Core;
 using Tgs.GameFundTransfer.Core.ApplicationServices;
 using Tgs.GameFundTransfer.ViewModels;
 using Tgs.ServiceUtility;
@@ -12,84 +11,98 @@ namespace Tgs.GameFundTransfer.Controllers;
 public class FundController : ControllerBase
 {
 	/// <summary>
-	/// Funds the in result asynchronous.
+	/// Funds the transfer in asynchronous.
 	/// </summary>
 	/// <param name="service">The service.</param>
 	/// <param name="source">The source.</param>
 	/// <returns></returns>
 	[HiddenApi]
-	[HttpPost(template: "in-result", Name = "FundInResult")]
-	public async ValueTask<FundResultViewModel> FundInResultAsync(
-		[FromServices] IGetService<FundInQuery, FundResult> service,
+	[HttpPost(template: "in", Name = "FundTransferIn")]
+	public async ValueTask<FundTransferResultViewModel> FundTransferInAsync(
+		[FromServices] IGetService<FundTransferInQuery, FundTransferResult> service,
 		FundInRequestViewModel source)
 	{
-		var query = new FundInQuery(
+		var query = new FundTransferInQuery(
 			GameProviderCode: source.GameProviderCode,
 			PlayerCode: source.PlayerCode,
 			WalletId: source.WalletId,
 			CurrencyCode: source.CurrencyCode,
 			Amount: source.Amount);
-		var result = await service
-			 .GetAsync(
-				 query: query,
-				 cancellationToken: HttpContext.RequestAborted)
+
+		var result = await service.GetAsync(
+			query: query,
+			cancellationToken: HttpContext.RequestAborted)
 			 .ConfigureAwait(false);
 
-		return new FundResultViewModel(
-			result.State,
-			result.Message,
+		return new FundTransferResultViewModel(
 			result.FundTransactionId,
-			result.TransactionId,
-			result.ExternalTransactionId);
+			result.CashTransactionId,
+			result.CashRespTransactionId,
+			result.GameTransactionId,
+			result.GameRespTransactionId);
 	}
 
 	/// <summary>
-	/// Funds the in zero result asynchronous.
+	/// Funds the transfer in one click asynchronous.
 	/// </summary>
 	/// <param name="service">The service.</param>
 	/// <param name="source">The source.</param>
 	/// <returns></returns>
-	[HttpPost(template: "in-result-zero", Name = "FundInZeroResult")]
-	public async ValueTask<FundResultViewModel> FundInZeroResultAsync(
-		[FromServices] IGetService<FundInZeroQuery, FundResult> service,
-		FundZeroRequestViewModel source)
+	[HttpPost(template: "in-one-click", Name = "FundTransferInOneClick")]
+	public async ValueTask<FundTransferResultViewModel> FundTransferInOneClickAsync(
+		[FromServices] IGetService<FundTransferInOneClickQuery, FundTransferResult> service,
+		FundTransferInOneClickViewModel source)
 	{
-		var query = new FundInZeroQuery(
+		var query = new FundTransferInOneClickQuery(
 			GameProviderCode: source.GameProviderCode,
 			PlayerCode: source.PlayerCode,
 			WalletId: source.WalletId,
 			CurrencyCode: source.CurrencyCode);
-		var result = await service
-			 .GetAsync(
-				 query: query,
-				 cancellationToken: HttpContext.RequestAborted)
-			 .ConfigureAwait(false);
 
-		return new FundResultViewModel(
-			result.State,
-			result.Message,
+		var result = await service.GetAsync(
+			query: query,
+			cancellationToken: HttpContext.RequestAborted)
+			.ConfigureAwait(false);
+
+		return new FundTransferResultViewModel(
 			result.FundTransactionId,
-			result.TransactionId,
-			result.ExternalTransactionId);
+			result.CashTransactionId,
+			result.CashRespTransactionId,
+			result.GameTransactionId,
+			result.GameRespTransactionId);
 	}
 
 	/// <summary>
-	/// Funds the out asynchronous.
+	/// Funds the transfer out asynchronous.
 	/// </summary>
 	/// <param name="service">The service.</param>
 	/// <param name="source">The source.</param>
 	/// <returns></returns>
 	[HiddenApi]
-	[HttpPost(template: "out", Name = "FundOut")]
-	public ValueTask FundOutAsync(
-		[FromServices] ICommandService<FundOutCommand> service,
+	[HttpPost(template: "out", Name = "FundTransferOut")]
+	public async ValueTask<FundTransferResultViewModel> FundTransferOutAsync(
+		[FromServices] IGetService<FundTransferOutQuery, FundTransferResult> service,
 		FundOutRequestViewModel source)
-		=> service.ExecuteAsync(new FundOutCommand(
+	{
+		var query = new FundTransferOutQuery(
 			GameProviderCode: source.GameProviderCode,
 			PlayerCode: source.PlayerCode,
 			WalletId: source.WalletId,
 			CurrencyCode: source.CurrencyCode,
-			Amount: source.Amount));
+			Amount: source.Amount);
+
+		var result = await service.GetAsync(
+			query: query,
+			cancellationToken: HttpContext.RequestAborted)
+			 .ConfigureAwait(false);
+
+		return new FundTransferResultViewModel(
+			result.FundTransactionId,
+			result.CashTransactionId,
+			result.CashRespTransactionId,
+			result.GameTransactionId,
+			result.GameRespTransactionId);
+	}
 
 	/// <summary>
 	/// Funds the balance asynchronous.

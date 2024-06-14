@@ -33,7 +33,7 @@ internal class FundProcessingFundOutAddGetService(
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
-		var gameProviderTransactionId = gameProviderInfo.GameProviderCode switch
+		var gameTransactionId = gameProviderInfo.GameProviderCode switch
 		{
 			var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.Cards365Transfer => await gameProviderTransactionIdUtensil.GetCards365TxnIdAsync(true, cancellationToken).ConfigureAwait(false),
 			var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.FaChai => await gameProviderTransactionIdUtensil.GetFaChaiTxnIdAsync(true, cancellationToken).ConfigureAwait(false),
@@ -53,7 +53,7 @@ internal class FundProcessingFundOutAddGetService(
 				gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
 				gameProviderId: gameProviderInfo.GameProviderId,
 				walletId: playerInfo.WalletId,
-				gameProviderTransactionId: gameProviderTransactionId,
+				gameProviderTransactionId: gameTransactionId,
 				playerCode: playerInfo.PlayerCode,
 				fundSource: FundSource.FundOut,
 				fromWallet: WalletDef.MainWallet,
@@ -73,8 +73,8 @@ internal class FundProcessingFundOutAddGetService(
 					["GameProviderId"] = gameProviderInfo.GameProviderId,
 					["GameProviderCode"] = gameProviderInfo.GameProviderCode,
 					["GameProviderFundTransferTransactionId"] = gameProviderFundTransferTransactionId,
-					["ExternalTransactionId"] = gameProviderFundTransferTransactionId.ToString(),
-					["GameProviderTransactionId"] = gameProviderTransactionId,
+					["CashTransactionId"] = gameProviderFundTransferTransactionId.ToString(),
+					["GameTransactionId"] = gameTransactionId,
 					["Mesaage"] = "This fund transaction order was created successfully.",
 				}.ToJsonString());
 
@@ -85,9 +85,9 @@ internal class FundProcessingFundOutAddGetService(
 				Username: playerInfo.Username,
 				GameProviderId: gameProviderInfo.GameProviderId,
 				GameProviderCode: gameProviderInfo.GameProviderCode,
-				GameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-				ExternalTransactionId: gameProviderFundTransferTransactionId.ToString(),
-				GameProviderTransactionId: gameProviderTransactionId);
+				FundTransactionId: gameProviderFundTransferTransactionId,
+				CashTransactionId: gameProviderFundTransferTransactionId.ToString(),
+				GameTransactionId: gameTransactionId);
 		}
 		catch (Exception ex)
 		{
@@ -102,8 +102,8 @@ internal class FundProcessingFundOutAddGetService(
 					["GameProviderId"] = gameProviderInfo.GameProviderId,
 					["GameProviderCode"] = gameProviderInfo.GameProviderCode,
 					["GameProviderFundTransferTransactionId"] = gameProviderFundTransferTransactionId,
-					["ExternalTransactionId"] = gameProviderFundTransferTransactionId.ToString(),
-					["GameProviderTransactionId"] = gameProviderTransactionId,
+					["CashTransactionId"] = gameProviderFundTransferTransactionId.ToString(),
+					["GameTransactionId"] = gameTransactionId,
 					["Mesaage"] = "An exception occurred when creating this funds transaction order.",
 				}.ToJsonString());
 			throw;

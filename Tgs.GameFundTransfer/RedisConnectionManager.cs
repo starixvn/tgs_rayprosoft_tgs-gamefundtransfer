@@ -23,7 +23,6 @@ internal class RedisConnectionManager : IDisposable
 		_connectionMultiplexer = ConnectionMultiplexer.Connect(connectionOptions);
 		Connection = _connectionMultiplexer;
 		Database = _connectionMultiplexer.GetDatabase();
-
 	}
 
 	public void Dispose()

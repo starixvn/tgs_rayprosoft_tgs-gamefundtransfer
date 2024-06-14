@@ -2,7 +2,7 @@
 
 namespace Tgs.GameFundTransfer.ViewModels;
 
-public record FundZeroRequestViewModel
+public record FundTransferInOneClickViewModel
 {
 	[Required]
 	public Guid GameProviderId { get; init; } = default!;
