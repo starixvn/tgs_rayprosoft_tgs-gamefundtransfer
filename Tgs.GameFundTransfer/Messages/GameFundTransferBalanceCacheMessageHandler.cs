@@ -7,15 +7,10 @@ namespace Tgs.GameFundTransfer.Messages;
 
 public class GameFundTransferBalanceCacheMessageHandler(
 	ILogger<GameFundTransferBalanceCacheMessageHandler> logger,
-	IFundBalanceCacheDispatcher dispatcher) : IMessageHandler<Common.Protos.GameFundTransferCacheRequest>
+	IFundBalanceCacheDispatcher dispatcher) : IMessageHandler<Common.Protos.GameFundTransferBalanceCacheRequest>
 {
-	public ValueTask HandleAsync(string subject, Common.Protos.GameFundTransferCacheRequest data, IEnumerable<MessageHeaderValue>? headerValues, CancellationToken cancellationToken = default)
+	public ValueTask HandleAsync(string subject, Common.Protos.GameFundTransferBalanceCacheRequest data, IEnumerable<MessageHeaderValue>? headerValues, CancellationToken cancellationToken = default)
 	{
-		logger.LogInformation("LogOn:{logOn} Subject:{subject} Mesaage:This message has been received.({data})",
-			DateTime.Now.ToString("o"),
-			subject,
-			data);
-
 		logger.LogInformation("{logInformation}",
 			JsonSerializer.Serialize(new
 			{

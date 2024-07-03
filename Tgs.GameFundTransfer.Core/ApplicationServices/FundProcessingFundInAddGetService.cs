@@ -110,7 +110,7 @@ internal class FundProcessingFundInAddGetService(
 		}
 		finally
 		{
-			var gameFundTransferCacheRequest = new Common.Protos.GameFundTransferCacheRequest
+			var gameFundTransferCacheRequest = new Common.Protos.GameFundTransferBalanceCacheRequest
 			{
 				Action = Common.Protos.Action.Release,
 				GameProviderCode = gameProviderInfo.GameProviderCode,

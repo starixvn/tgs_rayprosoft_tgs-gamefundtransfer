@@ -1,19 +1,14 @@
-﻿using System.Text.Json.Nodes;
-using Microsoft.Extensions.Logging;
-using Tgs.GameCurrency.Client;
-using Tgs.GamePlayerOnline.Client;
+﻿using Tgs.GameCurrency.Client;
 using Tgs.ServiceUtility;
 using Valhalla.MessageQueue;
 
 namespace Tgs.GameFundTransfer.Core.ApplicationServices;
 
 internal class FundBalanceGetService(
-	ILogger<FundBalanceGetService> logger,
 	IPlayerRepository playerRepository,
 	IFundBalanceRepository fundBalanceRepository,
 	IMessageSender messageSender,
-	IGameCurrencyClient gameCurrencyClient,
-	IGamePlayerOnlineClient gamePlayerOnlineClient) : IGetService<FundBalanceQuery, FundBalanceResult>
+	IGameCurrencyClient gameCurrencyClient) : IGetService<FundBalanceQuery, FundBalanceResult>
 {
 	public async ValueTask<FundBalanceResult> GetAsync(FundBalanceQuery query, CancellationToken cancellationToken = default)
 	{
@@ -28,38 +23,18 @@ internal class FundBalanceGetService(
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
-		try
-		{
-			await messageSender.PublishAsync(
-				subject: Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest,
-				data: new Common.Protos.GameFundTransferCacheRequest
-				{
-					Action = Common.Protos.Action.Cache,
-					GameProviderCode = query.GameProviderCode,
-					PlayerCode = playerInfo.PlayerCode,
-					Balance = fundBalanceInfo.Balance,
-					FreeBalance = fundBalanceInfo.FreeBalance,
-					OutstandingBalance = fundBalanceInfo.OutstandingBalance
-				},
-				cancellationToken: cancellationToken).ConfigureAwait(false);
-		}
-		catch (Exception ex)
-		{
-			logger.LogError(ex, "{info}",
-				new
-				{
-					LogOn = DateTime.Now.ToString("o"),
-					playerInfo.BrandId,
-					playerInfo.BrandCode,
-					playerInfo.PlayerCode,
-					playerInfo.Username,
-					query.GameProviderCode,
-					fundBalanceInfo.Balance,
-					fundBalanceInfo.FreeBalance,
-					fundBalanceInfo.OutstandingBalance
-				});
-			throw;
-		}
+		await messageSender.PublishAsync(
+			subject: Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest,
+			data: new Common.Protos.GameFundTransferBalanceCacheRequest
+			{
+				Action = Common.Protos.Action.Cache,
+				GameProviderCode = query.GameProviderCode,
+				PlayerCode = playerInfo.PlayerCode,
+				Balance = fundBalanceInfo.Balance,
+				FreeBalance = fundBalanceInfo.FreeBalance,
+				OutstandingBalance = fundBalanceInfo.OutstandingBalance
+			},
+			cancellationToken: cancellationToken).ConfigureAwait(false);
 
 		ConvertPlatformBalanceResult balanceResult = new ConvertPlatformBalanceResult(
 			ExchangeRate: 1,
@@ -79,34 +54,17 @@ internal class FundBalanceGetService(
 				.ConfigureAwait(false);
 		}
 
-		try
-		{
-			await gamePlayerOnlineClient.PlayerOnlineUpsertAsync(
-				gameProviderCode: query.GameProviderCode,
-				playerCode: query.PlayerCode,
-				balance: balanceResult.Balance,
-				freeBalance: balanceResult.FreeBalance,
-				outstandingBalance: balanceResult.OutstandingBalance,
-				cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-		}
-		catch (Exception ex)
-		{
-			logger.LogError(ex, "{info}",
-				new
-				{
-					LogOn = DateTime.Now.ToString("o"),
-					playerInfo.BrandId,
-					playerInfo.BrandCode,
-					playerInfo.PlayerCode,
-					playerInfo.Username,
-					query.GameProviderCode,
-					balanceResult.Balance,
-					balanceResult.FreeBalance,
-					balanceResult.OutstandingBalance
-				});
-			throw;
-		}
+		await messageSender.PublishAsync(
+			subject: Common.GameFundTransferNatsConst.GameFundTransferBalanceOnlineRequest,
+			data: new Common.Protos.GameFundTransferBalanceOnlineRequest
+			{
+				GameProviderCode = query.GameProviderCode,
+				PlayerCode = playerInfo.PlayerCode,
+				Balance = balanceResult.Balance,
+				FreeBalance = balanceResult.FreeBalance,
+				OutstandingBalance = balanceResult.OutstandingBalance
+			},
+			cancellationToken: cancellationToken).ConfigureAwait(false);
 
 		return new FundBalanceResult(
 			Balance: balanceResult.Balance,
