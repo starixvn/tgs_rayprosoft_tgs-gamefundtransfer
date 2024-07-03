@@ -99,7 +99,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			.Received(1)
 			.PublishAsync(
 			Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest),
-			Arg.Is(new Common.Protos.GameFundTransferCacheRequest
+			Arg.Is(new Common.Protos.GameFundTransferBalanceCacheRequest
 			{
 				Action = Common.Protos.Action.Release,
 				GameProviderCode = gameProviderInfo.GameProviderCode,
@@ -200,7 +200,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			.Received(1)
 			.PublishAsync(
 			Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest),
-			Arg.Is(new Common.Protos.GameFundTransferCacheRequest
+			Arg.Is(new Common.Protos.GameFundTransferBalanceCacheRequest
 			{
 				Action = Common.Protos.Action.Release,
 				GameProviderCode = gameProviderInfo.GameProviderCode,
@@ -301,7 +301,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			.Received(1)
 			.PublishAsync(
 			Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest),
-			Arg.Is(new Common.Protos.GameFundTransferCacheRequest
+			Arg.Is(new Common.Protos.GameFundTransferBalanceCacheRequest
 			{
 				Action = Common.Protos.Action.Release,
 				GameProviderCode = gameProviderInfo.GameProviderCode,
@@ -402,7 +402,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			.Received(1)
 			.PublishAsync(
 			Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest),
-			Arg.Is(new Common.Protos.GameFundTransferCacheRequest
+			Arg.Is(new Common.Protos.GameFundTransferBalanceCacheRequest
 			{
 				Action = Common.Protos.Action.Release,
 				GameProviderCode = gameProviderInfo.GameProviderCode,
@@ -503,7 +503,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			.Received(1)
 			.PublishAsync(
 			Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest),
-			Arg.Is(new Common.Protos.GameFundTransferCacheRequest
+			Arg.Is(new Common.Protos.GameFundTransferBalanceCacheRequest
 			{
 				Action = Common.Protos.Action.Release,
 				GameProviderCode = gameProviderInfo.GameProviderCode,
@@ -604,7 +604,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			.Received(1)
 			.PublishAsync(
 			Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest),
-			Arg.Is(new Common.Protos.GameFundTransferCacheRequest
+			Arg.Is(new Common.Protos.GameFundTransferBalanceCacheRequest
 			{
 				Action = Common.Protos.Action.Release,
 				GameProviderCode = gameProviderInfo.GameProviderCode,
@@ -705,7 +705,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			.Received(1)
 			.PublishAsync(
 			Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest),
-			Arg.Is(new Common.Protos.GameFundTransferCacheRequest
+			Arg.Is(new Common.Protos.GameFundTransferBalanceCacheRequest
 			{
 				Action = Common.Protos.Action.Release,
 				GameProviderCode = gameProviderInfo.GameProviderCode,
@@ -806,7 +806,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			.Received(1)
 			.PublishAsync(
 			Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest),
-			Arg.Is(new Common.Protos.GameFundTransferCacheRequest
+			Arg.Is(new Common.Protos.GameFundTransferBalanceCacheRequest
 			{
 				Action = Common.Protos.Action.Release,
 				GameProviderCode = gameProviderInfo.GameProviderCode,
@@ -907,7 +907,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			.Received(1)
 			.PublishAsync(
 			Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest),
-			Arg.Is(new Common.Protos.GameFundTransferCacheRequest
+			Arg.Is(new Common.Protos.GameFundTransferBalanceCacheRequest
 			{
 				Action = Common.Protos.Action.Release,
 				GameProviderCode = gameProviderInfo.GameProviderCode,
@@ -922,7 +922,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			.Received(1)
 			.PublishAsync(
 			Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest),
-			Arg.Is(new Common.Protos.GameFundTransferCacheRequest
+			Arg.Is(new Common.Protos.GameFundTransferBalanceCacheRequest
 			{
 				Action = Common.Protos.Action.Release,
 				GameProviderCode = gameProviderInfo.GameProviderCode,
@@ -1022,7 +1022,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			.Received(1)
 			.PublishAsync(
 			Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest),
-			Arg.Is(new Common.Protos.GameFundTransferCacheRequest
+			Arg.Is(new Common.Protos.GameFundTransferBalanceCacheRequest
 			{
 				Action = Common.Protos.Action.Release,
 				GameProviderCode = gameProviderInfo.GameProviderCode,

@@ -10,7 +10,7 @@ package GameFundTransfer;
 // The greeting service definition.
 
 // The request message containing the user's name.
-message GameFundTransferCacheRequest {
+message GameFundTransferBalanceCacheRequest {
     Action action = 1;
     string game_provider_code = 2;
     string player_code = 3;
@@ -23,6 +23,14 @@ enum Action {
     ACTION_NONE = 0;
     ACTION_CACHE = 1;
     ACTION_RELEASE = 2;
+}
+
+message GameFundTransferBalanceOnlineRequest {
+    string game_provider_code = 1;
+    string player_code = 2;
+    phoenix.protobuf.DecimalValue balance = 3;
+    phoenix.protobuf.DecimalValue free_balance = 4;
+    phoenix.protobuf.DecimalValue outstanding_balance = 5;
 }
 
 // The response message containing the greetings.

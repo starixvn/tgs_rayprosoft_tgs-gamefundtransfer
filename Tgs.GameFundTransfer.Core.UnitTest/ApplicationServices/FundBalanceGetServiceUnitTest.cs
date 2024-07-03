@@ -1,8 +1,6 @@
-﻿using Microsoft.Extensions.Logging.Abstractions;
-using NSubstitute;
+﻿using NSubstitute;
 using Tgs.GameCurrency.Client;
 using Tgs.GameFundTransfer.Core.ApplicationServices;
-using Tgs.GamePlayerOnline.Client;
 using Tgs.GameProviders.Domains;
 using Valhalla.MessageQueue;
 
@@ -13,12 +11,10 @@ public class FundBalanceGetServiceUnitTest
 	[Fact]
 	public async Task Normal_Process()
 	{
-		var faceLogger = NullLogger<FundBalanceGetService>.Instance;
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeFundBalanceRepository = Substitute.For<IFundBalanceRepository>();
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 		var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
-		var fakeGamePlayerOnlineClient = Substitute.For<IGamePlayerOnlineClient>();
 
 		var query = new FundBalanceQuery(
 			 GameProviderCode: GameProviderType.Kaiyuan,
@@ -61,12 +57,10 @@ public class FundBalanceGetServiceUnitTest
 			.Returns(balanceResult);
 
 		var sut = new FundBalanceGetService(
-			faceLogger,
 			fakePlayerRepository,
 			fakeFundBalanceRepository,
 			fakeMessageSender,
-			fakeGameCurrencyClient,
-			fakeGamePlayerOnlineClient);
+			fakeGameCurrencyClient);
 
 		var actual = await sut.GetAsync(query);
 
@@ -79,7 +73,7 @@ public class FundBalanceGetServiceUnitTest
 			.Received(1)
 			.PublishAsync(
 			subject: Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest),
-			data: Arg.Is(new Common.Protos.GameFundTransferCacheRequest
+			data: Arg.Is(new Common.Protos.GameFundTransferBalanceCacheRequest
 			{
 				Action = Common.Protos.Action.Cache,
 				GameProviderCode = query.GameProviderCode,
@@ -90,26 +84,28 @@ public class FundBalanceGetServiceUnitTest
 			}),
 			cancellationToken: Arg.Any<CancellationToken>());
 
-		_ = fakeGamePlayerOnlineClient
+		_ = fakeMessageSender
 			.Received(1)
-			.PlayerOnlineUpsertAsync(
-			gameProviderCode: query.GameProviderCode,
-			playerCode: query.PlayerCode,
-			balance: balanceResult.Balance,
-			freeBalance: balanceResult.FreeBalance,
-			outstandingBalance: balanceResult.OutstandingBalance,
+			.PublishAsync(
+			subject: Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceOnlineRequest),
+			data: Arg.Is(new Common.Protos.GameFundTransferBalanceOnlineRequest
+			{
+				GameProviderCode = query.GameProviderCode,
+				PlayerCode = playerInfo.PlayerCode,
+				Balance = balanceResult.Balance,
+				FreeBalance = balanceResult.FreeBalance,
+				OutstandingBalance = balanceResult.OutstandingBalance
+			}),
 			cancellationToken: Arg.Any<CancellationToken>());
 	}
 
 	[Fact]
 	public async Task Balance_Is_0()
 	{
-		var faceLogger = NullLogger<FundBalanceGetService>.Instance;
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeFundBalanceRepository = Substitute.For<IFundBalanceRepository>();
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 		var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
-		var fakeGamePlayerOnlineClient = Substitute.For<IGamePlayerOnlineClient>();
 
 		var query = new FundBalanceQuery(
 			 GameProviderCode: GameProviderType.Kaiyuan,
@@ -138,12 +134,10 @@ public class FundBalanceGetServiceUnitTest
 			.Returns(fundBalanceInfo);
 
 		var sut = new FundBalanceGetService(
-			faceLogger,
 			fakePlayerRepository,
 			fakeFundBalanceRepository,
 			fakeMessageSender,
-			fakeGameCurrencyClient,
-			fakeGamePlayerOnlineClient);
+			fakeGameCurrencyClient);
 
 		var actual = await sut.GetAsync(query);
 
@@ -166,37 +160,39 @@ public class FundBalanceGetServiceUnitTest
 			.Received(1)
 			.PublishAsync(
 			subject: Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest),
-			data: Arg.Is(new Common.Protos.GameFundTransferCacheRequest
+			data: Arg.Is(new Common.Protos.GameFundTransferBalanceCacheRequest
 			{
 				Action = Common.Protos.Action.Cache,
 				GameProviderCode = query.GameProviderCode,
 				PlayerCode = playerInfo.PlayerCode,
-				Balance = fundBalanceInfo.Balance,
-				FreeBalance = fundBalanceInfo.FreeBalance,
-				OutstandingBalance = fundBalanceInfo.OutstandingBalance
+				Balance = 0.0m,
+				FreeBalance = 0.0m,
+				OutstandingBalance = 0.0m
 			}),
 			cancellationToken: Arg.Any<CancellationToken>());
 
-		_ = fakeGamePlayerOnlineClient
+		_ = fakeMessageSender
 			.Received(1)
-			.PlayerOnlineUpsertAsync(
-			gameProviderCode: query.GameProviderCode,
-			playerCode: query.PlayerCode,
-			balance: 0.0m,
-			freeBalance: 0.0m,
-			outstandingBalance: 0.0m,
+			.PublishAsync(
+			subject: Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceOnlineRequest),
+			data: Arg.Is(new Common.Protos.GameFundTransferBalanceOnlineRequest
+			{
+				GameProviderCode = query.GameProviderCode,
+				PlayerCode = playerInfo.PlayerCode,
+				Balance = 0.0m,
+				FreeBalance = 0.0m,
+				OutstandingBalance = 0.0m
+			}),
 			cancellationToken: Arg.Any<CancellationToken>());
 	}
 
 	[Fact]
 	public async Task Platform_Currency_IDR_1000_Amount_Game_Provider_IDR()
 	{
-		var faceLogger = NullLogger<FundBalanceGetService>.Instance;
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeFundBalanceRepository = Substitute.For<IFundBalanceRepository>();
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 		var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
-		var fakeGamePlayerOnlineClient = Substitute.For<IGamePlayerOnlineClient>();
 
 		var query = new FundBalanceQuery(
 			 GameProviderCode: GameProviderType.Kaiyuan,
@@ -239,12 +235,10 @@ public class FundBalanceGetServiceUnitTest
 			.Returns(balanceResult);
 
 		var sut = new FundBalanceGetService(
-			faceLogger,
 			fakePlayerRepository,
 			fakeFundBalanceRepository,
 			fakeMessageSender,
-			fakeGameCurrencyClient,
-			fakeGamePlayerOnlineClient);
+			fakeGameCurrencyClient);
 
 		var actual = await sut.GetAsync(query);
 
@@ -257,7 +251,7 @@ public class FundBalanceGetServiceUnitTest
 			.Received(1)
 			.PublishAsync(
 			subject: Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest),
-			data: Arg.Is(new Common.Protos.GameFundTransferCacheRequest
+			data: Arg.Is(new Common.Protos.GameFundTransferBalanceCacheRequest
 			{
 				Action = Common.Protos.Action.Cache,
 				GameProviderCode = query.GameProviderCode,
@@ -268,26 +262,28 @@ public class FundBalanceGetServiceUnitTest
 			}),
 			cancellationToken: Arg.Any<CancellationToken>());
 
-		_ = fakeGamePlayerOnlineClient
+		_ = fakeMessageSender
 			.Received(1)
-			.PlayerOnlineUpsertAsync(
-			gameProviderCode: query.GameProviderCode,
-			playerCode: query.PlayerCode,
-			balance: balanceResult.Balance,
-			freeBalance: balanceResult.FreeBalance,
-			outstandingBalance: balanceResult.OutstandingBalance,
+			.PublishAsync(
+			subject: Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceOnlineRequest),
+			data: Arg.Is(new Common.Protos.GameFundTransferBalanceOnlineRequest
+			{
+				GameProviderCode = query.GameProviderCode,
+				PlayerCode = playerInfo.PlayerCode,
+				Balance = balanceResult.Balance,
+				FreeBalance = balanceResult.FreeBalance,
+				OutstandingBalance = balanceResult.OutstandingBalance
+			}),
 			cancellationToken: Arg.Any<CancellationToken>());
 	}
 
 	[Fact]
 	public async Task Platform_Currency_IDR_Game_Provider_IDR_1000_Amount_1()
 	{
-		var faceLogger = NullLogger<FundBalanceGetService>.Instance;
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeFundBalanceRepository = Substitute.For<IFundBalanceRepository>();
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 		var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
-		var fakeGamePlayerOnlineClient = Substitute.For<IGamePlayerOnlineClient>();
 
 		var query = new FundBalanceQuery(
 			 GameProviderCode: GameProviderType.Kaiyuan,
@@ -330,12 +326,10 @@ public class FundBalanceGetServiceUnitTest
 			.Returns(balanceResult);
 
 		var sut = new FundBalanceGetService(
-			faceLogger,
 			fakePlayerRepository,
 			fakeFundBalanceRepository,
 			fakeMessageSender,
-			fakeGameCurrencyClient,
-			fakeGamePlayerOnlineClient);
+			fakeGameCurrencyClient);
 
 		var actual = await sut.GetAsync(query);
 
@@ -348,7 +342,7 @@ public class FundBalanceGetServiceUnitTest
 			.Received(1)
 			.PublishAsync(
 			subject: Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest),
-			data: Arg.Is(new Common.Protos.GameFundTransferCacheRequest
+			data: Arg.Is(new Common.Protos.GameFundTransferBalanceCacheRequest
 			{
 				Action = Common.Protos.Action.Cache,
 				GameProviderCode = query.GameProviderCode,
@@ -359,14 +353,18 @@ public class FundBalanceGetServiceUnitTest
 			}),
 			cancellationToken: Arg.Any<CancellationToken>());
 
-		_ = fakeGamePlayerOnlineClient
+		_ = fakeMessageSender
 			.Received(1)
-			.PlayerOnlineUpsertAsync(
-			gameProviderCode: query.GameProviderCode,
-			playerCode: query.PlayerCode,
-			balance: balanceResult.Balance,
-			freeBalance: balanceResult.FreeBalance,
-			outstandingBalance: balanceResult.OutstandingBalance,
+			.PublishAsync(
+			subject: Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferBalanceOnlineRequest),
+			data: Arg.Is(new Common.Protos.GameFundTransferBalanceOnlineRequest
+			{
+				GameProviderCode = query.GameProviderCode,
+				PlayerCode = playerInfo.PlayerCode,
+				Balance = balanceResult.Balance,
+				FreeBalance = balanceResult.FreeBalance,
+				OutstandingBalance = balanceResult.OutstandingBalance
+			}),
 			cancellationToken: Arg.Any<CancellationToken>());
 	}
 }
