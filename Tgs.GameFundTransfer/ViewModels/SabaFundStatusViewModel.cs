@@ -11,5 +11,5 @@ public record SabaFundStatusViewModel
 	[Required]
 	public string VendorId { get; init; } = default!;
 	[Required]
-	public string VendorTransId { get; init; } = default!;
+	public string OrderId { get; init; } = default!;
 }
