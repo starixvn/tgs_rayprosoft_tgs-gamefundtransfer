@@ -13,6 +13,7 @@ using Tgs.GameFundTransfer.Core;
 using Tgs.GameFundTransfer.DocumentFilters;
 using Tgs.GameFundTransfer.GrpcServices;
 using Tgs.GameFundTransfer.Messages;
+using Tgs.GamePlayerOnline.Client.DependencyInjection;
 using Tgs.MessageQueue.Nats.Serializers;
 
 var filterInstrumentations = new[] { "html", "ico", "png", "jpg" };
@@ -111,6 +112,11 @@ builder.Services.AddGameFundTransfer(
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
 		http.BaseAddress = config.GetValue<Uri>("GameTransfer:GameCurrencyClientBaseUrl");
+	}))
+	.AddGamePlayerOnlineClient(httpClientBuilder => httpClientBuilder.ConfigureHttpClient((sp, http) =>
+	{
+		var config = sp.GetRequiredService<IConfiguration>();
+		http.BaseAddress = config.GetValue<Uri>("GameTransfer:GamePlayerOnlineClientBaseUrl");
 	}));
 
 builder.Services
