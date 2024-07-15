@@ -1,12 +1,13 @@
+include:
+  - project: rayprosoft/tgs-ci-scripts
+    ref: main
+    file: GitLab/Templates/gitlab-job-templates.yml
+
 variables:
   ImageName: pgtgs/game-gamefundtransfer
   TgsSettingKey: game-gamefundtransfer
   HelmTemplateFolderName: game-gamefundtransfer
-  BuildCacheKey: Tgs.GameFundTransfer.$CI_PIPELINE_ID
-
-default:
-  before_script:
-    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
+  BuildCacheKey: Tgs.GameFundTransfer.$CI_PIPELINE_IID
 
 stages:
   - build
@@ -17,213 +18,99 @@ stages:
   - deploy-prod
 
 build-code:
-  stage: build
-  script:
-    - dotnet build -c $BuildConfiguration
-  only:
-    - merge_requests
-    - main
-  cache:
-    key: $BuildCacheKey
-    untracked: true 
+  extends: .build-code-template
 
 unit-test:
-  stage: test
-  variables:
-    DOTNET_USE_POLLING_FILE_WATCHER: "true"
+  extends: .unit-test-template
   script:
-    - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
-  needs:
-    - build-code
-  only:
-    - merge_requests
-    - main
-  cache:
-    key: $BuildCacheKey
-    untracked: true   
-    policy: pull
-  artifacts:
-    when: always
-    reports:
-      junit: ./TestReports/*-TestReport.xml
+    - dotnet test "**/bin/$BuildConfiguration/$Framework/*Test.dll" -l:'junit;LogFilePath=TestResults/TestResults.xml'
 
 push-nuget:
-  stage: publish
-  needs:
-    - build-code
-    - unit-test
-  cache:
-    key: $BuildCacheKey
-    untracked: true   
-    policy: pull
-  only:
-    - main
+  extends: .push-nuget-template
   script:
-    - dotnet pack -c $BuildConfiguration "Tgs.GameFundTransfer.Client/Tgs.GameFundTransfer.Client.csproj" --no-restore
-    - dotnet nuget push "Tgs.GameFundTransfer.Client/bin/$BuildConfiguration/*.nupkg" -s "raypro-baget" -k $NugetApiKey --skip-duplicate
+    - push_package "Tgs.GameFundTransfer.Client"
   artifacts:
-    name: Nuget
-    untracked: false
-    expire_in: "30 days"
     paths:
       - Tgs.GameFundTransfer.Client/bin/$BuildConfiguration/*.nupkg
 
 push-docker-image:
-  stage: publish
-  needs:
-    - build-code
-    - unit-test
-  only:
-    - main
-  cache:
-    key: $BuildCacheKey
-    untracked: true   
-    policy: pull
+  extends: .push-docker-image-template
   script:
-    #- dotnet build "Tgs.GameFundTransfer/Tgs.GameFundTransfer.csproj" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:$Tag" --no-restore
-    - dotnet publish "Tgs.GameFundTransfer" 
-       --os linux --arch x64
-       /t:PublishContainer
-       -c $BuildConfiguration
-       /p:ContainerRepository=$ImageName
-       /p:ContainerImageTag=$Tag
-    - docker push $ImageName:$Tag
+    - push_docker "Tgs.GameFundTransfer" $ImageName $Tag
 
 push-k8s-template:
-  stage: publish
-  needs:
-    - unit-test
-  only:
-    - main
+  extends: .push-k8s-template
   script:
-    - mkdir -p artifacts/k8s
-    - cp -R deployment/k8s/$HelmTemplateFolderName artifacts/k8s/
-    - |
-      yq -i e '
-        .image.repository = strenv(ImageName) |
-        .image.tag = strenv(Tag)
-      ' artifacts/k8s/$HelmTemplateFolderName/values.yaml
-  artifacts:
-    name: HelmTemplate
-    untracked: false
-    expire_in: "180 days"
-    paths:
-      - artifacts/**/*
+    - push_k8s_template $HelmTemplateFolderName $ImageName $Tag
 
 deploy-dev:
+  extends: .deploy-k8s-template
+  image: 
+    name: pgtgs/tgs-backend-deploy:latest
   variables:
-    GIT_STRATEGY: none
     namespace: dev
+    replica: 1
+    DedicatedKey: dedicated_game
+    NodeSelectorKey: node-selector_game
   environment:
-    name: dev
+    name: service-dev
   stage: deploy-dev
+  tags:
+    - dev
+    - kubernetes
+    - deploy
   needs:
     - push-docker-image
     - job: push-k8s-template
       artifacts: true
   only:
     - main
-  before_script:
-    - export KUBECONFIG=$KubeConfig_Raypro_dev
+  when: manual
   script:
-    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$TgsSettingKey})
-    - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated_game})
-    - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector_game})
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
-        -n $namespace \
-        --name-template tgs \
-        -f - 
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources,
-        "replicaCount": 1,
-        "restart": {
-            "enabled": true,
-            "schedule": "45 0 * * *"
-        }
-      }
-      EOF
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
-        -n $namespace \
-        --name-template tgs \
-        -f - \
-        | kubectl -n $namespace apply -f -
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources,
-        "replicaCount": 1,
-        "restart": {
-            "enabled": true,
-            "schedule": "45 0 * * *"
-        }
-      }
-      EOF
+    - deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
 
 deploy-staging:
+  extends: .deploy-k8s-template
+  image: 
+    name: pgtgs/tgs-backend-deploy:latest
   variables:
-    GIT_STRATEGY: none
     namespace: staging
+    replica: 1
+    DedicatedKey: dedicated_game
+    NodeSelectorKey: node-selector_game
   environment:
-    name: staging
+    name: service-staging
   stage: deploy-staging
+  tags:
+    - staging
+    - kubernetes
+    - deploy
   needs:
-    - deploy-dev
+    - push-docker-image
     - job: push-k8s-template
       artifacts: true
   only:
     - main
   when: manual
-  before_script:
-    - export KUBECONFIG=$KubeConfig_Raypro_staging
   script:
-    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$TgsSettingKey})
-    - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated_game})
-    - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector_game})
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
-        -n $namespace \
-        --name-template tgs \
-        -f - 
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources,
-        "replicaCount": 1,
-        "restart": {
-            "enabled": true,
-            "schedule": "45 0 * * *"
-        }
-      }
-      EOF
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
-        -n $namespace \
-        --name-template tgs \
-        -f - \
-        | kubectl -n $namespace apply -f -
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources,
-        "replicaCount": 1,
-        "restart": {
-            "enabled": true,
-            "schedule": "45 0 * * *"
-        }
-      }
-      EOF
+    - deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
 
 deploy-prod:
+  extends: .deploy-k8s-template
+  image: 
+    name: pgtgs/tgs-backend-deploy:latest
   variables:
-    GIT_STRATEGY: none
     namespace: prod
+    replica: 2
+    DedicatedKey: dedicated_game
+    NodeSelectorKey: node-selector_game
   environment:
-    name: prod
+    name: service-prod
   stage: deploy-prod
+  tags:
+    - prod
+    - kubernetes
+    - deploy
   needs:
     - deploy-staging
     - job: push-k8s-template
@@ -231,42 +118,5 @@ deploy-prod:
   only:
     - main
   when: manual
-  before_script:
-    - export KUBECONFIG=$KubeConfig_Raypro_prod
   script:
-    - export resources=$(kubectl get cm resources-setting -o jsonpath={.data.$TgsSettingKey})
-    - export dedicated=$(kubectl get cm tgs-settings -o jsonpath={.data.dedicated_game})
-    - export node_selector=$(kubectl get cm tgs-settings -o jsonpath={.data.node-selector_game})
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
-        -n $namespace \
-        --name-template tgs \
-        -f - 
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources,
-        "replicaCount": 2,
-        "restart": {
-            "enabled": true,
-            "schedule": "45 0 * * *"
-        }
-      }
-      EOF
-    - |
-      cat << EOF | yq e -P | helm template artifacts/k8s/$HelmTemplateFolderName \
-        -n $namespace \
-        --name-template tgs \
-        -f - \
-        | kubectl -n $namespace apply -f -
-      {
-        "nodeSelector": $node_selector,
-        "tolerations": [$dedicated],
-        "resources": $resources,
-        "replicaCount": 2,
-        "restart": {
-            "enabled": true,
-            "schedule": "45 0 * * *"
-        }
-      }
-      EOF
+    - deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
