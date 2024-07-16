@@ -23,7 +23,7 @@ build-code:
 unit-test:
   extends: .unit-test-template
   script:
-    - dotnet test "**/bin/$BuildConfiguration/$Framework/*Test.dll" -l:'junit;LogFilePath=TestResults/TestResults.xml'
+    - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
 
 push-nuget:
   extends: .push-nuget-template
@@ -67,7 +67,15 @@ deploy-dev:
     - main
   when: manual
   script:
-    - deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
+    - |
+      cat << EOF | deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
+        {
+          "restart": {
+            "enabled": true,
+            "schedule": "13 0 * * *"
+          }          
+        }
+      EOF
 
 deploy-staging:
   extends: .deploy-k8s-template
@@ -93,7 +101,15 @@ deploy-staging:
     - main
   when: manual
   script:
-    - deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
+    - |
+      cat << EOF | deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
+        {
+          "restart": {
+            "enabled": true,
+            "schedule": "13 0 * * *"
+          }          
+        }
+      EOF
 
 deploy-prod:
   extends: .deploy-k8s-template
@@ -119,4 +135,12 @@ deploy-prod:
     - main
   when: manual
   script:
-    - deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
+    - |
+      cat << EOF | deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
+        {
+          "restart": {
+            "enabled": true,
+            "schedule": "13 0 * * *"
+          }          
+        }
+      EOF
