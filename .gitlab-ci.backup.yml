@@ -1,0 +1,146 @@
+include:
+  - project: rayprosoft/tgs-ci-scripts
+    ref: main
+    file: GitLab/Templates/gitlab-job-templates.yml
+
+variables:
+  ImageName: pgtgs/game-gamefundtransfer
+  TgsSettingKey: game-gamefundtransfer
+  HelmTemplateFolderName: game-gamefundtransfer
+  BuildCacheKey: Tgs.GameFundTransfer.$CI_PIPELINE_IID
+
+stages:
+  - build
+  - test
+  - publish
+  - deploy-dev
+  - deploy-staging
+  - deploy-prod
+
+build-code:
+  extends: .build-code-template
+
+unit-test:
+  extends: .unit-test-template
+  script:
+    - dotnet test -c $BuildConfiguration -l:"junit;LogFilePath=../TestReports/{assembly}-TestReport.xml" --no-restore --no-build
+
+push-nuget:
+  extends: .push-nuget-template
+  script:
+    - push_package "Tgs.GameFundTransfer.Client"
+  artifacts:
+    paths:
+      - Tgs.GameFundTransfer.Client/bin/$BuildConfiguration/*.nupkg
+
+push-docker-image:
+  extends: .push-docker-image-template
+  script:
+    - push_docker "Tgs.GameFundTransfer" $ImageName $Tag
+
+push-k8s-template:
+  extends: .push-k8s-template
+  script:
+    - push_k8s_template $HelmTemplateFolderName $ImageName $Tag
+
+deploy-dev:
+  extends: .deploy-k8s-template
+  image: 
+    name: pgtgs/tgs-backend-deploy:latest
+  variables:
+    namespace: dev
+    replica: 1
+    DedicatedKey: dedicated_game
+    NodeSelectorKey: node-selector_game
+  environment:
+    name: service-dev
+  stage: deploy-dev
+  tags:
+    - dev
+    - kubernetes
+    - deploy
+  needs:
+    - push-docker-image
+    - job: push-k8s-template
+      artifacts: true
+  only:
+    - main
+  when: manual
+  script:
+    - |
+      cat << EOF | deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
+        {
+          "restart": {
+            "enabled": true,
+            "schedule": "13 0 * * *"
+          }          
+        }
+      EOF
+
+deploy-staging:
+  extends: .deploy-k8s-template
+  image: 
+    name: pgtgs/tgs-backend-deploy:latest
+  variables:
+    namespace: staging
+    replica: 1
+    DedicatedKey: dedicated_game
+    NodeSelectorKey: node-selector_game
+  environment:
+    name: service-staging
+  stage: deploy-staging
+  tags:
+    - staging
+    - kubernetes
+    - deploy
+  needs:
+    - push-docker-image
+    - job: push-k8s-template
+      artifacts: true
+  only:
+    - main
+  when: manual
+  script:
+    - |
+      cat << EOF | deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
+        {
+          "restart": {
+            "enabled": true,
+            "schedule": "13 0 * * *"
+          }          
+        }
+      EOF
+
+deploy-prod:
+  extends: .deploy-k8s-template
+  image: 
+    name: pgtgs/tgs-backend-deploy:latest
+  variables:
+    namespace: prod
+    replica: 2
+    DedicatedKey: dedicated_game
+    NodeSelectorKey: node-selector_game
+  environment:
+    name: service-prod
+  stage: deploy-prod
+  tags:
+    - prod
+    - kubernetes
+    - deploy
+  needs:
+    - deploy-staging
+    - job: push-k8s-template
+      artifacts: true
+  only:
+    - main
+  when: manual
+  script:
+    - |
+      cat << EOF | deploy_k8s $TgsSettingKey $HelmTemplateFolderName $namespace
+        {
+          "restart": {
+            "enabled": true,
+            "schedule": "13 0 * * *"
+          }          
+        }
+      EOF
