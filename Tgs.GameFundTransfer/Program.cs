@@ -27,9 +27,9 @@ builder.Logging
 		options.ParseStateValues = true;
 		_ = options.AddFluentdForwardExporter(fluentOptions =>
 		{
-			var nodeIp = builder.Configuration.GetValue<string>("NODE_IP")!;
+			var nodeIp = builder.Configuration.GetValue<string>("Otel:NodeIp")!;
 			fluentOptions.Host = nodeIp;
-			fluentOptions.Tag = builder.Configuration.GetValue<string>("OTEL_SERVICE_NAME")!;
+			fluentOptions.Tag = builder.Configuration.GetValue<string>("Otel:ServiceName")!;
 			fluentOptions.UseMessagePack();
 		});
 	});
@@ -136,7 +136,7 @@ builder.Services
 
 builder.Services
 	.AddOpenTelemetry()
-	.WithTracing(builder => builder
+	.WithTracing(tracingBuilder => tracingBuilder
 		.SetResourceBuilder(ResourceBuilder.CreateDefault()
 			.AddEnvironmentVariableDetector())
 		.AddSource("Tgs.*")
@@ -154,7 +154,7 @@ builder.Services
 		.AddGrpcClientInstrumentation()
 		.AddGrpcCoreInstrumentation()
 		.AddEntityFrameworkCoreInstrumentation(options => options.SetDbStatementForText = true)
-		.AddOtlpExporter())
+		.AddOtlpExporter(options => options.Endpoint = builder.Configuration.GetValue<Uri>("Otel:Collector")))
 	.WithMetrics(meterBuiler => meterBuiler
 	.SetResourceBuilder(ResourceBuilder.CreateDefault()
 		.AddEnvironmentVariableDetector())
