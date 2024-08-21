@@ -32,7 +32,8 @@ builder.Logging
 			fluentOptions.Tag = builder.Configuration.GetValue<string>("Otel:ServiceName")!;
 			fluentOptions.UseMessagePack();
 		});
-	});
+	}
+	);
 
 // Add services to the container.
 builder.Services
@@ -136,9 +137,10 @@ builder.Services
 
 builder.Services
 	.AddOpenTelemetry()
+	.ConfigureResource(_ => _.AddService(builder.Configuration.GetValue<string>("Otel:ServiceName")))
 	.WithTracing(tracingBuilder => tracingBuilder
 		.SetResourceBuilder(ResourceBuilder.CreateDefault()
-			.AddEnvironmentVariableDetector())
+		.AddEnvironmentVariableDetector())
 		.AddSource("Tgs.*")
 		.AddSource("TGS.*")
 		.AddSource("Valhalla.*")
