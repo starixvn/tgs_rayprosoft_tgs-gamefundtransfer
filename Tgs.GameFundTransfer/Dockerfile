@@ -9,6 +9,7 @@ EXPOSE 8081
 FROM hub.lumigame.com/base/dotnet/core/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+COPY ["nuget.config", "."]
 COPY ["Tgs.GameFundTransfer/Tgs.GameFundTransfer.csproj", "Tgs.GameFundTransfer/"]
 COPY ["Tgs.GameFundTransfer.Common/Tgs.GameFundTransfer.Common.csproj", "Tgs.GameFundTransfer.Common/"]
 COPY ["Tgs.GameFundTransfer.Core/Tgs.GameFundTransfer.Core.csproj", "Tgs.GameFundTransfer.Core/"]
