@@ -113,10 +113,12 @@ builder.Services
 	.AddNatsMessageQueue(config => config
 	.ConfigureResolveConnection(sp => sp.GetRequiredKeyedService<NatsConnection>("Nats"))
 	.AddHandler<GameFundTransferBalanceCacheMessageHandler>(Tgs.GameFundTransfer.Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest, typeof(GameFundTransferBalanceCacheMessageHandler).FullName!)
-	.AddHandler<GameFundTransferBalanceOnlineMessageHandler>(Tgs.GameFundTransfer.Common.GameFundTransferNatsConst.GameFundTransferBalanceOnlineRequest, typeof(GameFundTransferBalanceOnlineMessageHandler).FullName!))
+	.AddHandler<GameFundTransferBalanceOnlineMessageHandler>(Tgs.GameFundTransfer.Common.GameFundTransferNatsConst.GameFundTransferBalanceOnlineRequest, typeof(GameFundTransferBalanceOnlineMessageHandler).FullName!)
+	.AddHandler<GameFundTransferTrackerMessageHandler>(Tgs.GameFundTransfer.Common.GameFundTransferNatsConst.GameFundTransferTrackerRequest, typeof(GameFundTransferTrackerMessageHandler).FullName!))
 	.ClearAllExchanges()
 	.AddNatsGlobPatternExchange(Tgs.GameFundTransfer.Common.GameFundTransferNatsConst.GameFundTransferBalanceCacheRequest)
-	.AddNatsGlobPatternExchange(Tgs.GameFundTransfer.Common.GameFundTransferNatsConst.GameFundTransferBalanceOnlineRequest);
+	.AddNatsGlobPatternExchange(Tgs.GameFundTransfer.Common.GameFundTransferNatsConst.GameFundTransferBalanceOnlineRequest)
+	.AddNatsGlobPatternExchange(Tgs.GameFundTransfer.Common.GameFundTransferNatsConst.GameFundTransferTrackerRequest);
 
 builder.Services
 	.AddOpenTelemetry()
