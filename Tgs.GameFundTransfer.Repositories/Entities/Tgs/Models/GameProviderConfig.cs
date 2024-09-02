@@ -9,31 +9,31 @@ public partial class GameProviderConfig
 {
     public Guid Id { get; set; }
 
-    public string ClientId { get; set; } = null!;
-
-    public string ConfigurationData { get; set; } = null!;
-
-    public string CreatedByUsername { get; set; } = null!;
-
-    public DateTime CreatedOn { get; set; }
+    public string Name { get; set; } = null!;
 
     public string? Description { get; set; }
 
-    public string DesktopEndpoint { get; set; } = null!;
-
-    public Guid GameProviderId { get; set; }
-
-    public bool IsDefault { get; set; }
-
-    public string MobileEndpoint { get; set; } = null!;
-
-    public string Name { get; set; } = null!;
+    public string ClientId { get; set; } = null!;
 
     public string SecretKey { get; set; } = null!;
 
     public short Status { get; set; }
 
-    public string UpdatedByUsername { get; set; } = null!;
+    public Guid GameProviderId { get; set; }
+
+    public string DesktopEndpoint { get; set; } = null!;
+
+    public string MobileEndpoint { get; set; } = null!;
+
+    public string ConfigurationData { get; set; } = null!;
+
+    public bool IsDefault { get; set; }
+
+    public DateTime CreatedOn { get; set; }
 
     public DateTime UpdatedOn { get; set; }
+
+    public string CreatedByUsername { get; set; } = null!;
+
+    public string UpdatedByUsername { get; set; } = null!;
 }

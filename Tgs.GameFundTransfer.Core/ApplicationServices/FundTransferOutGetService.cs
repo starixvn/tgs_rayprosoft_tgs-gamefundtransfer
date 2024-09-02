@@ -9,6 +9,7 @@ namespace Tgs.GameFundTransfer.Core.ApplicationServices;
 
 internal class FundTransferOutGetService(
 	ILogger<FundTransferOutGetService> logger,
+	IPlayerRepository playerRepository,
 	IGameCurrencyClient gameCurrencyClient,
 	IFundsDistributedLock fundsDistributedLock,
 	IGameProvidersClient gameProvidersClient,
@@ -22,9 +23,14 @@ internal class FundTransferOutGetService(
 		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(query.Amount);
 		ArgumentOutOfRangeException.ThrowIfGreaterThan(query.Amount, 10000000.00m);
 
+		var playerInfo = await playerRepository.GetAsync(
+			playerCode: query.PlayerCode,
+			cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+
 		var exchangeRateFundResult = await gameCurrencyClient.ConvertGameProviderFundsAsync(
 			gameProviderCode: query.GameProviderCode,
-			currencyCode: query.CurrencyCode,
+			currencyCode: playerInfo.CurrencyCode,
 			amount: query.Amount,
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
@@ -41,7 +47,7 @@ internal class FundTransferOutGetService(
 			.ConfigureAwait(false);
 
 		var balance = await cashServiceClient.GetBalanceAsync(
-			walletId: query.WalletId,
+			walletId: playerInfo.WalletId,
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
@@ -67,7 +73,7 @@ internal class FundTransferOutGetService(
 			try
 			{
 				transactionResponse = await cashServiceClient.GameProviderFundOutAsync(
-				   walletId: query.WalletId,
+				   walletId: playerInfo.WalletId,
 				   amount: query.Amount,
 				   description: $"【Default】->【{query.GameProviderCode}】",
 				   externalId: fundProcessingResult.CashTransactionId,
@@ -94,7 +100,7 @@ internal class FundTransferOutGetService(
 				try
 				{
 					var fundRefundResponse = await cashServiceClient.GameProviderFundRefundAsync(
-						walletId: query.WalletId,
+						walletId: playerInfo.WalletId,
 						amount: query.Amount,
 						description: transactionResponse.TransactionId.ToString(),
 						externalId: fundProcessingResult.CashTransactionId,

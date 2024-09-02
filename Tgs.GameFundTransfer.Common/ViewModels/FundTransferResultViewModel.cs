@@ -1,5 +1,4 @@
-﻿namespace Tgs.GameFundTransfer.ViewModels;
-
+﻿namespace Tgs.GameFundTransfer.Common.ViewModels;
 public record FundTransferResultViewModel(
 	Guid FundTransactionId,
 	string CashTransactionId,
