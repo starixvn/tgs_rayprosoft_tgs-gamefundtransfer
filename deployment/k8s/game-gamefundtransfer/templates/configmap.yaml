@@ -12,6 +12,7 @@ data:
           "Default": "Warning",
           "Tgs.GameFundTransfer.Messages.GameFundTransferBalanceCacheMessageHandler": "Information",
           "Tgs.GameFundTransfer.Messages.GameFundTransferBalanceOnlineMessageHandler": "Information",
+          "Tgs.GameFundTransfer.Messages.GameFundTransferTrackerMessageHandler": "Information",
           "Tgs.GameFundTransfer.Core.ApplicationServices.FundProcessingFundInAddGetService": "Information",
           "Tgs.GameFundTransfer.Core.ApplicationServices.FundProcessingFundOutAddGetService": "Information",
           "Tgs.GameFundTransfer.Core.ApplicationServices.GameProviderFundInGetService": "Information",
