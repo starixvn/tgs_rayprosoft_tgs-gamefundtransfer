@@ -16,6 +16,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 	public async Task Fund_In()
 	{
 		var faceLogger = NullLogger<FundTransferInGetService>.Instance;
+		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
 		var fakeFundsDistributedLock = Substitute.For<IFundsDistributedLock>();
 		var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
@@ -26,9 +27,19 @@ public class FundTransferInOneClickGetServiceUnitTest
 
 		var query = new FundTransferInOneClickQuery(
 			GameProviderCode: GameProviderType.Kaiyuan,
-			PlayerCode: "4ucmqplxb029",
+			PlayerCode: "4ucmqplxb029");
+
+		var playerInfo = new Models.PlayerInfo(
+			BrandId: Guid.NewGuid(),
+			BrandCode: "GPI",
+			PlayerCode: query.PlayerCode,
+			Username: query.PlayerCode,
 			WalletId: Guid.NewGuid(),
 			CurrencyCode: "CNY");
+		_ = fakePlayerRepository.GetAsync(
+			playerCode: Arg.Is(query.PlayerCode),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(playerInfo);
 
 		var gameProviderBalance = new PlayerBalanceResponse(
 			Balance: 100.0m,
@@ -46,7 +57,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 			OutstandingBalance: gameProviderBalance.OutstandingBalance);
 		_ = fakeGameCurrencyClient.ConvertPlatformBalanceAsync(
 			gameProviderCode: Arg.Is(query.GameProviderCode),
-			currencyCode: Arg.Is(query.CurrencyCode),
+			currencyCode: Arg.Is(playerInfo.CurrencyCode),
 			balance: Arg.Is(gameProviderBalance.Balance),
 			freeBalance: Arg.Is(gameProviderBalance.FreeBalance),
 			outstandingBalance: Arg.Is(gameProviderBalance.OutstandingBalance),
@@ -80,7 +91,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 				GameProviderCode: fundProcessingResult.GameProviderCode,
 				BrandCode: fundProcessingResult.BrandCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: query.CurrencyCode,
+				CurrencyCode: playerInfo.CurrencyCode,
 				GameTransactionId: fundProcessingResult.GameTransactionId,
 				Amount: gameProviderBalance.FreeBalance),
 			cancellationToken: Arg.Any<CancellationToken>())
@@ -92,7 +103,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 			Balance = 10
 		};
 		_ = fakeCashServiceClient.GameProviderFundInAsync(
-			walletId: Arg.Is(query.WalletId),
+			walletId: Arg.Is(playerInfo.WalletId),
 			amount: Arg.Is(convertPlatformBalanceResult.FreeBalance),
 			description: Arg.Is($"【{query.GameProviderCode}】->【Default】"),
 			externalId: Arg.Is(fundProcessingResult.CashTransactionId.ToString()),
@@ -101,6 +112,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 
 		var sut = new FundTransferInOneClickGetService(
 			faceLogger,
+			fakePlayerRepository,
 			fakeGameCurrencyClient,
 			fakeFundsDistributedLock,
 			fakeGameProvidersClient,
@@ -143,6 +155,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 	public async Task Fund_Transfer_Lock_Failed()
 	{
 		var faceLogger = NullLogger<FundTransferInGetService>.Instance;
+		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
 		var fakeFundsDistributedLock = Substitute.For<IFundsDistributedLock>();
 		var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
@@ -153,9 +166,19 @@ public class FundTransferInOneClickGetServiceUnitTest
 
 		var query = new FundTransferInOneClickQuery(
 			GameProviderCode: GameProviderType.Kaiyuan,
-			PlayerCode: "4ucmqplxb029",
+			PlayerCode: "4ucmqplxb029");
+
+		var playerInfo = new Models.PlayerInfo(
+			BrandId: Guid.NewGuid(),
+			BrandCode: "GPI",
+			PlayerCode: query.PlayerCode,
+			Username: query.PlayerCode,
 			WalletId: Guid.NewGuid(),
 			CurrencyCode: "CNY");
+		_ = fakePlayerRepository.GetAsync(
+			playerCode: Arg.Is(query.PlayerCode),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(playerInfo);
 
 		_ = fakeFundsDistributedLock.LockingAsync(
 			Arg.Is(query.GameProviderCode),
@@ -164,6 +187,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 
 		var sut = new FundTransferInOneClickGetService(
 			faceLogger,
+			fakePlayerRepository,
 			fakeGameCurrencyClient,
 			fakeFundsDistributedLock,
 			fakeGameProvidersClient,
@@ -185,6 +209,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 	public async Task Platform_Currency_IDR_1000_FundIn_Game_Provider_IDR_Amount_1()
 	{
 		var faceLogger = NullLogger<FundTransferInGetService>.Instance;
+		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
 		var fakeFundsDistributedLock = Substitute.For<IFundsDistributedLock>();
 		var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
@@ -195,9 +220,19 @@ public class FundTransferInOneClickGetServiceUnitTest
 
 		var query = new FundTransferInOneClickQuery(
 			GameProviderCode: GameProviderType.Kaiyuan,
-			PlayerCode: "4ucmqplxb029",
+			PlayerCode: "4ucmqplxb029");
+
+		var playerInfo = new Models.PlayerInfo(
+			BrandId: Guid.NewGuid(),
+			BrandCode: "GPI",
+			PlayerCode: query.PlayerCode,
+			Username: query.PlayerCode,
 			WalletId: Guid.NewGuid(),
 			CurrencyCode: "IDR_1000");
+		_ = fakePlayerRepository.GetAsync(
+			playerCode: Arg.Is(query.PlayerCode),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(playerInfo);
 
 		var gameProviderBalance = new PlayerBalanceResponse(
 			Balance: 1000.0m,
@@ -215,7 +250,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 			OutstandingBalance: 0.9m);
 		_ = fakeGameCurrencyClient.ConvertPlatformBalanceAsync(
 			gameProviderCode: Arg.Is(query.GameProviderCode),
-			currencyCode: Arg.Is(query.CurrencyCode),
+			currencyCode: Arg.Is(playerInfo.CurrencyCode),
 			balance: Arg.Is(gameProviderBalance.Balance),
 			freeBalance: Arg.Is(gameProviderBalance.FreeBalance),
 			outstandingBalance: Arg.Is(gameProviderBalance.OutstandingBalance),
@@ -249,7 +284,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 				GameProviderCode: fundProcessingResult.GameProviderCode,
 				BrandCode: fundProcessingResult.BrandCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: query.CurrencyCode,
+				CurrencyCode: playerInfo.CurrencyCode,
 				GameTransactionId: fundProcessingResult.GameTransactionId,
 				Amount: gameProviderBalance.FreeBalance),
 			cancellationToken: Arg.Any<CancellationToken>())
@@ -261,7 +296,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 			Balance = 1000
 		};
 		_ = fakeCashServiceClient.GameProviderFundInAsync(
-			walletId: Arg.Is(query.WalletId),
+			walletId: Arg.Is(playerInfo.WalletId),
 			amount: Arg.Is(convertPlatformBalanceResult.FreeBalance),
 			description: Arg.Is($"【{query.GameProviderCode}】->【Default】"),
 			externalId: Arg.Is(fundProcessingResult.CashTransactionId.ToString()),
@@ -270,6 +305,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 
 		var sut = new FundTransferInOneClickGetService(
 			faceLogger,
+			fakePlayerRepository,
 			fakeGameCurrencyClient,
 			fakeFundsDistributedLock,
 			fakeGameProvidersClient,
@@ -312,6 +348,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 	public async Task Platform_Currency_IDR_FundIn_Game_Provider_IDR_1000_Amount_1()
 	{
 		var faceLogger = NullLogger<FundTransferInGetService>.Instance;
+		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
 		var fakeFundsDistributedLock = Substitute.For<IFundsDistributedLock>();
 		var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
@@ -322,9 +359,19 @@ public class FundTransferInOneClickGetServiceUnitTest
 
 		var query = new FundTransferInOneClickQuery(
 			GameProviderCode: GameProviderType.Kaiyuan,
-			PlayerCode: "4ucmqplxb029",
+			PlayerCode: "4ucmqplxb029");
+
+		var playerInfo = new Models.PlayerInfo(
+			BrandId: Guid.NewGuid(),
+			BrandCode: "GPI",
+			PlayerCode: query.PlayerCode,
+			Username: query.PlayerCode,
 			WalletId: Guid.NewGuid(),
 			CurrencyCode: "IDR");
+		_ = fakePlayerRepository.GetAsync(
+			playerCode: Arg.Is(query.PlayerCode),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(playerInfo);
 
 		var gameProviderBalance = new PlayerBalanceResponse(
 			Balance: 10.0m,
@@ -342,7 +389,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 			OutstandingBalance: 900m);
 		_ = fakeGameCurrencyClient.ConvertPlatformBalanceAsync(
 			gameProviderCode: Arg.Is(query.GameProviderCode),
-			currencyCode: Arg.Is(query.CurrencyCode),
+			currencyCode: Arg.Is(playerInfo.CurrencyCode),
 			balance: Arg.Is(gameProviderBalance.Balance),
 			freeBalance: Arg.Is(gameProviderBalance.FreeBalance),
 			outstandingBalance: Arg.Is(gameProviderBalance.OutstandingBalance),
@@ -376,7 +423,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 				GameProviderCode: fundProcessingResult.GameProviderCode,
 				BrandCode: fundProcessingResult.BrandCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: query.CurrencyCode,
+				CurrencyCode: playerInfo.CurrencyCode,
 				GameTransactionId: fundProcessingResult.GameTransactionId,
 				Amount: gameProviderBalance.FreeBalance),
 			cancellationToken: Arg.Any<CancellationToken>())
@@ -388,7 +435,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 			Balance = 1000
 		};
 		_ = fakeCashServiceClient.GameProviderFundInAsync(
-			walletId: Arg.Is(query.WalletId),
+			walletId: Arg.Is(playerInfo.WalletId),
 			amount: Arg.Is(convertPlatformBalanceResult.FreeBalance),
 			description: Arg.Is($"【{query.GameProviderCode}】->【Default】"),
 			externalId: Arg.Is(fundProcessingResult.CashTransactionId.ToString()),
@@ -397,6 +444,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 
 		var sut = new FundTransferInOneClickGetService(
 			faceLogger,
+			fakePlayerRepository,
 			fakeGameCurrencyClient,
 			fakeFundsDistributedLock,
 			fakeGameProvidersClient,
@@ -439,6 +487,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 	public async Task This_Player_Has_Acquired_A_Game_Provider_Less_Than_Or_Equal_To_0()
 	{
 		var faceLogger = NullLogger<FundTransferInGetService>.Instance;
+		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeGameCurrencyClient = Substitute.For<IGameCurrencyClient>();
 		var fakeFundsDistributedLock = Substitute.For<IFundsDistributedLock>();
 		var fakeGameProvidersClient = Substitute.For<IGameProvidersClient>();
@@ -449,9 +498,19 @@ public class FundTransferInOneClickGetServiceUnitTest
 
 		var query = new FundTransferInOneClickQuery(
 			GameProviderCode: GameProviderType.Kaiyuan,
-			PlayerCode: "4ucmqplxb029",
+			PlayerCode: "4ucmqplxb029");
+
+		var playerInfo = new Models.PlayerInfo(
+			BrandId: Guid.NewGuid(),
+			BrandCode: "GPI",
+			PlayerCode: query.PlayerCode,
+			Username: query.PlayerCode,
 			WalletId: Guid.NewGuid(),
 			CurrencyCode: "CNY");
+		_ = fakePlayerRepository.GetAsync(
+			playerCode: Arg.Is(query.PlayerCode),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(playerInfo);
 
 		var gameProviderBalance = new PlayerBalanceResponse(
 			Balance: 10m,
@@ -469,7 +528,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 			OutstandingBalance: 10.0m);
 		_ = fakeGameCurrencyClient.ConvertPlatformBalanceAsync(
 			gameProviderCode: Arg.Is(query.GameProviderCode),
-			currencyCode: Arg.Is(query.CurrencyCode),
+			currencyCode: Arg.Is(playerInfo.CurrencyCode),
 			balance: Arg.Is(gameProviderBalance.Balance),
 			freeBalance: Arg.Is(gameProviderBalance.FreeBalance),
 			outstandingBalance: Arg.Is(gameProviderBalance.OutstandingBalance),
@@ -478,6 +537,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 
 		var sut = new FundTransferInOneClickGetService(
 			faceLogger,
+			fakePlayerRepository,
 			fakeGameCurrencyClient,
 			fakeFundsDistributedLock,
 			fakeGameProvidersClient,

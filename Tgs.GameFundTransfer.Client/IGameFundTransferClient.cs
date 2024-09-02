@@ -1,14 +1,14 @@
-﻿using Tgs.GameFundTransfer.Protos;
+﻿using Tgs.GameFundTransfer.Common.ViewModels;
 
 namespace Tgs.GameFundTransfer.Client;
 
 public interface IGameFundTransferClient
 {
-	ValueTask<FundBalanceReply> FundBalanceAsync(string gameProviderCode, string playerCode, CancellationToken cancellationToken = default);
+	ValueTask<FundTransferBalanceResultViewModel> FundTransferBalanceAsync(string playerCode, string gameProviderCode, CancellationToken cancellationToken = default);
 
-	ValueTask<FundTransferReply> FundTransferInAsync(string gameProviderCode, string playerCode, Guid walletId, string currencyCode, decimal amount, CancellationToken cancellationToken = default);
+	ValueTask<FundTransferResultViewModel?> FundTransferInAsync(string playerCode, string gameProviderCode, decimal amount, CancellationToken cancellationToken = default);
 
-	ValueTask<FundTransferReply> FundTransferInOneClickAsync(string gameProviderCode, string playerCode, Guid walletId, string currencyCode, CancellationToken cancellationToken = default);
+	ValueTask<FundTransferResultViewModel?> FundTransferInOneClickAsync(string playerCode, string gameProviderCode, CancellationToken cancellationToken = default);
 
-	ValueTask<FundTransferReply> FundTransferOutAsync(string gameProviderCode, string playerCode, Guid walletId, string currencyCode, decimal amount, CancellationToken cancellationToken = default);
+	ValueTask<FundTransferResultViewModel?> FundTransferOutAsync(string playerCode, string gameProviderCode, decimal amount, CancellationToken cancellationToken = default);
 }

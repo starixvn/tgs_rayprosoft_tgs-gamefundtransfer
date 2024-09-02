@@ -2,6 +2,4 @@
 
 public record FundTransferInOneClickQuery(
 	string GameProviderCode,
-	string PlayerCode,
-	Guid WalletId,
-	string CurrencyCode);
+	string PlayerCode);

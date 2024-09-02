@@ -18,27 +18,12 @@ data:
           "Tgs.GameFundTransfer.Core.ApplicationServices.GameProviderFundOutGetService": "Information"
         }
       },
-      "Kestrel": {
-        "EndpointDefaults": {
-          "Protocols": "Http2"
-        },
-        "Endpoints": {
-          "Http": {
-            "Url": "http://*:{{ .Values.service.targetPort }}",
-            "Protocols": "Http1"
-          },
-          "Grpc": {
-            "Url": "http://*:{{ .Values.service.grpc.targetPort }}",
-            "Protocols": "Http2"
-          }
-        }
-      },
-      "GameTransfer": {
+      "GameTransferConnectionStrings": {
         "GameProvidersClientBaseUrl": "http://game-gameproviders",
         "CashServiceClientBaseUrl": "http://cashservice-api",
         "GameCurrencyClientBaseUrl": "http://game-gamecurrency",
         "GameInterfaceSabaClientBaseUrl": "http://game-gameinterface-saba-service:9090",
-        "GamePlayerOnlineClientBaseUrl": "http://game-gameplayeronline",
+        "GamePlayerOnlineClientBaseUrl": "http://game-gameplayeronline"
       },
       "FundsLockedSetting": {
         "LockSeconds": 60

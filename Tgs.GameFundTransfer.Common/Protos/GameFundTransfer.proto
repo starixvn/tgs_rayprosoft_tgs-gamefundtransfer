@@ -33,4 +33,9 @@ message GameFundTransferBalanceOnlineRequest {
     phoenix.protobuf.DecimalValue outstanding_balance = 5;
 }
 
+message GameFundTransferTrackerRequest {
+    string game_provider_code = 1;
+    string player_code = 2;
+}
+
 // The response message containing the greetings.

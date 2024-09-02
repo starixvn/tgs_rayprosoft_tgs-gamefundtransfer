@@ -11,17 +11,17 @@ public partial class BrandGameProvider
 
     public Guid BrandId { get; set; }
 
+    public Guid GameProviderId { get; set; }
+
+    public short Status { get; set; }
+
+    public Guid GameProviderConfigurationId { get; set; }
+
     public string DefaultLanguageCode { get; set; } = null!;
 
     public string DesktopQueryString { get; set; } = null!;
 
-    public Guid GameProviderConfigurationId { get; set; }
-
-    public Guid GameProviderId { get; set; }
-
-    public bool IsManualChangeStatus { get; set; }
-
     public string MobileQueryString { get; set; } = null!;
 
-    public short Status { get; set; }
+    public bool IsManualChangeStatus { get; set; }
 }

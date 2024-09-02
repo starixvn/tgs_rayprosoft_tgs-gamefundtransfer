@@ -8,6 +8,7 @@ namespace Tgs.GameFundTransfer.Core.ApplicationServices;
 
 internal class FundTransferInOneClickGetService(
 	ILogger<FundTransferInGetService> logger,
+	IPlayerRepository playerRepository,
 	IGameCurrencyClient gameCurrencyClient,
 	IFundsDistributedLock fundsDistributedLock,
 	IGameProvidersClient gameProvidersClient,
@@ -18,6 +19,11 @@ internal class FundTransferInOneClickGetService(
 {
 	public async ValueTask<FundTransferResult> GetAsync(FundTransferInOneClickQuery query, CancellationToken cancellationToken = default)
 	{
+		var playerInfo = await playerRepository.GetAsync(
+			playerCode: query.PlayerCode,
+			cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+
 		await fundsDistributedLock.LockingAsync(
 			gameProviderCode: query.GameProviderCode,
 			playerCode: query.PlayerCode)
@@ -35,7 +41,7 @@ internal class FundTransferInOneClickGetService(
 
 			var convertPlatformBalanceResult = await gameCurrencyClient.ConvertPlatformBalanceAsync(
 				gameProviderCode: query.GameProviderCode,
-				currencyCode: query.CurrencyCode,
+				currencyCode: playerInfo.CurrencyCode,
 				balance: playerBalance.Balance,
 				freeBalance: playerBalance.FreeBalance,
 				outstandingBalance: playerBalance.OutstandingBalance,
@@ -58,7 +64,7 @@ internal class FundTransferInOneClickGetService(
 						GameProviderCode: fundProcessingResult.GameProviderCode,
 						BrandCode: fundProcessingResult.BrandCode,
 						PlayerCode: fundProcessingResult.PlayerCode,
-						CurrencyCode: query.CurrencyCode,
+						CurrencyCode: playerInfo.CurrencyCode,
 						GameTransactionId: fundProcessingResult.GameTransactionId,
 						Amount: playerBalance.FreeBalance),
 					cancellationToken: cancellationToken)
@@ -96,7 +102,7 @@ internal class FundTransferInOneClickGetService(
 			try
 			{
 				var transactionResponse = await cashServiceClient.GameProviderFundInAsync(
-					walletId: query.WalletId,
+					walletId: playerInfo.WalletId,
 					amount: convertPlatformBalanceResult.FreeBalance,
 					description: $"【{query.GameProviderCode}】->【Default】",
 					externalId: fundProcessingResult.CashTransactionId,

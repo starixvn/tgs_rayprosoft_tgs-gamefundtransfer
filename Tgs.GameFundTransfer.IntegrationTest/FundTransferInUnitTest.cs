@@ -1,8 +1,6 @@
-﻿using Grpc.Net.Client;
-
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
-
+using Tgs.GameFundTransfer.Client;
 using Tgs.GameFundTransfer.Core.ApplicationServices;
 using Tgs.ServiceUtility;
 
@@ -13,10 +11,8 @@ public class FundTransferInUnitTest
 	[Fact]
 	public async Task Normal_Process()
 	{
-		var gameProviderCode = "KY";
 		var playerCode = "4ucmqplxb029";
-		var walletId = Guid.NewGuid();
-		var currencyCode = "CNY";
+		var gameProviderCode = "CQ9";
 		var amount = 1.0m;
 
 		var fundTransactionId = Guid.NewGuid();
@@ -34,8 +30,6 @@ public class FundTransferInUnitTest
 			var query = new FundTransferInQuery(
 				 GameProviderCode: gameProviderCode,
 				 PlayerCode: playerCode,
-				 WalletId: walletId,
-				 CurrencyCode: currencyCode,
 				 Amount: amount);
 
 			_ = fakeService.GetAsync(
@@ -46,22 +40,19 @@ public class FundTransferInUnitTest
 			_ = services.AddTransient(_ => fakeService);
 		}));
 
-		var sut = new Client.GameFundTransferClient(new Protos.GameFundTransfer.GameFundTransferClient(
-				GrpcChannel.ForAddress(
-					address: web.Server.BaseAddress,
-					channelOptions: new GrpcChannelOptions { HttpHandler = web.Server.CreateHandler() })));
+		var httpClient = web.CreateClient();
+
+		var sut = new GameFundTransferClient(httpClient);
 
 		var actual = await sut.FundTransferInAsync(
-			gameProviderCode: gameProviderCode,
 			playerCode: playerCode,
-			walletId: walletId,
-			currencyCode: currencyCode,
+			gameProviderCode: gameProviderCode,
 			amount: amount);
 
 		Assert.NotNull(actual);
-		Assert.Equal(fundTransferResult.FundTransactionId, actual.FundTransactionId.ToGuid());
+		Assert.Equal(fundTransferResult.FundTransactionId, actual.FundTransactionId);
 		Assert.Equal(fundTransferResult.CashTransactionId, actual.CashTransactionId);
-		Assert.Equal(fundTransferResult.CashRespTransactionId, actual.CashRespTransactionId.ToGuid());
+		Assert.Equal(fundTransferResult.CashRespTransactionId, actual.CashRespTransactionId);
 		Assert.Equal(fundTransferResult.GameTransactionId, actual.GameTransactionId);
 		Assert.Equal(fundTransferResult.GameRespTransactionId, actual.GameRespTransactionId);
 	}

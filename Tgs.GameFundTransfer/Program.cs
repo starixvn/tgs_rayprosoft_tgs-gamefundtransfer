@@ -8,10 +8,8 @@ using NATS.Client.Core;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Tgs.GameFundTransfer;
 using Tgs.GameFundTransfer.Core;
 using Tgs.GameFundTransfer.DocumentFilters;
-using Tgs.GameFundTransfer.GrpcServices;
 using Tgs.GameFundTransfer.Messages;
 using Tgs.GamePlayerOnline.Client.DependencyInjection;
 using Tgs.MessageQueue.Nats.Serializers;
@@ -43,20 +41,6 @@ builder.Services
 		options.Filters.Add(new ConsumesAttribute(MediaTypeNames.Application.Json));
 	})
 	.AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
-
-// Additional configuration is required to successfully run gRPC on macOS.
-// For instructions on how to configure Kestrel and gRPC clients on macOS, visit https://go.microsoft.com/fwlink/?linkid=2099682
-
-// Add services to the container.
-builder.Services.AddSingleton<DiagnosticsInterceptorOptions>();
-builder.Services.AddSingleton<LoggingInterceptor>();
-builder.Services.AddGrpc(options =>
-{
-	options.Interceptors.Add<LoggingInterceptor>();
-	// If true, detailed exception messages are returned to clients when an exception is thrown in a service method.
-	// The default is false. Setting EnableDetailedErrors to true can leak sensitive information.
-	options.EnableDetailedErrors = true;
-});
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -91,12 +75,12 @@ builder.Services.AddGameFundTransfer(
 	(options, sp) =>
 	{
 		var configuration = sp.GetRequiredService<IConfiguration>();
-		options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:CashServiceClientBaseUrl")!;
+		options.BaseUrl = configuration.GetValue<Uri>("GameTransferConnectionStrings:CashServiceClientBaseUrl")!;
 	},
 	(options, sp) =>
 	{
 		var configuration = sp.GetRequiredService<IConfiguration>();
-		options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:GameInterfaceSabaClientBaseUrl")!;
+		options.BaseUrl = configuration.GetValue<Uri>("GameTransferConnectionStrings:GameInterfaceSabaClientBaseUrl")!;
 	})
 	.AddOptions<IPAddressOptions>()
 	.Configure((options) => options.IPAddress = builder.Configuration.GetSection("POD_IP").Value
@@ -106,17 +90,17 @@ builder.Services.AddGameFundTransfer(
 	.AddGameProvidersClient((options, sp) =>
 	{
 		var configuration = sp.GetRequiredService<IConfiguration>();
-		options.BaseUrl = configuration.GetValue<Uri>("GameTransfer:GameProvidersClientBaseUrl")!;
+		options.BaseUrl = configuration.GetValue<Uri>("GameTransferConnectionStrings:GameProvidersClientBaseUrl")!;
 	})
 	.AddGameCurrencyClient(httpClientBuilder => httpClientBuilder.ConfigureHttpClient((sp, http) =>
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
-		http.BaseAddress = config.GetValue<Uri>("GameTransfer:GameCurrencyClientBaseUrl");
+		http.BaseAddress = config.GetValue<Uri>("GameTransferConnectionStrings:GameCurrencyClientBaseUrl");
 	}))
 	.AddGamePlayerOnlineClient(httpClientBuilder => httpClientBuilder.ConfigureHttpClient((sp, http) =>
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
-		http.BaseAddress = config.GetValue<Uri>("GameTransfer:GamePlayerOnlineClientBaseUrl");
+		http.BaseAddress = config.GetValue<Uri>("GameTransferConnectionStrings:GamePlayerOnlineClientBaseUrl");
 	}));
 
 builder.Services
@@ -178,10 +162,6 @@ _ = app.UseAuthorization();
 _ = app.MapControllers();
 
 app.MapHealthChecks("/healthz");
-
-// Configure the HTTP request pipeline.
-app.MapGrpcService<GameFundTransferGrpcService>();
-app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
 _ = app.UseRegisterAsync();
 

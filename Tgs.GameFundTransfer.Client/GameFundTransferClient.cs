@@ -1,70 +1,79 @@
-﻿using Tgs.GameFundTransfer.Protos;
+﻿using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Tgs.GameFundTransfer.Client;
-
-internal class GameFundTransferClient(Protos.GameFundTransfer.GameFundTransferClient client) : IGameFundTransferClient
+internal class GameFundTransferClient(HttpClient httpClient) : IGameFundTransferClient
 {
-	public async ValueTask<FundBalanceReply> FundBalanceAsync(string gameProviderCode, string playerCode, CancellationToken cancellationToken = default)
+	private static readonly JsonSerializerOptions? _SerializerOptions = new()
 	{
-		var request = new FundBalanceRequest
+		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+		Converters =
 		{
-			GameProviderCode = gameProviderCode,
-			PlayerCode = playerCode,
-		};
+			new JsonStringEnumConverter()
+		}
+	};
+	public async ValueTask<Common.ViewModels.FundTransferBalanceResultViewModel> FundTransferBalanceAsync(string playerCode, string gameProviderCode, CancellationToken cancellationToken = default)
+	{
+		var response = await httpClient.GetAsync(
+			requestUri: $"/FundTransfer/{playerCode}/{gameProviderCode}/balance",
+			cancellationToken: cancellationToken).ConfigureAwait(false);
 
-		return await client.FundBalanceAsync(
-			request: request,
-			cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
+		_ = response.EnsureSuccessStatusCode();
+
+		var contentJson = await response.Content.ReadAsStringAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
+		return JsonSerializer.Deserialize<Common.ViewModels.FundTransferBalanceResultViewModel>(contentJson, _SerializerOptions)!;
 	}
 
-	public async ValueTask<FundTransferReply> FundTransferInAsync(string gameProviderCode, string playerCode, Guid walletId, string currencyCode, decimal amount, CancellationToken cancellationToken = default)
+	public ValueTask<Common.ViewModels.FundTransferResultViewModel?> FundTransferInAsync(string playerCode, string gameProviderCode, decimal amount, CancellationToken cancellationToken = default)
 	{
-		var request = new FundTransferRequest
-		{
-			GameProviderCode = gameProviderCode,
-			PlayerCode = playerCode,
-			WalletId = walletId,
-			CurrencyCode = currencyCode,
-			Amount = amount,
-		};
+		var jsonContent = JsonContent.Create(
+			inputValue: new Common.ViewModels.FundTransferViewModel
+			{
+				Amount = amount
+			},
+			options: _SerializerOptions);
 
-		return await client.FundTransferInAsync(
-			request: request,
-			cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
+		return httpClient.PostAsync($"/FundTransfer/{playerCode}/{gameProviderCode}/in", jsonContent, cancellationToken)
+			.ToAsyncEnumerable()
+			.Do(response => response.EnsureSuccessStatusCode())
+			.Where(response => response.StatusCode == System.Net.HttpStatusCode.OK)
+			.SelectMany(response => response.Content
+				.ReadFromJsonAsync<Common.ViewModels.FundTransferResultViewModel>(_SerializerOptions, cancellationToken)
+				.ToAsyncEnumerable())
+			.FirstOrDefaultAsync(cancellationToken: cancellationToken);
 	}
 
-	public async ValueTask<FundTransferReply> FundTransferInOneClickAsync(string gameProviderCode, string playerCode, Guid walletId, string currencyCode, CancellationToken cancellationToken = default)
+	public ValueTask<Common.ViewModels.FundTransferResultViewModel?> FundTransferInOneClickAsync(string playerCode, string gameProviderCode, CancellationToken cancellationToken = default)
 	{
-		var request = new FundTransferInOneClickRequest
-		{
-			GameProviderCode = gameProviderCode,
-			PlayerCode = playerCode,
-			WalletId = walletId,
-			CurrencyCode = currencyCode,
-		};
-
-		return await client.FundTransferInOneClickAsync(
-			request: request,
-			cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
+		return httpClient.PostAsync($"/FundTransfer/{playerCode}/{gameProviderCode}/in-one-click", null, cancellationToken)
+			.ToAsyncEnumerable()
+			.Do(response => response.EnsureSuccessStatusCode())
+			.Where(response => response.StatusCode == System.Net.HttpStatusCode.OK)
+			.SelectMany(response => response.Content
+				.ReadFromJsonAsync<Common.ViewModels.FundTransferResultViewModel>(_SerializerOptions, cancellationToken)
+				.ToAsyncEnumerable())
+			.FirstOrDefaultAsync(cancellationToken: cancellationToken);
 	}
 
-	public async ValueTask<FundTransferReply> FundTransferOutAsync(string gameProviderCode, string playerCode, Guid walletId, string currencyCode, decimal amount, CancellationToken cancellationToken = default)
+	public ValueTask<Common.ViewModels.FundTransferResultViewModel?> FundTransferOutAsync(string playerCode, string gameProviderCode, decimal amount, CancellationToken cancellationToken = default)
 	{
-		var request = new FundTransferRequest
-		{
-			GameProviderCode = gameProviderCode,
-			PlayerCode = playerCode,
-			WalletId = walletId,
-			CurrencyCode = currencyCode,
-			Amount = amount,
-		};
+		var jsonContent = JsonContent.Create(
+			inputValue: new Common.ViewModels.FundTransferViewModel
+			{
+				Amount = amount
+			},
+			options: _SerializerOptions);
 
-		return await client.FundTransferOutAsync(
-			request: request,
-			cancellationToken: cancellationToken)
-			.ConfigureAwait(false);
+		return httpClient.PostAsync($"/FundTransfer/{playerCode}/{gameProviderCode}/out", jsonContent, cancellationToken)
+			.ToAsyncEnumerable()
+			.Do(response => response.EnsureSuccessStatusCode())
+			.Where(response => response.StatusCode == System.Net.HttpStatusCode.OK)
+			.SelectMany(response => response.Content
+				.ReadFromJsonAsync<Common.ViewModels.FundTransferResultViewModel>(_SerializerOptions, cancellationToken)
+				.ToAsyncEnumerable())
+			.FirstOrDefaultAsync(cancellationToken: cancellationToken);
 	}
 }

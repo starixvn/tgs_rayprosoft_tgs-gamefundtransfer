@@ -8,6 +8,7 @@ namespace Tgs.GameFundTransfer.Core.ApplicationServices;
 
 internal class FundTransferInGetService(
 	ILogger<FundTransferInGetService> logger,
+	IPlayerRepository playerRepository,
 	IGameCurrencyClient gameCurrencyClient,
 	IFundsDistributedLock fundsDistributedLock,
 	IGameProvidersClient gameProvidersClient,
@@ -22,9 +23,14 @@ internal class FundTransferInGetService(
 		ArgumentOutOfRangeException.ThrowIfLessThan(query.Amount, 0.01m);
 		ArgumentOutOfRangeException.ThrowIfGreaterThan(query.Amount, 10000000.00m);
 
+		var playerInfo = await playerRepository.GetAsync(
+			playerCode: query.PlayerCode,
+			cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+
 		var exchangeRateFundResult = await gameCurrencyClient.ConvertGameProviderFundsAsync(
 			gameProviderCode: query.GameProviderCode,
-			currencyCode: query.CurrencyCode,
+			currencyCode: playerInfo.CurrencyCode,
 			amount: query.Amount,
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
@@ -63,7 +69,7 @@ internal class FundTransferInGetService(
 						GameProviderCode: fundProcessingResult.GameProviderCode,
 						BrandCode: fundProcessingResult.BrandCode,
 						PlayerCode: fundProcessingResult.PlayerCode,
-						CurrencyCode: query.CurrencyCode,
+						CurrencyCode: playerInfo.CurrencyCode,
 						GameTransactionId: fundProcessingResult.GameTransactionId,
 						Amount: gameProviderAmount),
 					cancellationToken: cancellationToken)
@@ -101,7 +107,7 @@ internal class FundTransferInGetService(
 			try
 			{
 				var transactionResponse = await cashServiceClient.GameProviderFundInAsync(
-					walletId: query.WalletId,
+					walletId: playerInfo.WalletId,
 					amount: query.Amount,
 					description: $"【{query.GameProviderCode}】->【Default】",
 					externalId: fundProcessingResult.CashTransactionId,

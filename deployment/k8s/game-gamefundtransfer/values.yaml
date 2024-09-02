@@ -46,9 +46,6 @@ service:
   type: ClusterIP
   port: 80
   targetPort: 8080
-  grpc:
-    port: 9090
-    targetPort: 9090
 
 ingress:
   enabled: false

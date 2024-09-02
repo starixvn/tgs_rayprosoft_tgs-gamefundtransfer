@@ -7,7 +7,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<Version>1.0.6</Version>
+		<Version>1.0.7</Version>
 		<Authors>Raypro</Authors>
 		<PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-gamefundtransfer</PackageProjectUrl>
 		<RepositoryUrl>https://gitlab.com/rayprosoft/tgs-gamefundtransfer.git</RepositoryUrl>
@@ -20,23 +20,17 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.65.0" />
-		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.65.0" />
-		<PackageReference Include="Grpc.Tools" Version="2.65.0">
+		<PackageReference Include="PhoenixToolkits.NuGet.BuildTools" Version="0.0.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="PhoenixToolkits.NuGet.BuildTools" Version="0.0.3">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.7" />
+		<PackageReference Include="System.Interactive.Async" Version="6.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Tgs.GameFundTransfer.Protos\Tgs.GameFundTransfer.Protos.csproj">
-	    <PrivateAssets>all</PrivateAssets>
-	  </ProjectReference>
+		<ProjectReference Include="..\Tgs.GameFundTransfer.Common\Tgs.GameFundTransfer.Common.csproj">
+		  <PrivateAssets>all</PrivateAssets>
+		</ProjectReference>
 	</ItemGroup>
 
 </Project>

@@ -4,12 +4,7 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<UserSecretsId>bdc85ead-1f9e-4194-8843-d5fd265b491d</UserSecretsId>
-		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 		<ServerGarbageCollection>true</ServerGarbageCollection>
-	</PropertyGroup>
-
-	<PropertyGroup>
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 		<NoWarn>$(NoWarn);1591;0063</NoWarn>
 	</PropertyGroup>
@@ -29,7 +24,7 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
 		<PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.7" />
 		<PackageReference Include="StackExchange.Redis" Version="2.8.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
 		<PackageReference Include="Grpc.AspNetCore" Version="2.65.0" />
 		<PackageReference Include="Tgs.Interceptors" Version="0.2.1" />
 	</ItemGroup>
@@ -37,7 +32,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Tgs.GameFundTransfer.Common\Tgs.GameFundTransfer.Common.csproj" />
 		<ProjectReference Include="..\Tgs.GameFundTransfer.Core\Tgs.GameFundTransfer.Core.csproj" />
-		<ProjectReference Include="..\Tgs.GameFundTransfer.Protos\Tgs.GameFundTransfer.Protos.csproj" />
 		<ProjectReference Include="..\Tgs.GameFundTransfer.Repositories\Tgs.GameFundTransfer.Repositories.csproj" />
 	</ItemGroup>
 
