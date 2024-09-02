@@ -10,8 +10,8 @@ data:
       "Logging": {
         "LogLevel": {
           "Default": "Warning",
-          "Tgs.GameFundTransfer.Messages.GameFundTransferBalanceCacheMessageHandler": "Information",
-          "Tgs.GameFundTransfer.Messages.GameFundTransferBalanceOnlineMessageHandler": "Information",
+          "Tgs.GameFundTransfer.Messages.GameFundTransferBalanceCacheMessageHandler": "Warning",
+          "Tgs.GameFundTransfer.Messages.GameFundTransferBalanceOnlineMessageHandler": "Warning",
           "Tgs.GameFundTransfer.Messages.GameFundTransferTrackerMessageHandler": "Information",
           "Tgs.GameFundTransfer.Core.ApplicationServices.FundProcessingFundInAddGetService": "Information",
           "Tgs.GameFundTransfer.Core.ApplicationServices.FundProcessingFundOutAddGetService": "Information",
