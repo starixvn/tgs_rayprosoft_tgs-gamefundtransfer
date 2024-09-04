@@ -18,9 +18,8 @@ public class GameProviderFundInGetServiceUnitTest
 
 		var query = new GameProviderFundInQuery(
 			 GameProviderCode: GameProviderType.Kaiyuan,
-			 BrandCode: "GPI",
 			 PlayerCode: "4ucmqplxb029",
-			 CurrencyCode: "CNY",
+			 WalletId: Guid.NewGuid(),
 			 GameTransactionId: "72412202405200607050004ucmqplxb029",
 			 Amount: 1);
 
@@ -54,6 +53,7 @@ public class GameProviderFundInGetServiceUnitTest
 			{
 				GameProviderCode = query.GameProviderCode,
 				PlayerCode = query.PlayerCode,
+				WalletId = query.WalletId
 			}),
 			cancellationToken: Arg.Any<CancellationToken>());
 	}
@@ -67,9 +67,8 @@ public class GameProviderFundInGetServiceUnitTest
 
 		var query = new GameProviderFundInQuery(
 			 GameProviderCode: GameProviderType.Kaiyuan,
-			 BrandCode: "GPI",
 			 PlayerCode: "4ucmqplxb029",
-			 CurrencyCode: "CNY",
+			 WalletId: Guid.NewGuid(),
 			 GameTransactionId: "72412202405200607050004ucmqplxb029",
 			 Amount: 1);
 
@@ -99,6 +98,7 @@ public class GameProviderFundInGetServiceUnitTest
 			{
 				GameProviderCode = query.GameProviderCode,
 				PlayerCode = query.PlayerCode,
+				WalletId = query.WalletId
 			}),
 			cancellationToken: Arg.Any<CancellationToken>());
 	}

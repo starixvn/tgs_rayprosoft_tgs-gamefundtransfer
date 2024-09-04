@@ -2,4 +2,5 @@
 
 public record FundTransferTrackerCommand(
 	string GameProviderCode,
-	string PlayerCode);
+	string PlayerCode,
+	Guid WalletId);

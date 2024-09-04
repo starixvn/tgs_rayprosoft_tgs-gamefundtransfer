@@ -19,7 +19,8 @@ public class GameFundTransferTrackerMessageHandler(
 				Data = new
 				{
 					data.GameProviderCode,
-					data.PlayerCode
+					data.PlayerCode,
+					WalletId = data.WalletId.ToGuid()
 				},
 				Message = "This receive message handler."
 			}));
@@ -27,7 +28,8 @@ public class GameFundTransferTrackerMessageHandler(
 		return service.ExecuteAsync(
 			command: new FundTransferTrackerCommand(
 				GameProviderCode: data.GameProviderCode,
-				PlayerCode: data.PlayerCode),
+				PlayerCode: data.PlayerCode,
+				WalletId: data.WalletId.ToGuid()),
 			cancellationToken: cancellationToken);
 	}
 }

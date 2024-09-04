@@ -13,38 +13,77 @@ internal class GameProviderFundInGetService(
 {
 	public async ValueTask<GameProviderFundInResult> GetAsync(GameProviderFundInQuery query, CancellationToken cancellationToken = default)
 	{
-		var response = await gameProvidersClient.PlayerFundInAsync(
-			gameProviderCode: query.GameProviderCode,
-			playerCode: query.PlayerCode,
-			orderId: query.GameTransactionId,
-			amount: query.Amount,
-			cancellationToken: cancellationToken)
-		.ConfigureAwait(false);
+		try
+		{
+			var response = await gameProvidersClient.PlayerFundInAsync(
+				gameProviderCode: query.GameProviderCode,
+				playerCode: query.PlayerCode,
+				orderId: query.GameTransactionId,
+				amount: query.Amount,
+				cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
 
-		ArgumentException.ThrowIfNullOrWhiteSpace(response.OrderId);
+			ArgumentException.ThrowIfNullOrWhiteSpace(response.OrderId);
 
-		logger.LogInformation("{info}",
-			new JsonObject
-			{
-				["LogOn"] = DateTime.Now.ToString("o"),
-				["GameProviderCode"] = query.GameProviderCode,
-				["PlayerCode"] = query.PlayerCode,
-				["OrderId"] = response.OrderId.ToString(),
-				["ExternalOrderId"] = response.ExternalOrderId,
-				["Mesaage"] = "This game provider funds transfer was successful.",
-			}.ToJsonString());
+			logger.LogInformation("{logInformation}",
+				new JsonObject
+				{
+					["LogOn"] = DateTime.Now.ToString("u"),
+					["GameProviderCode"] = query.GameProviderCode,
+					["PlayerCode"] = query.PlayerCode,
+					["WalletId"] = query.WalletId,
+					["GameTransactionId"] = query.GameTransactionId,
+					["OrderId"] = response.OrderId.ToString(),
+					["ExternalOrderId"] = response.ExternalOrderId,
+					["Amount"] = query.Amount,
+					["Mesaage"] = "This game provider funds transfer was successful."
+				}.ToJsonString());
 
-		await messageSender.PublishAsync(
-			subject: Common.GameFundTransferNatsConst.GameFundTransferTrackerRequest,
-			data: new Common.Protos.GameFundTransferTrackerRequest
-			{
-				GameProviderCode = query.GameProviderCode,
-				PlayerCode = query.PlayerCode
-			},
-			cancellationToken: cancellationToken).ConfigureAwait(false);
+			await messageSender.PublishAsync(
+				subject: Common.GameFundTransferNatsConst.GameFundTransferTrackerRequest,
+				data: new Common.Protos.GameFundTransferTrackerRequest
+				{
+					GameProviderCode = query.GameProviderCode,
+					PlayerCode = query.PlayerCode,
+					WalletId = query.WalletId
+				},
+				cancellationToken: cancellationToken).ConfigureAwait(false);
 
-		return new GameProviderFundInResult(
-			response.OrderId,
-			response.ExternalOrderId);
+			return new GameProviderFundInResult(
+				response.OrderId,
+				response.ExternalOrderId);
+		}
+		catch (ArgumentException ex)
+		{
+			logger.LogError(ex, "{logError}",
+				new JsonObject
+				{
+					["LogOn"] = DateTime.Now.ToString("u"),
+					["GameProviderCode"] = query.GameProviderCode,
+					["PlayerCode"] = query.PlayerCode,
+					["WalletId"] = query.WalletId,
+					["GameTransactionId"] = query.GameTransactionId,
+					["Amount"] = query.Amount,
+					["Mesaage"] = "The transaction number provided by this game provider is empty."
+				}.ToJsonString());
+
+			throw;
+		}
+		catch (Exception ex)
+		{
+			logger.LogError(ex, "{logError}",
+				new JsonObject
+				{
+					["LogOn"] = DateTime.Now.ToString("u"),
+					["GameProviderCode"] = query.GameProviderCode,
+					["PlayerCode"] = query.PlayerCode,
+					["WalletId"] = query.WalletId,
+					["GameTransactionId"] = query.GameTransactionId,
+					["Amount"] = query.Amount,
+					["Mesaage"] = "This game provider call failed."
+				}.ToJsonString());
+
+			throw;
+		}
 	}
 }

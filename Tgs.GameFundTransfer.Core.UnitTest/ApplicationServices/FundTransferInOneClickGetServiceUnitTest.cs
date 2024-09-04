@@ -89,9 +89,8 @@ public class FundTransferInOneClickGetServiceUnitTest
 		_ = fakeGameProviderFundInService.GetAsync(
 			query: new GameProviderFundInQuery(
 				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: playerInfo.CurrencyCode,
+				WalletId: playerInfo.WalletId,
 				GameTransactionId: fundProcessingResult.GameTransactionId,
 				Amount: gameProviderBalance.FreeBalance),
 			cancellationToken: Arg.Any<CancellationToken>())
@@ -282,9 +281,8 @@ public class FundTransferInOneClickGetServiceUnitTest
 		_ = fakeGameProviderFundInService.GetAsync(
 			query: new GameProviderFundInQuery(
 				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: playerInfo.CurrencyCode,
+				WalletId: playerInfo.WalletId,
 				GameTransactionId: fundProcessingResult.GameTransactionId,
 				Amount: gameProviderBalance.FreeBalance),
 			cancellationToken: Arg.Any<CancellationToken>())
@@ -421,9 +419,8 @@ public class FundTransferInOneClickGetServiceUnitTest
 		_ = fakeGameProviderFundInService.GetAsync(
 			query: new GameProviderFundInQuery(
 				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: playerInfo.CurrencyCode,
+				WalletId: playerInfo.WalletId,
 				GameTransactionId: fundProcessingResult.GameTransactionId,
 				Amount: gameProviderBalance.FreeBalance),
 			cancellationToken: Arg.Any<CancellationToken>())

@@ -224,9 +224,8 @@ public class FundTransferInGetServiceUnitTest
 		_ = fakeGameProviderFundInService.GetAsync(
 			query: new GameProviderFundInQuery(
 				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: playerInfo.CurrencyCode,
+				WalletId: playerInfo.WalletId,
 				GameTransactionId: fundProcessingResult.GameTransactionId,
 				Amount: exchangeRateFundResult.Amount),
 			cancellationToken: Arg.Any<CancellationToken>())
@@ -500,9 +499,8 @@ public class FundTransferInGetServiceUnitTest
 		_ = fakeGameProviderFundInService.GetAsync(
 			query: new GameProviderFundInQuery(
 				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: playerInfo.CurrencyCode,
+				WalletId: playerInfo.WalletId,
 				GameTransactionId: fundProcessingResult.GameTransactionId,
 				Amount: exchangeRateFundResult.Amount),
 			cancellationToken: Arg.Any<CancellationToken>())
@@ -633,9 +631,8 @@ public class FundTransferInGetServiceUnitTest
 		_ = fakeGameProviderFundInService.GetAsync(
 			query: new GameProviderFundInQuery(
 				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: playerInfo.CurrencyCode,
+				WalletId: playerInfo.WalletId,
 				GameTransactionId: fundProcessingResult.GameTransactionId,
 				Amount: exchangeRateFundResult.Amount),
 			cancellationToken: Arg.Any<CancellationToken>())
@@ -767,9 +764,8 @@ public class FundTransferInGetServiceUnitTest
 		_ = fakeGameProviderFundInService.GetAsync(
 			query: new GameProviderFundInQuery(
 				GameProviderCode: fundProcessingResult.GameProviderCode,
-				BrandCode: fundProcessingResult.BrandCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
-				CurrencyCode: playerInfo.CurrencyCode,
+				WalletId: playerInfo.WalletId,
 				GameTransactionId: fundProcessingResult.GameTransactionId,
 				Amount: exchangeRateFundResult.Amount),
 			cancellationToken: Arg.Any<CancellationToken>())

@@ -50,7 +50,7 @@ app.kubernetes.io/name: {{ include "game-gamefundtransfer.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app: {{ include "game-gamefundtransfer.name" . }}
 tgs.kind: game
-tgs.game.kind: gamefundtransfer
+tgs.game.kind: gamefund
 {{- end }}
 
 {{/*

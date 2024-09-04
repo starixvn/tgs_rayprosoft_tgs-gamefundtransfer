@@ -1,6 +1,6 @@
 ﻿syntax = "proto3";
 
-//import "phoenix/protobuf/guid.proto";
+import "phoenix/protobuf/guid.proto";
 import "phoenix/protobuf/decimal.proto";
 
 option csharp_namespace = "Tgs.GameFundTransfer.Common.Protos";
@@ -36,6 +36,7 @@ message GameFundTransferBalanceOnlineRequest {
 message GameFundTransferTrackerRequest {
     string game_provider_code = 1;
     string player_code = 2;
+    phoenix.protobuf.GuidValue wallet_id = 3;
 }
 
 // The response message containing the greetings.

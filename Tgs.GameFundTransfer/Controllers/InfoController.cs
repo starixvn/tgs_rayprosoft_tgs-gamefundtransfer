@@ -7,6 +7,7 @@ using Tgs.GameFundTransfer.Core;
 using System.Text.Json.Nodes;
 
 namespace Tgs.GameFundTransfer.Controllers;
+
 [Route("[controller]")]
 [ApiController]
 public class InfoController : ControllerBase
