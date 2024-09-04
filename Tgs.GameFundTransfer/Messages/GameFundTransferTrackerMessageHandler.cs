@@ -19,9 +19,9 @@ public class GameFundTransferTrackerMessageHandler(
 				Subject = subject,
 				Data = new
 				{
-					data.GameProviderId,
+					GameProviderId = data.GameProviderId.ToGuid(),
 					data.GameProviderCode,
-					data.WalletId,
+					WalletId = data.WalletId.ToGuid(),
 					data.PlayerCode
 				},
 				Message = "This receive message handler."
