@@ -17,11 +17,12 @@ public class GameProviderFundInGetServiceUnitTest
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 
 		var query = new GameProviderFundInQuery(
-			 GameProviderCode: GameProviderType.Kaiyuan,
-			 PlayerCode: "4ucmqplxb029",
-			 WalletId: Guid.NewGuid(),
-			 GameTransactionId: "72412202405200607050004ucmqplxb029",
-			 Amount: 1);
+			GameProviderId: Guid.NewGuid(),
+			GameProviderCode: GameProviderType.Kaiyuan,
+			PlayerCode: "4ucmqplxb029",
+			WalletId: Guid.NewGuid(),
+			GameTransactionId: "72412202405200607050004ucmqplxb029",
+			Amount: 1);
 
 		var response = new PlayerFundResponse(
 			OrderId: query.GameTransactionId,
@@ -51,6 +52,7 @@ public class GameProviderFundInGetServiceUnitTest
 			subject: Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferTrackerRequest),
 			data: Arg.Is(new Common.Protos.GameFundTransferTrackerRequest
 			{
+				GameProviderId = query.GameProviderId,
 				GameProviderCode = query.GameProviderCode,
 				PlayerCode = query.PlayerCode,
 				WalletId = query.WalletId
@@ -66,11 +68,12 @@ public class GameProviderFundInGetServiceUnitTest
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 
 		var query = new GameProviderFundInQuery(
-			 GameProviderCode: GameProviderType.Kaiyuan,
-			 PlayerCode: "4ucmqplxb029",
-			 WalletId: Guid.NewGuid(),
-			 GameTransactionId: "72412202405200607050004ucmqplxb029",
-			 Amount: 1);
+			GameProviderId: Guid.NewGuid(),
+			GameProviderCode: GameProviderType.Kaiyuan,
+			PlayerCode: "4ucmqplxb029",
+			WalletId: Guid.NewGuid(),
+			GameTransactionId: "72412202405200607050004ucmqplxb029",
+			Amount: 1);
 
 		var response = new PlayerFundResponse(
 			OrderId: string.Empty,
@@ -96,6 +99,7 @@ public class GameProviderFundInGetServiceUnitTest
 			subject: Arg.Is(Common.GameFundTransferNatsConst.GameFundTransferTrackerRequest),
 			data: Arg.Is(new Common.Protos.GameFundTransferTrackerRequest
 			{
+				GameProviderId = query.GameProviderId,
 				GameProviderCode = query.GameProviderCode,
 				PlayerCode = query.PlayerCode,
 				WalletId = query.WalletId

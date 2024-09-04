@@ -34,9 +34,10 @@ message GameFundTransferBalanceOnlineRequest {
 }
 
 message GameFundTransferTrackerRequest {
-    string game_provider_code = 1;
-    string player_code = 2;
+    phoenix.protobuf.GuidValue game_provider_id = 1;
+    string game_provider_code = 2;
     phoenix.protobuf.GuidValue wallet_id = 3;
+    string player_code = 4;
 }
 
 // The response message containing the greetings.

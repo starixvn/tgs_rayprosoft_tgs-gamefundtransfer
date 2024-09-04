@@ -1,6 +1,7 @@
 ﻿namespace Tgs.GameFundTransfer.Core.ApplicationServices;
 
 public record FundTransferTrackerCommand(
+	Guid GameProviderId,
 	string GameProviderCode,
-	string PlayerCode,
-	Guid WalletId);
+	Guid WalletId,
+	string PlayerCode);

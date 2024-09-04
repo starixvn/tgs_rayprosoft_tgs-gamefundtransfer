@@ -136,6 +136,7 @@ internal class FundTransferOutGetService(
 			{
 				var gameProviderFundOutResult = await gameProviderFundOutService.GetAsync(
 					query: new GameProviderFundOutQuery(
+						GameProviderId: fundProcessingResult.GameProviderId,
 						GameProviderCode: fundProcessingResult.GameProviderCode,
 						PlayerCode: fundProcessingResult.PlayerCode,
 						WalletId: playerInfo.WalletId,

@@ -29,6 +29,7 @@ internal class GameProviderFundOutGetService(
 				new JsonObject
 				{
 					["LogOn"] = DateTime.Now.ToString("u"),
+					["GameProviderId"] = query.GameProviderId,
 					["GameProviderCode"] = query.GameProviderCode,
 					["PlayerCode"] = query.PlayerCode,
 					["WalletId"] = query.WalletId,
@@ -43,9 +44,10 @@ internal class GameProviderFundOutGetService(
 				subject: Common.GameFundTransferNatsConst.GameFundTransferTrackerRequest,
 				data: new Common.Protos.GameFundTransferTrackerRequest
 				{
+					GameProviderId = query.GameProviderId,
 					GameProviderCode = query.GameProviderCode,
-					PlayerCode = query.PlayerCode,
-					WalletId = query.WalletId
+					WalletId = query.WalletId,
+					PlayerCode = query.PlayerCode
 				},
 				cancellationToken: cancellationToken).ConfigureAwait(false);
 
@@ -59,6 +61,7 @@ internal class GameProviderFundOutGetService(
 				new JsonObject
 				{
 					["LogOn"] = DateTime.Now.ToString("u"),
+					["GameProviderId"] = query.GameProviderId,
 					["GameProviderCode"] = query.GameProviderCode,
 					["PlayerCode"] = query.PlayerCode,
 					["WalletId"] = query.WalletId,
@@ -74,6 +77,7 @@ internal class GameProviderFundOutGetService(
 				new JsonObject
 				{
 					["LogOn"] = DateTime.Now.ToString("u"),
+					["GameProviderId"] = query.GameProviderId,
 					["GameProviderCode"] = query.GameProviderCode,
 					["PlayerCode"] = query.PlayerCode,
 					["WalletId"] = query.WalletId,
