@@ -62,39 +62,19 @@ internal class FundTransferInOneClickGetService(
 				gameProviderFundInResult = await gameProviderFundInService.GetAsync(
 					query: new GameProviderFundInQuery(
 						GameProviderCode: fundProcessingResult.GameProviderCode,
-						BrandCode: fundProcessingResult.BrandCode,
 						PlayerCode: fundProcessingResult.PlayerCode,
-						CurrencyCode: playerInfo.CurrencyCode,
+						WalletId: playerInfo.WalletId,
 						GameTransactionId: fundProcessingResult.GameTransactionId,
 						Amount: playerBalance.FreeBalance),
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
 			}
-			catch (ArgumentException ex)
+			catch
 			{
 				await fundTransferTransactionRepository.UpdateByGameProviderFundFailedAsync(
 					gameProviderFundTransferTransactionId: fundProcessingResult.FundTransactionId,
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
-
-				logger.LogError(ex, "LogOn:{logOn} Mesaage:The transaction number provided by this game provider ({gameProviderCode}) is empty.({gameProviderFundTransferTransactionId})",
-					DateTime.Now.ToString("o"),
-					fundProcessingResult.GameProviderCode,
-					fundProcessingResult.FundTransactionId);
-
-				throw;
-			}
-			catch (Exception ex)
-			{
-				await fundTransferTransactionRepository.UpdateByGameProviderFundFailedAsync(
-					gameProviderFundTransferTransactionId: fundProcessingResult.FundTransactionId,
-					cancellationToken: cancellationToken)
-					.ConfigureAwait(false);
-
-				logger.LogError(ex, "LogOn:{logOn} Mesaage:This game provider({gameProviderCode}) call failed.({gameProviderFundTransferTransactionId})",
-					DateTime.Now.ToString("o"),
-					fundProcessingResult.GameProviderCode,
-					fundProcessingResult.FundTransactionId);
 
 				throw;
 			}

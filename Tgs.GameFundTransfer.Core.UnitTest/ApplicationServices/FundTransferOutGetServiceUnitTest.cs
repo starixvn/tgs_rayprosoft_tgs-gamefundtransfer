@@ -265,6 +265,7 @@ public class FundTransferOutGetServiceUnitTest
 			query: new GameProviderFundOutQuery(
 				GameProviderCode: fundProcessingResult.GameProviderCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
+				WalletId: playerInfo.WalletId,
 				GameTransactionId: fundProcessingResult.GameTransactionId,
 				Amount: exchangeRateFundResult.Amount),
 			cancellationToken: Arg.Any<CancellationToken>())
@@ -845,6 +846,7 @@ public class FundTransferOutGetServiceUnitTest
 			query: new GameProviderFundOutQuery(
 				GameProviderCode: fundProcessingResult.GameProviderCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
+				WalletId: playerInfo.WalletId,
 				GameTransactionId: fundProcessingResult.GameTransactionId,
 				Amount: exchangeRateFundResult.Amount),
 			cancellationToken: Arg.Any<CancellationToken>())
@@ -983,6 +985,7 @@ public class FundTransferOutGetServiceUnitTest
 			query: new GameProviderFundOutQuery(
 				GameProviderCode: fundProcessingResult.GameProviderCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
+				WalletId: playerInfo.WalletId,
 				GameTransactionId: fundProcessingResult.GameTransactionId,
 				Amount: exchangeRateFundResult.Amount),
 			cancellationToken: Arg.Any<CancellationToken>())

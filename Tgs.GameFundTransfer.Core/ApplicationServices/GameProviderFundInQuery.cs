@@ -1,8 +1,7 @@
 ﻿namespace Tgs.GameFundTransfer.Core.ApplicationServices;
 public record GameProviderFundInQuery(
 	string GameProviderCode,
-	string BrandCode,
 	string PlayerCode,
-	string CurrencyCode,
+	Guid WalletId,
 	string GameTransactionId,
 	decimal Amount);

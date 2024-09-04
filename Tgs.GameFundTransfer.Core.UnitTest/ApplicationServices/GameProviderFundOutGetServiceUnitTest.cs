@@ -19,6 +19,7 @@ public class GameProviderFundOutGetServiceUnitTest
 		var query = new GameProviderFundOutQuery(
 			 GameProviderCode: GameProviderType.Kaiyuan,
 			 PlayerCode: "4ucmqplxb029",
+			 WalletId: Guid.NewGuid(),
 			 GameTransactionId: "72412202405200607050004ucmqplxb029",
 			 Amount: 1);
 
@@ -52,6 +53,7 @@ public class GameProviderFundOutGetServiceUnitTest
 			{
 				GameProviderCode = query.GameProviderCode,
 				PlayerCode = query.PlayerCode,
+				WalletId = query.WalletId
 			}),
 			cancellationToken: Arg.Any<CancellationToken>());
 	}
@@ -66,6 +68,7 @@ public class GameProviderFundOutGetServiceUnitTest
 		var query = new GameProviderFundOutQuery(
 			 GameProviderCode: GameProviderType.Kaiyuan,
 			 PlayerCode: "4ucmqplxb029",
+			 WalletId: Guid.NewGuid(),
 			 GameTransactionId: "72412202405200607050004ucmqplxb029",
 			 Amount: 1);
 
@@ -95,6 +98,7 @@ public class GameProviderFundOutGetServiceUnitTest
 			{
 				GameProviderCode = query.GameProviderCode,
 				PlayerCode = query.PlayerCode,
+				WalletId = query.WalletId
 			}),
 			cancellationToken: Arg.Any<CancellationToken>());
 	}
