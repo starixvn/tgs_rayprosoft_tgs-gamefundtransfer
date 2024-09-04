@@ -88,6 +88,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 			GameRespTransactionId: Guid.NewGuid().ToString("N"));
 		_ = fakeGameProviderFundInService.GetAsync(
 			query: new GameProviderFundInQuery(
+				GameProviderId: fundProcessingResult.GameProviderId,
 				GameProviderCode: fundProcessingResult.GameProviderCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
 				WalletId: playerInfo.WalletId,
@@ -280,6 +281,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 			GameRespTransactionId: Guid.NewGuid().ToString("N"));
 		_ = fakeGameProviderFundInService.GetAsync(
 			query: new GameProviderFundInQuery(
+				GameProviderId: fundProcessingResult.GameProviderId,
 				GameProviderCode: fundProcessingResult.GameProviderCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
 				WalletId: playerInfo.WalletId,
@@ -418,6 +420,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 			GameRespTransactionId: Guid.NewGuid().ToString("N"));
 		_ = fakeGameProviderFundInService.GetAsync(
 			query: new GameProviderFundInQuery(
+				GameProviderId: fundProcessingResult.GameProviderId,
 				GameProviderCode: fundProcessingResult.GameProviderCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
 				WalletId: playerInfo.WalletId,

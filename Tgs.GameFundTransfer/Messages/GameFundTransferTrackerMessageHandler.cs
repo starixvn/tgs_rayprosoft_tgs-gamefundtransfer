@@ -2,6 +2,7 @@
 using Tgs.GameFundTransfer.Core.ApplicationServices;
 using Tgs.ServiceUtility;
 using Valhalla.MessageQueue;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Tgs.GameFundTransfer.Messages;
 
@@ -18,18 +19,22 @@ public class GameFundTransferTrackerMessageHandler(
 				Subject = subject,
 				Data = new
 				{
+					data.GameProviderId,
 					data.GameProviderCode,
-					data.PlayerCode,
-					WalletId = data.WalletId.ToGuid()
+					data.WalletId,
+					data.PlayerCode
 				},
 				Message = "This receive message handler."
 			}));
-
+		return ValueTask.CompletedTask;
+		/*
 		return service.ExecuteAsync(
 			command: new FundTransferTrackerCommand(
+				GameProviderId: data.GameProviderId.ToGuid(),
 				GameProviderCode: data.GameProviderCode,
 				PlayerCode: data.PlayerCode,
 				WalletId: data.WalletId.ToGuid()),
 			cancellationToken: cancellationToken);
+		*/
 	}
 }

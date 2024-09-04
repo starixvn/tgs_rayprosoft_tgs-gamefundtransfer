@@ -61,6 +61,7 @@ internal class FundTransferInOneClickGetService(
 			{
 				gameProviderFundInResult = await gameProviderFundInService.GetAsync(
 					query: new GameProviderFundInQuery(
+						GameProviderId: fundProcessingResult.GameProviderId,
 						GameProviderCode: fundProcessingResult.GameProviderCode,
 						PlayerCode: fundProcessingResult.PlayerCode,
 						WalletId: playerInfo.WalletId,

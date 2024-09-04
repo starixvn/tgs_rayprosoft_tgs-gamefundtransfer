@@ -263,6 +263,7 @@ public class FundTransferOutGetServiceUnitTest
 		_ = fakeGameProviderFundOutService
 			.GetAsync(
 			query: new GameProviderFundOutQuery(
+				GameProviderId: fundProcessingResult.GameProviderId,
 				GameProviderCode: fundProcessingResult.GameProviderCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
 				WalletId: playerInfo.WalletId,
@@ -844,6 +845,7 @@ public class FundTransferOutGetServiceUnitTest
 		_ = fakeGameProviderFundOutService
 			.GetAsync(
 			query: new GameProviderFundOutQuery(
+				GameProviderId: fundProcessingResult.GameProviderId,
 				GameProviderCode: fundProcessingResult.GameProviderCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
 				WalletId: playerInfo.WalletId,
@@ -983,6 +985,7 @@ public class FundTransferOutGetServiceUnitTest
 		_ = fakeGameProviderFundOutService
 			.GetAsync(
 			query: new GameProviderFundOutQuery(
+				GameProviderId: fundProcessingResult.GameProviderId,
 				GameProviderCode: fundProcessingResult.GameProviderCode,
 				PlayerCode: fundProcessingResult.PlayerCode,
 				WalletId: playerInfo.WalletId,
