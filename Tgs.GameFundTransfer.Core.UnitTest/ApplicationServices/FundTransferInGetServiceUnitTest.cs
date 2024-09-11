@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Nodes;
-using System.Threading;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Tgs.CashService.Client;
