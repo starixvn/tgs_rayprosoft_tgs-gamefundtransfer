@@ -17,7 +17,6 @@ public static class ServiceCollectionExtensions
 		.AddTransient<IFundsDistributedLock>(sp => ActivatorUtilities.CreateInstance<FundsDistributedLock>(sp, redisDatabaseResolver(sp)))
 		.AddTransient<IFundBalanceRepository, FundBalanceRepository>()
 		.Decorate<IFundBalanceRepository>((innerRepository, sp) => ActivatorUtilities.CreateInstance<FundBalanceCacheRepository>(sp, innerRepository, redisDatabaseResolver(sp), TimeSpan.FromSeconds(30)))
-		.AddTransient<IFundTransferTransactionRepository, FundTransferTransactionRepository>()
 		.AddTransient<IPlayerRepository, PlayerRepository>()
 		.Decorate<IPlayerRepository>((innerRepository, sp) => ActivatorUtilities.CreateInstance<PlayerCacheRepository>(sp, innerRepository, TimeSpan.FromMinutes(5)))
 		.AddTransient<IGameProviderRepository, GameProviderRepository>()

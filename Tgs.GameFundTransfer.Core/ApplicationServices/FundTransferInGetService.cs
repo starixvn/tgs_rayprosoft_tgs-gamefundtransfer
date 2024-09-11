@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text.Json.Nodes;
+using Microsoft.Extensions.Logging;
 using Tgs.CashService.Client;
 using Tgs.GameCurrency.Client;
+using Tgs.GameFund.Client;
 using Tgs.GameProviders.Client;
 using Tgs.ServiceUtility;
 
@@ -15,7 +17,7 @@ internal class FundTransferInGetService(
 	ICashServiceClient cashServiceClient,
 	IGetService<FundProcessingFundInAddQuery, FundProcessingResult> service,
 	IGetService<GameProviderFundInQuery, GameProviderFundInResult> gameProviderFundInService,
-	IFundTransferTransactionRepository fundTransferTransactionRepository) : IGetService<FundTransferInQuery, FundTransferResult>
+	IGameFundClient client) : IGetService<FundTransferInQuery, FundTransferResult>
 {
 	public async ValueTask<FundTransferResult> GetAsync(FundTransferInQuery query, CancellationToken cancellationToken = default)
 	{
@@ -75,13 +77,42 @@ internal class FundTransferInGetService(
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
 			}
-			catch
+			catch (Exception ex)
 			{
-				await fundTransferTransactionRepository.UpdateByGameProviderFundFailedAsync(
-					gameProviderFundTransferTransactionId: fundProcessingResult.FundTransactionId,
+				await client.GameFundTransferUpdateByGameWalletFailedAsync(
+					id: fundProcessingResult.FundTransactionId,
+					description: string.Empty,
+					additionalData: new JsonObject
+					{
+						["LogOn"] = DateTime.Now.ToString("o"),
+						["BrandId"] = fundProcessingResult.BrandId,
+						["BrandCode"] = fundProcessingResult.BrandCode,
+						["PlayerCode"] = fundProcessingResult.PlayerCode,
+						["Username"] = fundProcessingResult.Username,
+						["GameProviderId"] = fundProcessingResult.GameProviderId,
+						["GameProviderCode"] = fundProcessingResult.GameProviderCode,
+						["FundTransactionId"] = fundProcessingResult.FundTransactionId,
+						["CashTransactionId"] = fundProcessingResult.CashTransactionId,
+						["GameTransactionId"] = fundProcessingResult.GameTransactionId
+					},
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
 
+				logger.LogError(ex, "{info}",
+					new JsonObject
+					{
+						["LogOn"] = DateTime.Now.ToString("o"),
+						["BrandId"] = fundProcessingResult.BrandId,
+						["BrandCode"] = fundProcessingResult.BrandCode,
+						["PlayerCode"] = fundProcessingResult.PlayerCode,
+						["Username"] = fundProcessingResult.Username,
+						["GameProviderId"] = fundProcessingResult.GameProviderId,
+						["GameProviderCode"] = fundProcessingResult.GameProviderCode,
+						["FundTransactionId"] = fundProcessingResult.FundTransactionId,
+						["CashTransactionId"] = fundProcessingResult.CashTransactionId,
+						["GameTransactionId"] = fundProcessingResult.GameTransactionId,
+						["Mesaage"] = "The game wallet transfer failed."
+					}.ToJsonString());
 				throw;
 			}
 
@@ -95,10 +126,27 @@ internal class FundTransferInGetService(
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
 
-				await fundTransferTransactionRepository.UpdateBySuccessAsync(
-					gameProviderFundTransferTransactionId: fundProcessingResult.FundTransactionId,
-					transactionId: transactionResponse.TransactionId,
-					balance: transactionResponse.Balance,
+				await client.GameFundTransferUpdateBySuccessAsync(
+					id: fundProcessingResult.FundTransactionId,
+					cashRespTransactionId: transactionResponse.TransactionId,
+					gameRespTransactionId: gameProviderFundInResult.GameRespTransactionId,
+					mainWalletBalance: transactionResponse.Balance,
+					description: string.Empty,
+					additionalData: new JsonObject
+					{
+						["LogOn"] = DateTime.Now.ToString("o"),
+						["BrandId"] = fundProcessingResult.BrandId,
+						["BrandCode"] = fundProcessingResult.BrandCode,
+						["PlayerCode"] = fundProcessingResult.PlayerCode,
+						["Username"] = fundProcessingResult.Username,
+						["GameProviderId"] = fundProcessingResult.GameProviderId,
+						["GameProviderCode"] = fundProcessingResult.GameProviderCode,
+						["FundTransactionId"] = fundProcessingResult.FundTransactionId,
+						["CashTransactionId"] = fundProcessingResult.CashTransactionId,
+						["GameTransactionId"] = fundProcessingResult.GameTransactionId,
+						["CashRespTransactionId"] = transactionResponse.TransactionId,
+						["GameRespTransactionId"] = gameProviderFundInResult.GameRespTransactionId
+					},
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
 
@@ -111,13 +159,42 @@ internal class FundTransferInGetService(
 			}
 			catch (Exception ex)
 			{
-				await fundTransferTransactionRepository.UpdateByMainWalletFundFailedAsync(
-					gameProviderFundTransferTransactionId: fundProcessingResult.FundTransactionId,
+				await client.GameFundTransferUpdateByMainWalletFailedAsync(
+					id: fundProcessingResult.FundTransactionId,
+					description: string.Empty,
+					additionalData: new JsonObject
+					{
+						["LogOn"] = DateTime.Now.ToString("o"),
+						["BrandId"] = fundProcessingResult.BrandId,
+						["BrandCode"] = fundProcessingResult.BrandCode,
+						["PlayerCode"] = fundProcessingResult.PlayerCode,
+						["Username"] = fundProcessingResult.Username,
+						["GameProviderId"] = fundProcessingResult.GameProviderId,
+						["GameProviderCode"] = fundProcessingResult.GameProviderCode,
+						["FundTransactionId"] = fundProcessingResult.FundTransactionId,
+						["CashTransactionId"] = fundProcessingResult.CashTransactionId,
+						["GameTransactionId"] = fundProcessingResult.GameTransactionId,
+						["GameRespTransactionId"] = gameProviderFundInResult.GameRespTransactionId
+					},
 					cancellationToken: cancellationToken)
 					.ConfigureAwait(false);
 
-				logger.LogError(exception: ex, "The main wallet transfer failed.({gameProviderFundTransferTransactionId})", fundProcessingResult.FundTransactionId);
-
+				logger.LogError(ex, "{info}",
+					new JsonObject
+					{
+						["LogOn"] = DateTime.Now.ToString("o"),
+						["BrandId"] = fundProcessingResult.BrandId,
+						["BrandCode"] = fundProcessingResult.BrandCode,
+						["PlayerCode"] = fundProcessingResult.PlayerCode,
+						["Username"] = fundProcessingResult.Username,
+						["GameProviderId"] = fundProcessingResult.GameProviderId,
+						["GameProviderCode"] = fundProcessingResult.GameProviderCode,
+						["FundTransactionId"] = fundProcessingResult.FundTransactionId,
+						["CashTransactionId"] = fundProcessingResult.CashTransactionId,
+						["GameTransactionId"] = fundProcessingResult.GameTransactionId,
+						["GameRespTransactionId"] = gameProviderFundInResult.GameRespTransactionId,
+						["Mesaage"] = "The main wallet transfer failed."
+					}.ToJsonString());
 				throw;
 			}
 		}

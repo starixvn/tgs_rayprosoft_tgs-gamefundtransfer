@@ -31,10 +31,6 @@
       "ObjectType": 0
     },
     {
-      "Name": "dbo.game_provider_fund_transfer_transactions",
-      "ObjectType": 0
-    },
-    {
       "Name": "dbo.game_providers",
       "ObjectType": 0
     },

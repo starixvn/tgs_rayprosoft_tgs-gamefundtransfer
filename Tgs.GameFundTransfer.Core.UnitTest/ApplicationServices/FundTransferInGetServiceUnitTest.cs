@@ -1,7 +1,10 @@
-﻿using Microsoft.Extensions.Logging.Abstractions;
+﻿using System.Text.Json.Nodes;
+using System.Threading;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Tgs.CashService.Client;
 using Tgs.GameCurrency.Client;
+using Tgs.GameFund.Client;
 using Tgs.GameFundTransfer.Core.ApplicationServices;
 using Tgs.GameFundTransfer.Core.Exceptions;
 using Tgs.GameProviders.Client;
@@ -25,7 +28,7 @@ public class FundTransferInGetServiceUnitTest
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakeService = Substitute.For<IGetService<FundProcessingFundInAddQuery, FundProcessingResult>>();
 		var fakeGameProviderFundInService = Substitute.For<IGetService<GameProviderFundInQuery, GameProviderFundInResult>>();
-		var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 
 		var query = new FundTransferInQuery(
 			GameProviderCode: GameProviderType.Kaiyuan,
@@ -41,16 +44,20 @@ public class FundTransferInGetServiceUnitTest
 			fakeCashServiceClient,
 			fakeService,
 			fakeGameProviderFundInService,
-			fakeGameProviderFundTransferTransactionRepository);
+			fakeClient);
 
 		_ = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => sut.GetAsync(query).AsTask());
 
-		_ = fakeGameProviderFundTransferTransactionRepository
+		_ = fakeClient
 			.Received(0)
-			.UpdateBySuccessAsync(
-			gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
-			transactionId: Arg.Any<Guid>(),
-			balance: Arg.Any<decimal>());
+			.GameFundTransferUpdateBySuccessAsync(
+			id: Arg.Any<Guid>(),
+			cashRespTransactionId: Arg.Any<Guid>(),
+			gameRespTransactionId: Arg.Any<string>(),
+			mainWalletBalance: Arg.Any<decimal>(),
+			description: Arg.Any<string>(),
+			additionalData: Arg.Any<JsonNode>(),
+			cancellationToken: Arg.Any<CancellationToken>());
 
 		_ = fakeFundsDistributedLock
 			.Received(0)
@@ -71,7 +78,7 @@ public class FundTransferInGetServiceUnitTest
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakeService = Substitute.For<IGetService<FundProcessingFundInAddQuery, FundProcessingResult>>();
 		var fakeGameProviderFundInService = Substitute.For<IGetService<GameProviderFundInQuery, GameProviderFundInResult>>();
-		var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 
 		var query = new FundTransferInQuery(
 			GameProviderCode: GameProviderType.Kaiyuan,
@@ -87,16 +94,20 @@ public class FundTransferInGetServiceUnitTest
 			fakeCashServiceClient,
 			fakeService,
 			fakeGameProviderFundInService,
-			fakeGameProviderFundTransferTransactionRepository);
+			fakeClient);
 
 		_ = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => sut.GetAsync(query).AsTask());
 
-		_ = fakeGameProviderFundTransferTransactionRepository
+		_ = fakeClient
 			.Received(0)
-			.UpdateBySuccessAsync(
-			gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
-			transactionId: Arg.Any<Guid>(),
-			balance: Arg.Any<decimal>());
+			.GameFundTransferUpdateBySuccessAsync(
+			id: Arg.Any<Guid>(),
+			cashRespTransactionId: Arg.Any<Guid>(),
+			gameRespTransactionId: Arg.Any<string>(),
+			mainWalletBalance: Arg.Any<decimal>(),
+			description: Arg.Any<string>(),
+			additionalData: Arg.Any<JsonNode>(),
+			cancellationToken: Arg.Any<CancellationToken>());
 
 		_ = fakeFundsDistributedLock
 			.Received(0)
@@ -117,7 +128,7 @@ public class FundTransferInGetServiceUnitTest
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakeService = Substitute.For<IGetService<FundProcessingFundInAddQuery, FundProcessingResult>>();
 		var fakeGameProviderFundInService = Substitute.For<IGetService<GameProviderFundInQuery, GameProviderFundInResult>>();
-		var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 
 		var query = new FundTransferInQuery(
 			GameProviderCode: GameProviderType.Kaiyuan,
@@ -133,16 +144,20 @@ public class FundTransferInGetServiceUnitTest
 			fakeCashServiceClient,
 			fakeService,
 			fakeGameProviderFundInService,
-			fakeGameProviderFundTransferTransactionRepository);
+			fakeClient);
 
 		_ = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => sut.GetAsync(query).AsTask());
 
-		_ = fakeGameProviderFundTransferTransactionRepository
+		_ = fakeClient
 			.Received(0)
-			.UpdateBySuccessAsync(
-			gameProviderFundTransferTransactionId: Arg.Any<Guid>(),
-			transactionId: Arg.Any<Guid>(),
-			balance: Arg.Any<decimal>());
+			.GameFundTransferUpdateBySuccessAsync(
+			id: Arg.Any<Guid>(),
+			cashRespTransactionId: Arg.Any<Guid>(),
+			gameRespTransactionId: Arg.Any<string>(),
+			mainWalletBalance: Arg.Any<decimal>(),
+			description: Arg.Any<string>(),
+			additionalData: Arg.Any<JsonNode>(),
+			cancellationToken: Arg.Any<CancellationToken>());
 
 		_ = fakeFundsDistributedLock
 			.Received(0)
@@ -162,7 +177,7 @@ public class FundTransferInGetServiceUnitTest
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakeService = Substitute.For<IGetService<FundProcessingFundInAddQuery, FundProcessingResult>>();
 		var fakeGameProviderFundInService = Substitute.For<IGetService<GameProviderFundInQuery, GameProviderFundInResult>>();
-		var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 
 		var query = new FundTransferInQuery(
 			GameProviderCode: GameProviderType.Kaiyuan,
@@ -253,7 +268,7 @@ public class FundTransferInGetServiceUnitTest
 			fakeCashServiceClient,
 			fakeService,
 			fakeGameProviderFundInService,
-			fakeGameProviderFundTransferTransactionRepository);
+			fakeClient);
 
 		var actual = await sut.GetAsync(query);
 
@@ -270,12 +285,16 @@ public class FundTransferInGetServiceUnitTest
 			Arg.Is(query.GameProviderCode),
 			Arg.Is(query.PlayerCode));
 
-		_ = fakeGameProviderFundTransferTransactionRepository
+		_ = fakeClient
 			.Received(1)
-			.UpdateBySuccessAsync(
-			 Arg.Is(fundProcessingResult.FundTransactionId),
-			 Arg.Is(transactionResponse.TransactionId),
-			 Arg.Is(transactionResponse.Balance));
+			.GameFundTransferUpdateBySuccessAsync(
+			id: Arg.Is(fundProcessingResult.FundTransactionId),
+			cashRespTransactionId: Arg.Is(transactionResponse.TransactionId),
+			gameRespTransactionId: Arg.Is(gameProviderFundInResult.GameRespTransactionId),
+			mainWalletBalance: Arg.Is(transactionResponse.Balance),
+			description: Arg.Any<string>(),
+			additionalData: Arg.Any<JsonNode>(),
+			cancellationToken: Arg.Any<CancellationToken>());
 
 		_ = fakeFundsDistributedLock
 			.Received(1)
@@ -295,7 +314,7 @@ public class FundTransferInGetServiceUnitTest
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakeService = Substitute.For<IGetService<FundProcessingFundInAddQuery, FundProcessingResult>>();
 		var fakeGameProviderFundInService = Substitute.For<IGetService<GameProviderFundInQuery, GameProviderFundInResult>>();
-		var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 
 		var query = new FundTransferInQuery(
 			GameProviderCode: GameProviderType.Kaiyuan,
@@ -337,16 +356,20 @@ public class FundTransferInGetServiceUnitTest
 			fakeCashServiceClient,
 			fakeService,
 			fakeGameProviderFundInService,
-			fakeGameProviderFundTransferTransactionRepository);
+			fakeClient);
 
 		_ = await Assert.ThrowsAsync<FundTransferException>(() => sut.GetAsync(query).AsTask());
 
-		_ = fakeGameProviderFundTransferTransactionRepository
+		_ = fakeClient
 			.Received(0)
-			.UpdateBySuccessAsync(
-			 Arg.Any<Guid>(),
-			 Arg.Any<Guid>(),
-			 Arg.Any<decimal>());
+			.GameFundTransferUpdateBySuccessAsync(
+			id: Arg.Any<Guid>(),
+			cashRespTransactionId: Arg.Any<Guid>(),
+			gameRespTransactionId: Arg.Any<string>(),
+			mainWalletBalance: Arg.Any<decimal>(),
+			description: Arg.Any<string>(),
+			additionalData: Arg.Any<JsonNode>(),
+			cancellationToken: Arg.Any<CancellationToken>());
 
 		_ = fakeFundsDistributedLock
 			.Received(0)
@@ -366,7 +389,7 @@ public class FundTransferInGetServiceUnitTest
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakeService = Substitute.For<IGetService<FundProcessingFundInAddQuery, FundProcessingResult>>();
 		var fakeGameProviderFundInService = Substitute.For<IGetService<GameProviderFundInQuery, GameProviderFundInResult>>();
-		var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 
 		var query = new FundTransferInQuery(
 			GameProviderCode: GameProviderType.Kaiyuan,
@@ -416,7 +439,7 @@ public class FundTransferInGetServiceUnitTest
 			fakeCashServiceClient,
 			fakeService,
 			fakeGameProviderFundInService,
-			fakeGameProviderFundTransferTransactionRepository);
+			fakeClient);
 
 		_ = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => sut.GetAsync(query).AsTask());
 
@@ -438,7 +461,7 @@ public class FundTransferInGetServiceUnitTest
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakeService = Substitute.For<IGetService<FundProcessingFundInAddQuery, FundProcessingResult>>();
 		var fakeGameProviderFundInService = Substitute.For<IGetService<GameProviderFundInQuery, GameProviderFundInResult>>();
-		var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 
 		var query = new FundTransferInQuery(
 			GameProviderCode: GameProviderType.Kaiyuan,
@@ -529,7 +552,7 @@ public class FundTransferInGetServiceUnitTest
 			fakeCashServiceClient,
 			fakeService,
 			fakeGameProviderFundInService,
-			fakeGameProviderFundTransferTransactionRepository);
+			fakeClient);
 
 		var actual = await sut.GetAsync(query);
 
@@ -546,12 +569,16 @@ public class FundTransferInGetServiceUnitTest
 			Arg.Is(query.GameProviderCode),
 			Arg.Is(query.PlayerCode));
 
-		_ = fakeGameProviderFundTransferTransactionRepository
+		_ = fakeClient
 			.Received(1)
-			.UpdateBySuccessAsync(
-			 Arg.Is(fundProcessingResult.FundTransactionId),
-			 Arg.Is(transactionResponse.TransactionId),
-			 Arg.Is(transactionResponse.Balance));
+			.GameFundTransferUpdateBySuccessAsync(
+			id: Arg.Is(fundProcessingResult.FundTransactionId),
+			cashRespTransactionId: Arg.Is(transactionResponse.TransactionId),
+			gameRespTransactionId: Arg.Is(gameProviderFundInResult.GameRespTransactionId),
+			mainWalletBalance: Arg.Is(transactionResponse.Balance),
+			description: Arg.Any<string>(),
+			additionalData: Arg.Any<JsonNode>(),
+			cancellationToken: Arg.Any<CancellationToken>());
 
 		_ = fakeFundsDistributedLock
 			.Received(1)
@@ -571,7 +598,7 @@ public class FundTransferInGetServiceUnitTest
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakeService = Substitute.For<IGetService<FundProcessingFundInAddQuery, FundProcessingResult>>();
 		var fakeGameProviderFundInService = Substitute.For<IGetService<GameProviderFundInQuery, GameProviderFundInResult>>();
-		var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 
 		var query = new FundTransferInQuery(
 			GameProviderCode: GameProviderType.AWC_PGS,
@@ -662,7 +689,7 @@ public class FundTransferInGetServiceUnitTest
 			fakeCashServiceClient,
 			fakeService,
 			fakeGameProviderFundInService,
-			fakeGameProviderFundTransferTransactionRepository);
+			fakeClient);
 
 		var actual = await sut.GetAsync(query);
 
@@ -679,12 +706,16 @@ public class FundTransferInGetServiceUnitTest
 			Arg.Is(query.GameProviderCode),
 			Arg.Is(query.PlayerCode));
 
-		_ = fakeGameProviderFundTransferTransactionRepository
+		_ = fakeClient
 			.Received(1)
-			.UpdateBySuccessAsync(
-			 Arg.Is(fundProcessingResult.FundTransactionId),
-			 Arg.Is(transactionResponse.TransactionId),
-			 Arg.Is(transactionResponse.Balance));
+			.GameFundTransferUpdateBySuccessAsync(
+			id: Arg.Is(fundProcessingResult.FundTransactionId),
+			cashRespTransactionId: Arg.Is(transactionResponse.TransactionId),
+			gameRespTransactionId: Arg.Is(gameProviderFundInResult.GameRespTransactionId),
+			mainWalletBalance: Arg.Is(transactionResponse.Balance),
+			description: Arg.Any<string>(),
+			additionalData: Arg.Any<JsonNode>(),
+			cancellationToken: Arg.Any<CancellationToken>());
 
 		_ = fakeFundsDistributedLock
 			.Received(1)
@@ -704,7 +735,7 @@ public class FundTransferInGetServiceUnitTest
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakeService = Substitute.For<IGetService<FundProcessingFundInAddQuery, FundProcessingResult>>();
 		var fakeGameProviderFundInService = Substitute.For<IGetService<GameProviderFundInQuery, GameProviderFundInResult>>();
-		var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 
 		var query = new FundTransferInQuery(
 			GameProviderCode: GameProviderType.AWC_PGS,
@@ -796,7 +827,7 @@ public class FundTransferInGetServiceUnitTest
 			fakeCashServiceClient,
 			fakeService,
 			fakeGameProviderFundInService,
-			fakeGameProviderFundTransferTransactionRepository);
+			fakeClient);
 
 		var actual = await sut.GetAsync(query);
 
@@ -813,12 +844,16 @@ public class FundTransferInGetServiceUnitTest
 			Arg.Is(query.GameProviderCode),
 			Arg.Is(query.PlayerCode));
 
-		_ = fakeGameProviderFundTransferTransactionRepository
+		_ = fakeClient
 			.Received(1)
-			.UpdateBySuccessAsync(
-			 Arg.Is(fundProcessingResult.FundTransactionId),
-			 Arg.Is(transactionResponse.TransactionId),
-			 Arg.Is(transactionResponse.Balance));
+			.GameFundTransferUpdateBySuccessAsync(
+			id: Arg.Is(fundProcessingResult.FundTransactionId),
+			cashRespTransactionId: Arg.Is(transactionResponse.TransactionId),
+			gameRespTransactionId: Arg.Is(gameProviderFundInResult.GameRespTransactionId),
+			mainWalletBalance: Arg.Is(transactionResponse.Balance),
+			description: Arg.Any<string>(),
+			additionalData: Arg.Any<JsonNode>(),
+			cancellationToken: Arg.Any<CancellationToken>());
 
 		_ = fakeFundsDistributedLock
 			.Received(1)
@@ -838,7 +873,7 @@ public class FundTransferInGetServiceUnitTest
 		var fakeCashServiceClient = Substitute.For<ICashServiceClient>();
 		var fakeService = Substitute.For<IGetService<FundProcessingFundInAddQuery, FundProcessingResult>>();
 		var fakeGameProviderFundInService = Substitute.For<IGetService<GameProviderFundInQuery, GameProviderFundInResult>>();
-		var fakeGameProviderFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 
 		var query = new FundTransferInQuery(
 			GameProviderCode: GameProviderType.Kaiyuan,
@@ -884,7 +919,7 @@ public class FundTransferInGetServiceUnitTest
 			fakeCashServiceClient,
 			fakeService,
 			fakeGameProviderFundInService,
-			fakeGameProviderFundTransferTransactionRepository);
+			fakeClient);
 
 		_ = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => sut.GetAsync(query).AsTask());
 

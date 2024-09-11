@@ -11,9 +11,10 @@
     <PackageReference Include="PhoenixToolkits.MessageQueue.Nats" Version="2.2.0" />
     <PackageReference Include="Polly" Version="8.4.1" />
     <PackageReference Include="Snowflake.Core" Version="2.0.0" />
-    <PackageReference Include="StackExchange.Redis" Version="2.8.12" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
     <PackageReference Include="Tgs.CashService.Client" Version="0.2.9" />
     <PackageReference Include="Tgs.GameCurrency.Client" Version="1.0.2" />
+    <PackageReference Include="Tgs.GameFund.Client" Version="0.0.4" />
     <PackageReference Include="Tgs.GameFund.Tracker.Client" Version="1.0.0" />
     <PackageReference Include="Tgs.GameInterface.SabaService.Client" Version="1.0.5" />
     <PackageReference Include="Tgs.GamePlayerOnline.Client" Version="1.0.0" />

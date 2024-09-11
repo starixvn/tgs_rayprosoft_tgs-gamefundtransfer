@@ -25,7 +25,8 @@ data:
         "GameCurrencyClientBaseUrl": "http://game-gamecurrency",
         "GameInterfaceSabaClientBaseUrl": "http://game-gameinterface-saba-service:9090",
         "GamePlayerOnlineClientBaseUrl": "http://game-gameplayeronline",
-        "GameFundTrackerClientBaseUrl": "http://game-gamefund-tracker"
+        "GameFundTrackerClientBaseUrl": "http://game-gamefund-tracker",
+        "GameFundClientBaseUrl": "http://game-gamefund/"
       },
       "FundsLockedSetting": {
         "LockSeconds": 60

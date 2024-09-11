@@ -6,6 +6,7 @@ using Tgs.GameFundTransfer.Core.ApplicationServices;
 using Tgs.GameProviders.Domains;
 
 namespace Tgs.GameFundTransfer.Core.UnitTest.ApplicationServices;
+
 public class FundTransferTrackerCommandServiceUnitTest
 {
 	[Fact]
