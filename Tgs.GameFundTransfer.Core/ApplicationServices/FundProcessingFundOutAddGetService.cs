@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
+using Tgs.GameFund.Client;
 using Tgs.GameFundTransfer.Common.Enums;
 
 using Tgs.SerialNumberGenerator;
@@ -14,12 +15,12 @@ internal class FundProcessingFundOutAddGetService(
 	IPlayerRepository playerRepository,
 	IGameProviderRepository gameProviderRepository,
 	IGameProviderTransactionIdUtensil gameProviderTransactionIdUtensil,
-	IFundTransferTransactionRepository fundTransferTransactionRepository,
+	IGameFundClient client,
 	IMessageSender messageSender) : IGetService<FundProcessingFundOutAddQuery, FundProcessingResult>
 {
 	public async ValueTask<FundProcessingResult> GetAsync(FundProcessingFundOutAddQuery query, CancellationToken cancellationToken = default)
 	{
-		var gameProviderFundTransferTransactionId = await serialNumberGenerator.GenerateAsync(
+		var fundTransactionId = await serialNumberGenerator.GenerateAsync(
 			cancellationToken: cancellationToken)
 			.ConfigureAwait(false);
 
@@ -44,20 +45,20 @@ internal class FundProcessingFundOutAddGetService(
 			var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.TPhere => await gameProviderTransactionIdUtensil.GetTPhereTxnIdAsync(true, cancellationToken).ConfigureAwait(false),
 			var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.V8Poker => await gameProviderTransactionIdUtensil.GetV8PokerTxnIdAsync(query.PlayerCode, cancellationToken).ConfigureAwait(false),
 			var gameProviderCode when gameProviderCode == GameProviders.Domains.GameProviderType.YeeBet => (await gameProviderTransactionIdUtensil.GetYeeBetTxnIdAsync(cancellationToken).ConfigureAwait(false)).ToString(),
-			_ => await gameProviderTransactionIdUtensil.GetTxnIdAsync(gameProviderFundTransferTransactionId, cancellationToken).ConfigureAwait(false),
+			_ => await gameProviderTransactionIdUtensil.GetTxnIdAsync(fundTransactionId, cancellationToken).ConfigureAwait(false),
 		};
 
 		try
 		{
-			await fundTransferTransactionRepository.AddProcessingAsync(
-				gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
+			var gameFundTransferInfo = await client.GameFundTransferAddFundOutAsync(
+				id: fundTransactionId,
 				gameProviderId: gameProviderInfo.GameProviderId,
 				walletId: playerInfo.WalletId,
-				gameProviderTransactionId: gameTransactionId,
 				playerCode: playerInfo.PlayerCode,
-				fundSource: FundSource.FundOut,
-				fromWallet: WalletDef.MainWallet,
-				toWallet: gameProviderInfo.GameProviderCode,
+				walletFrom: WalletDef.MainWallet,
+				walletTo: gameProviderInfo.GameProviderCode,
+				cashTransactionId: fundTransactionId.ToString(),
+				gameTransactionId: gameTransactionId,
 				amount: query.Amount,
 				cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
@@ -72,9 +73,9 @@ internal class FundProcessingFundOutAddGetService(
 					["Username"] = playerInfo.Username,
 					["GameProviderId"] = gameProviderInfo.GameProviderId,
 					["GameProviderCode"] = gameProviderInfo.GameProviderCode,
-					["GameProviderFundTransferTransactionId"] = gameProviderFundTransferTransactionId,
-					["CashTransactionId"] = gameProviderFundTransferTransactionId.ToString(),
-					["GameTransactionId"] = gameTransactionId,
+					["FundTransactionId"] = gameFundTransferInfo.Id,
+					["CashTransactionId"] = gameFundTransferInfo.CashTransactionId,
+					["GameTransactionId"] = gameFundTransferInfo.GameTransactionId,
 					["Mesaage"] = "This fund transaction order was created successfully.",
 				}.ToJsonString());
 
@@ -85,9 +86,9 @@ internal class FundProcessingFundOutAddGetService(
 				Username: playerInfo.Username,
 				GameProviderId: gameProviderInfo.GameProviderId,
 				GameProviderCode: gameProviderInfo.GameProviderCode,
-				FundTransactionId: gameProviderFundTransferTransactionId,
-				CashTransactionId: gameProviderFundTransferTransactionId.ToString(),
-				GameTransactionId: gameTransactionId);
+				FundTransactionId: gameFundTransferInfo.Id,
+				CashTransactionId: gameFundTransferInfo.CashTransactionId,
+				GameTransactionId: gameFundTransferInfo.GameTransactionId);
 		}
 		catch (Exception ex)
 		{
@@ -101,10 +102,10 @@ internal class FundProcessingFundOutAddGetService(
 					["Username"] = playerInfo.Username,
 					["GameProviderId"] = gameProviderInfo.GameProviderId,
 					["GameProviderCode"] = gameProviderInfo.GameProviderCode,
-					["GameProviderFundTransferTransactionId"] = gameProviderFundTransferTransactionId,
-					["CashTransactionId"] = gameProviderFundTransferTransactionId.ToString(),
+					["FundTransactionId"] = fundTransactionId,
+					["CashTransactionId"] = fundTransactionId.ToString(),
 					["GameTransactionId"] = gameTransactionId,
-					["Mesaage"] = "An exception occurred when creating this funds transaction order.",
+					["Mesaage"] = "An exception occurred when creating this funds transaction order."
 				}.ToJsonString());
 			throw;
 		}

@@ -1,5 +1,8 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
+using Tgs.GameFund.Client;
+using Tgs.GameFund.Common.Enums;
+using Tgs.GameFund.Common.ViewModels;
 using Tgs.GameFundTransfer.Common.Enums;
 using Tgs.GameFundTransfer.Core.ApplicationServices;
 using Tgs.GameProviders.Domains;
@@ -18,7 +21,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 		var fakeGameProviderTransactionIdUtensil = Substitute.For<IGameProviderTransactionIdUtensil>();
-		var fakeFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 
 		var query = new FundProcessingFundOutAddQuery(
@@ -26,10 +29,10 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			PlayerCode: "4ucmqplxb029",
 			Amount: 10m);
 
-		var gameProviderFundTransferTransactionId = Guid.NewGuid();
+		var fundTransactionId = Guid.NewGuid();
 		_ = fakeSerialNumberGenerator.GenerateAsync(
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderFundTransferTransactionId);
+			.Returns(fundTransactionId);
 
 		var playerInfo = new Models.PlayerInfo(
 			BrandId: Guid.NewGuid(),
@@ -53,11 +56,38 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(gameProviderInfo);
 
-		var gameProviderTransactionId = gameProviderFundTransferTransactionId.ToString("N");
+		var gameTransactionId = fundTransactionId.ToString("N");
 		_ = fakeGameProviderTransactionIdUtensil.GetTxnIdAsync(
-			gameProviderFundTransferTransactionId: Arg.Is(gameProviderFundTransferTransactionId),
+			gameProviderFundTransferTransactionId: Arg.Is(fundTransactionId),
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderTransactionId);
+			.Returns(gameTransactionId);
+
+		var gameFundTransferInfo = new GameFundTransferInfoViewModel(
+			Id: fundTransactionId,
+			GameProviderId: gameProviderInfo.GameProviderId,
+			WalletId: playerInfo.WalletId,
+			PlayerCode: playerInfo.PlayerCode,
+			WalletFrom: WalletDef.MainWallet,
+			WalletTo: gameProviderInfo.GameProviderCode,
+			Source: GameFundTransferSource.FundOut,
+			Status: GameFundTransferStatus.Processing,
+			CashTransactionId: fundTransactionId.ToString(),
+			GameTransactionId: gameTransactionId,
+			Amount: query.Amount,
+			CreatedOn: DateTimeOffset.UtcNow,
+			UpdatedOn: DateTimeOffset.UtcNow);
+		_ = fakeClient.GameFundTransferAddFundOutAsync(
+			id: Arg.Is(fundTransactionId),
+			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
+			walletId: Arg.Is(playerInfo.WalletId),
+			playerCode: Arg.Is(playerInfo.PlayerCode),
+			walletFrom: Arg.Is(WalletDef.MainWallet),
+			walletTo: Arg.Is(gameProviderInfo.GameProviderCode),
+			cashTransactionId: Arg.Is(fundTransactionId.ToString()),
+			gameTransactionId: Arg.Is(gameTransactionId),
+			amount: Arg.Is(query.Amount),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(gameFundTransferInfo);
 
 		var sut = new FundProcessingFundOutAddGetService(
 			faceLogger,
@@ -65,7 +95,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			fakePlayerRepository,
 			fakeGameProviderRepository,
 			fakeGameProviderTransactionIdUtensil,
-			fakeFundTransferTransactionRepository,
+			fakeClient,
 			fakeMessageSender);
 
 		var actual = await sut.GetAsync(query);
@@ -77,23 +107,9 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
-		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
-
-		_ = fakeFundTransferTransactionRepository
-			.Received(1)
-			.AddProcessingAsync(
-			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
-			walletId: Arg.Is(playerInfo.WalletId),
-			gameProviderTransactionId: Arg.Is(gameProviderTransactionId),
-			playerCode: Arg.Is(playerInfo.PlayerCode),
-			fundSource: Arg.Is(FundSource.FundOut),
-			fromWallet: Arg.Is(WalletDef.MainWallet),
-			toWallet: Arg.Is(gameProviderInfo.GameProviderCode),
-			amount: Arg.Is(query.Amount),
-			cancellationToken: Arg.Any<CancellationToken>());
+		Assert.Equal(fundTransactionId, actual.FundTransactionId);
+		Assert.Equal(fundTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeMessageSender
 			.Received(1)
@@ -119,7 +135,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 		var fakeGameProviderTransactionIdUtensil = Substitute.For<IGameProviderTransactionIdUtensil>();
-		var fakeFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 
 		var query = new FundProcessingFundOutAddQuery(
@@ -127,10 +143,10 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			PlayerCode: "4ucmqplxb029",
 			Amount: 10m);
 
-		var gameProviderFundTransferTransactionId = Guid.NewGuid();
+		var fundTransactionId = Guid.NewGuid();
 		_ = fakeSerialNumberGenerator.GenerateAsync(
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderFundTransferTransactionId);
+			.Returns(fundTransactionId);
 
 		var playerInfo = new Models.PlayerInfo(
 			BrandId: Guid.NewGuid(),
@@ -154,11 +170,38 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(gameProviderInfo);
 
-		var gameProviderTransactionId = "D1716176296";
+		var gameTransactionId = "D1716176296";
 		_ = fakeGameProviderTransactionIdUtensil.GetCards365TxnIdAsync(
 			Deposit: Arg.Is(true),
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderTransactionId);
+			.Returns(gameTransactionId);
+
+		var gameFundTransferInfo = new GameFundTransferInfoViewModel(
+			Id: fundTransactionId,
+			GameProviderId: gameProviderInfo.GameProviderId,
+			WalletId: playerInfo.WalletId,
+			PlayerCode: playerInfo.PlayerCode,
+			WalletFrom: WalletDef.MainWallet,
+			WalletTo: gameProviderInfo.GameProviderCode,
+			Source: GameFundTransferSource.FundOut,
+			Status: GameFundTransferStatus.Processing,
+			CashTransactionId: fundTransactionId.ToString(),
+			GameTransactionId: gameTransactionId,
+			Amount: query.Amount,
+			CreatedOn: DateTimeOffset.UtcNow,
+			UpdatedOn: DateTimeOffset.UtcNow);
+		_ = fakeClient.GameFundTransferAddFundOutAsync(
+			id: Arg.Is(fundTransactionId),
+			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
+			walletId: Arg.Is(playerInfo.WalletId),
+			playerCode: Arg.Is(playerInfo.PlayerCode),
+			walletFrom: Arg.Is(WalletDef.MainWallet),
+			walletTo: Arg.Is(gameProviderInfo.GameProviderCode),
+			cashTransactionId: Arg.Is(fundTransactionId.ToString()),
+			gameTransactionId: Arg.Is(gameTransactionId),
+			amount: Arg.Is(query.Amount),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(gameFundTransferInfo);
 
 		var sut = new FundProcessingFundOutAddGetService(
 			faceLogger,
@@ -166,7 +209,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			fakePlayerRepository,
 			fakeGameProviderRepository,
 			fakeGameProviderTransactionIdUtensil,
-			fakeFundTransferTransactionRepository,
+			fakeClient,
 			fakeMessageSender);
 
 		var actual = await sut.GetAsync(query);
@@ -178,23 +221,9 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
-		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
-
-		_ = fakeFundTransferTransactionRepository
-			.Received(1)
-			.AddProcessingAsync(
-			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
-			walletId: Arg.Is(playerInfo.WalletId),
-			gameProviderTransactionId: Arg.Is(gameProviderTransactionId),
-			playerCode: Arg.Is(playerInfo.PlayerCode),
-			fundSource: Arg.Is(FundSource.FundOut),
-			fromWallet: Arg.Is(WalletDef.MainWallet),
-			toWallet: Arg.Is(gameProviderInfo.GameProviderCode),
-			amount: Arg.Is(query.Amount),
-			cancellationToken: Arg.Any<CancellationToken>());
+		Assert.Equal(fundTransactionId, actual.FundTransactionId);
+		Assert.Equal(fundTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeMessageSender
 			.Received(1)
@@ -220,7 +249,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 		var fakeGameProviderTransactionIdUtensil = Substitute.For<IGameProviderTransactionIdUtensil>();
-		var fakeFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 
 		var query = new FundProcessingFundOutAddQuery(
@@ -228,10 +257,10 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			PlayerCode: "4ucmqplxb029",
 			Amount: 10m);
 
-		var gameProviderFundTransferTransactionId = Guid.NewGuid();
+		var fundTransactionId = Guid.NewGuid();
 		_ = fakeSerialNumberGenerator.GenerateAsync(
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderFundTransferTransactionId);
+			.Returns(fundTransactionId);
 
 		var playerInfo = new Models.PlayerInfo(
 			BrandId: Guid.NewGuid(),
@@ -255,11 +284,38 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(gameProviderInfo);
 
-		var gameProviderTransactionId = "D1716176296";
+		var gameTransactionId = "D1716176296";
 		_ = fakeGameProviderTransactionIdUtensil.GetFaChaiTxnIdAsync(
 			Deposit: Arg.Is(true),
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderTransactionId);
+			.Returns(gameTransactionId);
+
+		var gameFundTransferInfo = new GameFundTransferInfoViewModel(
+			Id: fundTransactionId,
+			GameProviderId: gameProviderInfo.GameProviderId,
+			WalletId: playerInfo.WalletId,
+			PlayerCode: playerInfo.PlayerCode,
+			WalletFrom: WalletDef.MainWallet,
+			WalletTo: gameProviderInfo.GameProviderCode,
+			Source: GameFundTransferSource.FundOut,
+			Status: GameFundTransferStatus.Processing,
+			CashTransactionId: fundTransactionId.ToString(),
+			GameTransactionId: gameTransactionId,
+			Amount: query.Amount,
+			CreatedOn: DateTimeOffset.UtcNow,
+			UpdatedOn: DateTimeOffset.UtcNow);
+		_ = fakeClient.GameFundTransferAddFundOutAsync(
+			id: Arg.Is(fundTransactionId),
+			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
+			walletId: Arg.Is(playerInfo.WalletId),
+			playerCode: Arg.Is(playerInfo.PlayerCode),
+			walletFrom: Arg.Is(WalletDef.MainWallet),
+			walletTo: Arg.Is(gameProviderInfo.GameProviderCode),
+			cashTransactionId: Arg.Is(fundTransactionId.ToString()),
+			gameTransactionId: Arg.Is(gameTransactionId),
+			amount: Arg.Is(query.Amount),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(gameFundTransferInfo);
 
 		var sut = new FundProcessingFundOutAddGetService(
 			faceLogger,
@@ -267,7 +323,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			fakePlayerRepository,
 			fakeGameProviderRepository,
 			fakeGameProviderTransactionIdUtensil,
-			fakeFundTransferTransactionRepository,
+			fakeClient,
 			fakeMessageSender);
 
 		var actual = await sut.GetAsync(query);
@@ -279,23 +335,9 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
-		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
-
-		_ = fakeFundTransferTransactionRepository
-			.Received(1)
-			.AddProcessingAsync(
-			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
-			walletId: Arg.Is(playerInfo.WalletId),
-			gameProviderTransactionId: Arg.Is(gameProviderTransactionId),
-			playerCode: Arg.Is(playerInfo.PlayerCode),
-			fundSource: Arg.Is(FundSource.FundOut),
-			fromWallet: Arg.Is(WalletDef.MainWallet),
-			toWallet: Arg.Is(gameProviderInfo.GameProviderCode),
-			amount: Arg.Is(query.Amount),
-			cancellationToken: Arg.Any<CancellationToken>());
+		Assert.Equal(fundTransactionId, actual.FundTransactionId);
+		Assert.Equal(fundTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeMessageSender
 			.Received(1)
@@ -321,7 +363,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 		var fakeGameProviderTransactionIdUtensil = Substitute.For<IGameProviderTransactionIdUtensil>();
-		var fakeFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 
 		var query = new FundProcessingFundOutAddQuery(
@@ -329,10 +371,10 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			PlayerCode: "4ucmqplxb029",
 			Amount: 10m);
 
-		var gameProviderFundTransferTransactionId = Guid.NewGuid();
+		var fundTransactionId = Guid.NewGuid();
 		_ = fakeSerialNumberGenerator.GenerateAsync(
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderFundTransferTransactionId);
+			.Returns(fundTransactionId);
 
 		var playerInfo = new Models.PlayerInfo(
 			BrandId: Guid.NewGuid(),
@@ -356,11 +398,38 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(gameProviderInfo);
 
-		var gameProviderTransactionId = "60073202405200607050004ucmqplxb029";
+		var gameTransactionId = "60073202405200607050004ucmqplxb029";
 		_ = fakeGameProviderTransactionIdUtensil.GetGKXGamingTxnIdAsync(
 			playerCode: Arg.Is(query.PlayerCode),
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderTransactionId);
+			.Returns(gameTransactionId);
+
+		var gameFundTransferInfo = new GameFundTransferInfoViewModel(
+			Id: fundTransactionId,
+			GameProviderId: gameProviderInfo.GameProviderId,
+			WalletId: playerInfo.WalletId,
+			PlayerCode: playerInfo.PlayerCode,
+			WalletFrom: WalletDef.MainWallet,
+			WalletTo: gameProviderInfo.GameProviderCode,
+			Source: GameFundTransferSource.FundOut,
+			Status: GameFundTransferStatus.Processing,
+			CashTransactionId: fundTransactionId.ToString(),
+			GameTransactionId: gameTransactionId,
+			Amount: query.Amount,
+			CreatedOn: DateTimeOffset.UtcNow,
+			UpdatedOn: DateTimeOffset.UtcNow);
+		_ = fakeClient.GameFundTransferAddFundOutAsync(
+			id: Arg.Is(fundTransactionId),
+			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
+			walletId: Arg.Is(playerInfo.WalletId),
+			playerCode: Arg.Is(playerInfo.PlayerCode),
+			walletFrom: Arg.Is(WalletDef.MainWallet),
+			walletTo: Arg.Is(gameProviderInfo.GameProviderCode),
+			cashTransactionId: Arg.Is(fundTransactionId.ToString()),
+			gameTransactionId: Arg.Is(gameTransactionId),
+			amount: Arg.Is(query.Amount),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(gameFundTransferInfo);
 
 		var sut = new FundProcessingFundOutAddGetService(
 			faceLogger,
@@ -368,7 +437,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			fakePlayerRepository,
 			fakeGameProviderRepository,
 			fakeGameProviderTransactionIdUtensil,
-			fakeFundTransferTransactionRepository,
+			fakeClient,
 			fakeMessageSender);
 
 		var actual = await sut.GetAsync(query);
@@ -380,23 +449,9 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
-		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
-
-		_ = fakeFundTransferTransactionRepository
-			.Received(1)
-			.AddProcessingAsync(
-			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
-			walletId: Arg.Is(playerInfo.WalletId),
-			gameProviderTransactionId: Arg.Is(gameProviderTransactionId),
-			playerCode: Arg.Is(playerInfo.PlayerCode),
-			fundSource: Arg.Is(FundSource.FundOut),
-			fromWallet: Arg.Is(WalletDef.MainWallet),
-			toWallet: Arg.Is(gameProviderInfo.GameProviderCode),
-			amount: Arg.Is(query.Amount),
-			cancellationToken: Arg.Any<CancellationToken>());
+		Assert.Equal(fundTransactionId, actual.FundTransactionId);
+		Assert.Equal(fundTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeMessageSender
 			.Received(1)
@@ -422,7 +477,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 		var fakeGameProviderTransactionIdUtensil = Substitute.For<IGameProviderTransactionIdUtensil>();
-		var fakeFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 
 		var query = new FundProcessingFundOutAddQuery(
@@ -430,10 +485,10 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			PlayerCode: "4ucmqplxb029",
 			Amount: 10m);
 
-		var gameProviderFundTransferTransactionId = Guid.NewGuid();
+		var fundTransactionId = Guid.NewGuid();
 		_ = fakeSerialNumberGenerator.GenerateAsync(
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderFundTransferTransactionId);
+			.Returns(fundTransactionId);
 
 		var playerInfo = new Models.PlayerInfo(
 			BrandId: Guid.NewGuid(),
@@ -457,11 +512,38 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(gameProviderInfo);
 
-		var gameProviderTransactionId = "60073202405200607050004ucmqplxb029";
+		var gameTransactionId = "60073202405200607050004ucmqplxb029";
 		_ = fakeGameProviderTransactionIdUtensil.GetKaiyuanTxnIdAsync(
 			playerCode: Arg.Is(query.PlayerCode),
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderTransactionId);
+			.Returns(gameTransactionId);
+
+		var gameFundTransferInfo = new GameFundTransferInfoViewModel(
+			Id: fundTransactionId,
+			GameProviderId: gameProviderInfo.GameProviderId,
+			WalletId: playerInfo.WalletId,
+			PlayerCode: playerInfo.PlayerCode,
+			WalletFrom: WalletDef.MainWallet,
+			WalletTo: gameProviderInfo.GameProviderCode,
+			Source: GameFundTransferSource.FundOut,
+			Status: GameFundTransferStatus.Processing,
+			CashTransactionId: fundTransactionId.ToString(),
+			GameTransactionId: gameTransactionId,
+			Amount: query.Amount,
+			CreatedOn: DateTimeOffset.UtcNow,
+			UpdatedOn: DateTimeOffset.UtcNow);
+		_ = fakeClient.GameFundTransferAddFundOutAsync(
+			id: Arg.Is(fundTransactionId),
+			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
+			walletId: Arg.Is(playerInfo.WalletId),
+			playerCode: Arg.Is(playerInfo.PlayerCode),
+			walletFrom: Arg.Is(WalletDef.MainWallet),
+			walletTo: Arg.Is(gameProviderInfo.GameProviderCode),
+			cashTransactionId: Arg.Is(fundTransactionId.ToString()),
+			gameTransactionId: Arg.Is(gameTransactionId),
+			amount: Arg.Is(query.Amount),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(gameFundTransferInfo);
 
 		var sut = new FundProcessingFundOutAddGetService(
 			faceLogger,
@@ -469,7 +551,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			fakePlayerRepository,
 			fakeGameProviderRepository,
 			fakeGameProviderTransactionIdUtensil,
-			fakeFundTransferTransactionRepository,
+			fakeClient,
 			fakeMessageSender);
 
 		var actual = await sut.GetAsync(query);
@@ -481,23 +563,9 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
-		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
-
-		_ = fakeFundTransferTransactionRepository
-			.Received(1)
-			.AddProcessingAsync(
-			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
-			walletId: Arg.Is(playerInfo.WalletId),
-			gameProviderTransactionId: Arg.Is(gameProviderTransactionId),
-			playerCode: Arg.Is(playerInfo.PlayerCode),
-			fundSource: Arg.Is(FundSource.FundOut),
-			fromWallet: Arg.Is(WalletDef.MainWallet),
-			toWallet: Arg.Is(gameProviderInfo.GameProviderCode),
-			amount: Arg.Is(query.Amount),
-			cancellationToken: Arg.Any<CancellationToken>());
+		Assert.Equal(fundTransactionId, actual.FundTransactionId);
+		Assert.Equal(fundTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeMessageSender
 			.Received(1)
@@ -523,7 +591,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 		var fakeGameProviderTransactionIdUtensil = Substitute.For<IGameProviderTransactionIdUtensil>();
-		var fakeFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 
 		var query = new FundProcessingFundOutAddQuery(
@@ -531,10 +599,10 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			PlayerCode: "4ucmqplxb029",
 			Amount: 10m);
 
-		var gameProviderFundTransferTransactionId = Guid.NewGuid();
+		var fundTransactionId = Guid.NewGuid();
 		_ = fakeSerialNumberGenerator.GenerateAsync(
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderFundTransferTransactionId);
+			.Returns(fundTransactionId);
 
 		var playerInfo = new Models.PlayerInfo(
 			BrandId: Guid.NewGuid(),
@@ -558,11 +626,38 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(gameProviderInfo);
 
-		var gameProviderTransactionId = "60073202405200607050004ucmqplxb029";
+		var gameTransactionId = "60073202405200607050004ucmqplxb029";
 		_ = fakeGameProviderTransactionIdUtensil.GetLEGamingTxnIdAsync(
 			playerCode: Arg.Is(query.PlayerCode),
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderTransactionId);
+			.Returns(gameTransactionId);
+
+		var gameFundTransferInfo = new GameFundTransferInfoViewModel(
+			Id: fundTransactionId,
+			GameProviderId: gameProviderInfo.GameProviderId,
+			WalletId: playerInfo.WalletId,
+			PlayerCode: playerInfo.PlayerCode,
+			WalletFrom: WalletDef.MainWallet,
+			WalletTo: gameProviderInfo.GameProviderCode,
+			Source: GameFundTransferSource.FundOut,
+			Status: GameFundTransferStatus.Processing,
+			CashTransactionId: fundTransactionId.ToString(),
+			GameTransactionId: gameTransactionId,
+			Amount: query.Amount,
+			CreatedOn: DateTimeOffset.UtcNow,
+			UpdatedOn: DateTimeOffset.UtcNow);
+		_ = fakeClient.GameFundTransferAddFundOutAsync(
+			id: Arg.Is(fundTransactionId),
+			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
+			walletId: Arg.Is(playerInfo.WalletId),
+			playerCode: Arg.Is(playerInfo.PlayerCode),
+			walletFrom: Arg.Is(WalletDef.MainWallet),
+			walletTo: Arg.Is(gameProviderInfo.GameProviderCode),
+			cashTransactionId: Arg.Is(fundTransactionId.ToString()),
+			gameTransactionId: Arg.Is(gameTransactionId),
+			amount: Arg.Is(query.Amount),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(gameFundTransferInfo);
 
 		var sut = new FundProcessingFundOutAddGetService(
 			faceLogger,
@@ -570,7 +665,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			fakePlayerRepository,
 			fakeGameProviderRepository,
 			fakeGameProviderTransactionIdUtensil,
-			fakeFundTransferTransactionRepository,
+			fakeClient,
 			fakeMessageSender);
 
 		var actual = await sut.GetAsync(query);
@@ -582,23 +677,9 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
-		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
-
-		_ = fakeFundTransferTransactionRepository
-			.Received(1)
-			.AddProcessingAsync(
-			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
-			walletId: Arg.Is(playerInfo.WalletId),
-			gameProviderTransactionId: Arg.Is(gameProviderTransactionId),
-			playerCode: Arg.Is(playerInfo.PlayerCode),
-			fundSource: Arg.Is(FundSource.FundOut),
-			fromWallet: Arg.Is(WalletDef.MainWallet),
-			toWallet: Arg.Is(gameProviderInfo.GameProviderCode),
-			amount: Arg.Is(query.Amount),
-			cancellationToken: Arg.Any<CancellationToken>());
+		Assert.Equal(fundTransactionId, actual.FundTransactionId);
+		Assert.Equal(fundTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeMessageSender
 			.Received(1)
@@ -624,7 +705,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 		var fakeGameProviderTransactionIdUtensil = Substitute.For<IGameProviderTransactionIdUtensil>();
-		var fakeFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 
 		var query = new FundProcessingFundOutAddQuery(
@@ -632,10 +713,10 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			PlayerCode: "4ucmqplxb029",
 			Amount: 10m);
 
-		var gameProviderFundTransferTransactionId = Guid.NewGuid();
+		var fundTransactionId = Guid.NewGuid();
 		_ = fakeSerialNumberGenerator.GenerateAsync(
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderFundTransferTransactionId);
+			.Returns(fundTransactionId);
 
 		var playerInfo = new Models.PlayerInfo(
 			BrandId: Guid.NewGuid(),
@@ -659,11 +740,38 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(gameProviderInfo);
 
-		var gameProviderTransactionId = "D1716176296";
+		var gameTransactionId = "D1716176296";
 		_ = fakeGameProviderTransactionIdUtensil.GetSBOTxnIdAsync(
 			Deposit: Arg.Is(true),
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderTransactionId);
+			.Returns(gameTransactionId);
+
+		var gameFundTransferInfo = new GameFundTransferInfoViewModel(
+			Id: fundTransactionId,
+			GameProviderId: gameProviderInfo.GameProviderId,
+			WalletId: playerInfo.WalletId,
+			PlayerCode: playerInfo.PlayerCode,
+			WalletFrom: WalletDef.MainWallet,
+			WalletTo: gameProviderInfo.GameProviderCode,
+			Source: GameFundTransferSource.FundOut,
+			Status: GameFundTransferStatus.Processing,
+			CashTransactionId: fundTransactionId.ToString(),
+			GameTransactionId: gameTransactionId,
+			Amount: query.Amount,
+			CreatedOn: DateTimeOffset.UtcNow,
+			UpdatedOn: DateTimeOffset.UtcNow);
+		_ = fakeClient.GameFundTransferAddFundOutAsync(
+			id: Arg.Is(fundTransactionId),
+			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
+			walletId: Arg.Is(playerInfo.WalletId),
+			playerCode: Arg.Is(playerInfo.PlayerCode),
+			walletFrom: Arg.Is(WalletDef.MainWallet),
+			walletTo: Arg.Is(gameProviderInfo.GameProviderCode),
+			cashTransactionId: Arg.Is(fundTransactionId.ToString()),
+			gameTransactionId: Arg.Is(gameTransactionId),
+			amount: Arg.Is(query.Amount),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(gameFundTransferInfo);
 
 		var sut = new FundProcessingFundOutAddGetService(
 			faceLogger,
@@ -671,7 +779,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			fakePlayerRepository,
 			fakeGameProviderRepository,
 			fakeGameProviderTransactionIdUtensil,
-			fakeFundTransferTransactionRepository,
+			fakeClient,
 			fakeMessageSender);
 
 		var actual = await sut.GetAsync(query);
@@ -683,23 +791,9 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
-		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
-
-		_ = fakeFundTransferTransactionRepository
-			.Received(1)
-			.AddProcessingAsync(
-			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
-			walletId: Arg.Is(playerInfo.WalletId),
-			gameProviderTransactionId: Arg.Is(gameProviderTransactionId),
-			playerCode: Arg.Is(playerInfo.PlayerCode),
-			fundSource: Arg.Is(FundSource.FundOut),
-			fromWallet: Arg.Is(WalletDef.MainWallet),
-			toWallet: Arg.Is(gameProviderInfo.GameProviderCode),
-			amount: Arg.Is(query.Amount),
-			cancellationToken: Arg.Any<CancellationToken>());
+		Assert.Equal(fundTransactionId, actual.FundTransactionId);
+		Assert.Equal(fundTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeMessageSender
 			.Received(1)
@@ -725,7 +819,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 		var fakeGameProviderTransactionIdUtensil = Substitute.For<IGameProviderTransactionIdUtensil>();
-		var fakeFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 
 		var query = new FundProcessingFundOutAddQuery(
@@ -733,10 +827,10 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			PlayerCode: "4ucmqplxb029",
 			Amount: 10m);
 
-		var gameProviderFundTransferTransactionId = Guid.NewGuid();
+		var fundTransactionId = Guid.NewGuid();
 		_ = fakeSerialNumberGenerator.GenerateAsync(
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderFundTransferTransactionId);
+			.Returns(fundTransactionId);
 
 		var playerInfo = new Models.PlayerInfo(
 			BrandId: Guid.NewGuid(),
@@ -760,11 +854,38 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(gameProviderInfo);
 
-		var gameProviderTransactionId = "D1716176296";
+		var gameTransactionId = "D1716176296";
 		_ = fakeGameProviderTransactionIdUtensil.GetTPhereTxnIdAsync(
 			Deposit: Arg.Is(true),
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderTransactionId);
+			.Returns(gameTransactionId);
+
+		var gameFundTransferInfo = new GameFundTransferInfoViewModel(
+			Id: fundTransactionId,
+			GameProviderId: gameProviderInfo.GameProviderId,
+			WalletId: playerInfo.WalletId,
+			PlayerCode: playerInfo.PlayerCode,
+			WalletFrom: WalletDef.MainWallet,
+			WalletTo: gameProviderInfo.GameProviderCode,
+			Source: GameFundTransferSource.FundOut,
+			Status: GameFundTransferStatus.Processing,
+			CashTransactionId: fundTransactionId.ToString(),
+			GameTransactionId: gameTransactionId,
+			Amount: query.Amount,
+			CreatedOn: DateTimeOffset.UtcNow,
+			UpdatedOn: DateTimeOffset.UtcNow);
+		_ = fakeClient.GameFundTransferAddFundOutAsync(
+			id: Arg.Is(fundTransactionId),
+			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
+			walletId: Arg.Is(playerInfo.WalletId),
+			playerCode: Arg.Is(playerInfo.PlayerCode),
+			walletFrom: Arg.Is(WalletDef.MainWallet),
+			walletTo: Arg.Is(gameProviderInfo.GameProviderCode),
+			cashTransactionId: Arg.Is(fundTransactionId.ToString()),
+			gameTransactionId: Arg.Is(gameTransactionId),
+			amount: Arg.Is(query.Amount),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(gameFundTransferInfo);
 
 		var sut = new FundProcessingFundOutAddGetService(
 			faceLogger,
@@ -772,7 +893,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			fakePlayerRepository,
 			fakeGameProviderRepository,
 			fakeGameProviderTransactionIdUtensil,
-			fakeFundTransferTransactionRepository,
+			fakeClient,
 			fakeMessageSender);
 
 		var actual = await sut.GetAsync(query);
@@ -784,23 +905,9 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
-		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
-
-		_ = fakeFundTransferTransactionRepository
-			.Received(1)
-			.AddProcessingAsync(
-			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
-			walletId: Arg.Is(playerInfo.WalletId),
-			gameProviderTransactionId: Arg.Is(gameProviderTransactionId),
-			playerCode: Arg.Is(playerInfo.PlayerCode),
-			fundSource: Arg.Is(FundSource.FundOut),
-			fromWallet: Arg.Is(WalletDef.MainWallet),
-			toWallet: Arg.Is(gameProviderInfo.GameProviderCode),
-			amount: Arg.Is(query.Amount),
-			cancellationToken: Arg.Any<CancellationToken>());
+		Assert.Equal(fundTransactionId, actual.FundTransactionId);
+		Assert.Equal(fundTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeMessageSender
 			.Received(1)
@@ -826,7 +933,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 		var fakeGameProviderTransactionIdUtensil = Substitute.For<IGameProviderTransactionIdUtensil>();
-		var fakeFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 
 		var query = new FundProcessingFundOutAddQuery(
@@ -834,10 +941,10 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			PlayerCode: "4ucmqplxb029",
 			Amount: 10m);
 
-		var gameProviderFundTransferTransactionId = Guid.NewGuid();
+		var fundTransactionId = Guid.NewGuid();
 		_ = fakeSerialNumberGenerator.GenerateAsync(
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderFundTransferTransactionId);
+			.Returns(fundTransactionId);
 
 		var playerInfo = new Models.PlayerInfo(
 			BrandId: Guid.NewGuid(),
@@ -861,11 +968,38 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(gameProviderInfo);
 
-		var gameProviderTransactionId = "60073202405200607050004ucmqplxb029";
+		var gameTransactionId = "60073202405200607050004ucmqplxb029";
 		_ = fakeGameProviderTransactionIdUtensil.GetV8PokerTxnIdAsync(
 			playerCode: Arg.Is(query.PlayerCode),
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderTransactionId);
+			.Returns(gameTransactionId);
+
+		var gameFundTransferInfo = new GameFundTransferInfoViewModel(
+			Id: fundTransactionId,
+			GameProviderId: gameProviderInfo.GameProviderId,
+			WalletId: playerInfo.WalletId,
+			PlayerCode: playerInfo.PlayerCode,
+			WalletFrom: WalletDef.MainWallet,
+			WalletTo: gameProviderInfo.GameProviderCode,
+			Source: GameFundTransferSource.FundOut,
+			Status: GameFundTransferStatus.Processing,
+			CashTransactionId: fundTransactionId.ToString(),
+			GameTransactionId: gameTransactionId,
+			Amount: query.Amount,
+			CreatedOn: DateTimeOffset.UtcNow,
+			UpdatedOn: DateTimeOffset.UtcNow);
+		_ = fakeClient.GameFundTransferAddFundOutAsync(
+			id: Arg.Is(fundTransactionId),
+			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
+			walletId: Arg.Is(playerInfo.WalletId),
+			playerCode: Arg.Is(playerInfo.PlayerCode),
+			walletFrom: Arg.Is(WalletDef.MainWallet),
+			walletTo: Arg.Is(gameProviderInfo.GameProviderCode),
+			cashTransactionId: Arg.Is(fundTransactionId.ToString()),
+			gameTransactionId: Arg.Is(gameTransactionId),
+			amount: Arg.Is(query.Amount),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(gameFundTransferInfo);
 
 		var sut = new FundProcessingFundOutAddGetService(
 			faceLogger,
@@ -873,7 +1007,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			fakePlayerRepository,
 			fakeGameProviderRepository,
 			fakeGameProviderTransactionIdUtensil,
-			fakeFundTransferTransactionRepository,
+			fakeClient,
 			fakeMessageSender);
 
 		var actual = await sut.GetAsync(query);
@@ -885,23 +1019,9 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
-		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
-
-		_ = fakeFundTransferTransactionRepository
-			.Received(1)
-			.AddProcessingAsync(
-			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
-			walletId: Arg.Is(playerInfo.WalletId),
-			gameProviderTransactionId: Arg.Is(gameProviderTransactionId),
-			playerCode: Arg.Is(playerInfo.PlayerCode),
-			fundSource: Arg.Is(FundSource.FundOut),
-			fromWallet: Arg.Is(WalletDef.MainWallet),
-			toWallet: Arg.Is(gameProviderInfo.GameProviderCode),
-			amount: Arg.Is(query.Amount),
-			cancellationToken: Arg.Any<CancellationToken>());
+		Assert.Equal(fundTransactionId, actual.FundTransactionId);
+		Assert.Equal(fundTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeMessageSender
 			.Received(1)
@@ -942,7 +1062,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		var fakePlayerRepository = Substitute.For<IPlayerRepository>();
 		var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 		var fakeGameProviderTransactionIdUtensil = Substitute.For<IGameProviderTransactionIdUtensil>();
-		var fakeFundTransferTransactionRepository = Substitute.For<IFundTransferTransactionRepository>();
+		var fakeClient = Substitute.For<IGameFundClient>();
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 
 		var query = new FundProcessingFundOutAddQuery(
@@ -950,10 +1070,10 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			PlayerCode: "4ucmqplxb029",
 			Amount: 10m);
 
-		var gameProviderFundTransferTransactionId = Guid.NewGuid();
+		var fundTransactionId = Guid.NewGuid();
 		_ = fakeSerialNumberGenerator.GenerateAsync(
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderFundTransferTransactionId);
+			.Returns(fundTransactionId);
 
 		var playerInfo = new Models.PlayerInfo(
 			BrandId: Guid.NewGuid(),
@@ -977,10 +1097,37 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(gameProviderInfo);
 
-		var gameProviderTransactionId = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+		var gameTransactionId = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 		_ = fakeGameProviderTransactionIdUtensil.GetYeeBetTxnIdAsync(
 			cancellationToken: Arg.Any<CancellationToken>())
-			.Returns(gameProviderTransactionId);
+			.Returns(gameTransactionId);
+
+		var gameFundTransferInfo = new GameFundTransferInfoViewModel(
+			Id: fundTransactionId,
+			GameProviderId: gameProviderInfo.GameProviderId,
+			WalletId: playerInfo.WalletId,
+			PlayerCode: playerInfo.PlayerCode,
+			WalletFrom: WalletDef.MainWallet,
+			WalletTo: gameProviderInfo.GameProviderCode,
+			Source: GameFundTransferSource.FundOut,
+			Status: GameFundTransferStatus.Processing,
+			CashTransactionId: fundTransactionId.ToString(),
+			GameTransactionId: gameTransactionId.ToString(),
+			Amount: query.Amount,
+			CreatedOn: DateTimeOffset.UtcNow,
+			UpdatedOn: DateTimeOffset.UtcNow);
+		_ = fakeClient.GameFundTransferAddFundOutAsync(
+			id: Arg.Is(fundTransactionId),
+			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
+			walletId: Arg.Is(playerInfo.WalletId),
+			playerCode: Arg.Is(playerInfo.PlayerCode),
+			walletFrom: Arg.Is(WalletDef.MainWallet),
+			walletTo: Arg.Is(gameProviderInfo.GameProviderCode),
+			cashTransactionId: Arg.Is(fundTransactionId.ToString()),
+			gameTransactionId: Arg.Is(gameTransactionId.ToString()),
+			amount: Arg.Is(query.Amount),
+			cancellationToken: Arg.Any<CancellationToken>())
+			.Returns(gameFundTransferInfo);
 
 		var sut = new FundProcessingFundOutAddGetService(
 			faceLogger,
@@ -988,7 +1135,7 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 			fakePlayerRepository,
 			fakeGameProviderRepository,
 			fakeGameProviderTransactionIdUtensil,
-			fakeFundTransferTransactionRepository,
+			fakeClient,
 			fakeMessageSender);
 
 		var actual = await sut.GetAsync(query);
@@ -1000,23 +1147,9 @@ public class FundProcessingFundOutAddGetServiceUnitTest
 		Assert.Equal(playerInfo.Username, actual.Username);
 		Assert.Equal(gameProviderInfo.GameProviderId, actual.GameProviderId);
 		Assert.Equal(gameProviderInfo.GameProviderCode, actual.GameProviderCode);
-		Assert.Equal(gameProviderFundTransferTransactionId, actual.FundTransactionId);
-		Assert.Equal(gameProviderFundTransferTransactionId.ToString(), actual.CashTransactionId);
-		Assert.Equal(gameProviderTransactionId.ToString(), actual.GameTransactionId);
-
-		_ = fakeFundTransferTransactionRepository
-			.Received(1)
-			.AddProcessingAsync(
-			gameProviderFundTransferTransactionId: gameProviderFundTransferTransactionId,
-			gameProviderId: Arg.Is(gameProviderInfo.GameProviderId),
-			walletId: Arg.Is(playerInfo.WalletId),
-			gameProviderTransactionId: Arg.Is(gameProviderTransactionId.ToString()),
-			playerCode: Arg.Is(playerInfo.PlayerCode),
-			fundSource: Arg.Is(FundSource.FundOut),
-			fromWallet: Arg.Is(WalletDef.MainWallet),
-			toWallet: Arg.Is(gameProviderInfo.GameProviderCode),
-			amount: Arg.Is(query.Amount),
-			cancellationToken: Arg.Any<CancellationToken>());
+		Assert.Equal(fundTransactionId, actual.FundTransactionId);
+		Assert.Equal(fundTransactionId.ToString(), actual.CashTransactionId);
+		Assert.Equal(gameTransactionId.ToString(), actual.GameTransactionId);
 
 		_ = fakeMessageSender
 			.Received(1)

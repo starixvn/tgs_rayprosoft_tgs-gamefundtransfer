@@ -106,8 +106,12 @@ builder.Services.AddGameFundTransfer(
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
 		http.BaseAddress = config.GetValue<Uri>("GameTransferConnectionStrings:GameFundTrackerClientBaseUrl");
+	}))
+	.AddGameFundClient(httpClientBuilder => httpClientBuilder.ConfigureHttpClient((sp, http) =>
+	{
+		var config = sp.GetRequiredService<IConfiguration>();
+		http.BaseAddress = config.GetValue<Uri>("GameTransferConnectionStrings:GameFundClientBaseUrl");
 	}));
-
 
 builder.Services
 	.AddKeyedSingleton("Nats", (sp, _) => new NatsConnection(NatsOpts.Default with

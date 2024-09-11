@@ -22,8 +22,6 @@ public partial class TgsContext : DbContext
 
     public virtual DbSet<GameProviderConfig> GameProviderConfigs { get; set; }
 
-    public virtual DbSet<GameProviderFundTransferTransaction> GameProviderFundTransferTransactions { get; set; }
-
     public virtual DbSet<Player> Players { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -36,7 +34,6 @@ public partial class TgsContext : DbContext
         modelBuilder.ApplyConfiguration(new Configurations.BrandGameProviderConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.GameProviderConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.GameProviderConfigConfiguration());
-        modelBuilder.ApplyConfiguration(new Configurations.GameProviderFundTransferTransactionConfiguration());
         modelBuilder.ApplyConfiguration(new Configurations.PlayerConfiguration());
         OnModelCreatingPartial(modelBuilder);
     }
