@@ -42,7 +42,7 @@ public class FundBalanceGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(fundBalanceInfo);
 
-		var balanceResult = new ConvertPlatformBalanceResult(
+		var balanceResult = new GameCurrency.Common.ConvertPlatformBalanceResult(
 			ExchangeRate: 1,
 			Balance: 100,
 			FreeBalance: 90,
@@ -220,7 +220,7 @@ public class FundBalanceGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(fundBalanceInfo);
 
-		var balanceResult = new ConvertPlatformBalanceResult(
+		var balanceResult = new GameCurrency.Common.ConvertPlatformBalanceResult(
 			ExchangeRate: 0.001m,
 			Balance: 1m,
 			FreeBalance: 0.1m,
@@ -311,7 +311,7 @@ public class FundBalanceGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(fundBalanceInfo);
 
-		var balanceResult = new ConvertPlatformBalanceResult(
+		var balanceResult = new GameCurrency.Common.ConvertPlatformBalanceResult(
 			ExchangeRate: 1000m,
 			Balance: 10000m,
 			FreeBalance: 100m,
