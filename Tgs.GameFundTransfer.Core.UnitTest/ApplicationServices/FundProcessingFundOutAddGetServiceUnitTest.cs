@@ -3,7 +3,6 @@ using NSubstitute;
 using Tgs.GameFund.Client;
 using Tgs.GameFund.Common.Enums;
 using Tgs.GameFund.Common.ViewModels;
-using Tgs.GameFundTransfer.Common.Enums;
 using Tgs.GameFundTransfer.Core.ApplicationServices;
 using Tgs.GameProviders.Domains;
 using Tgs.SerialNumberGenerator;

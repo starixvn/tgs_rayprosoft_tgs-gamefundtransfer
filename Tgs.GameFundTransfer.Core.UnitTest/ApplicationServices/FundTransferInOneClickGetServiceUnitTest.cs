@@ -52,7 +52,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 			Arg.Is(query.PlayerCode))
 			.Returns(ValueTask.FromResult(gameProviderBalance));
 
-		var convertPlatformBalanceResult = new ConvertPlatformBalanceResult(
+		var convertPlatformBalanceResult = new GameCurrency.Common.ConvertPlatformBalanceResult(
 			ExchangeRate: 1,
 			Balance: gameProviderBalance.Balance,
 			FreeBalance: gameProviderBalance.FreeBalance,
@@ -248,7 +248,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 			playerCode: Arg.Is(query.PlayerCode))
 			.Returns(ValueTask.FromResult(gameProviderBalance));
 
-		var convertPlatformBalanceResult = new ConvertPlatformBalanceResult(
+		var convertPlatformBalanceResult = new GameCurrency.Common.ConvertPlatformBalanceResult(
 			ExchangeRate: 0.001m,
 			Balance: 1,
 			FreeBalance: 0.1m,
@@ -390,7 +390,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 			Arg.Is(query.PlayerCode))
 			.Returns(ValueTask.FromResult(gameProviderBalance));
 
-		var convertPlatformBalanceResult = new ConvertPlatformBalanceResult(
+		var convertPlatformBalanceResult = new GameCurrency.Common.ConvertPlatformBalanceResult(
 			ExchangeRate: 1000m,
 			Balance: 10000,
 			FreeBalance: 100m,
@@ -532,7 +532,7 @@ public class FundTransferInOneClickGetServiceUnitTest
 			Arg.Is(query.PlayerCode))
 			.Returns(ValueTask.FromResult(gameProviderBalance));
 
-		var convertPlatformBalanceResult = new ConvertPlatformBalanceResult(
+		var convertPlatformBalanceResult = new GameCurrency.Common.ConvertPlatformBalanceResult(
 			ExchangeRate: 1,
 			Balance: 10.0m,
 			FreeBalance: 0m,

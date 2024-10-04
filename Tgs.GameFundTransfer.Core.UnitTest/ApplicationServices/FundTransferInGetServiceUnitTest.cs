@@ -195,7 +195,7 @@ public class FundTransferInGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(playerInfo);
 
-		var exchangeRateFundResult = new ConvertGameProviderFundsResult(
+		var exchangeRateFundResult = new GameCurrency.Common.ConvertGameProviderFundsResult(
 			ExchangeRate: 1,
 			Amount: query.Amount);
 		_ = fakeGameCurrencyClient.ConvertGameProviderFundsAsync(
@@ -332,7 +332,7 @@ public class FundTransferInGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(playerInfo);
 
-		var exchangeRateFundResult = new ConvertGameProviderFundsResult(
+		var exchangeRateFundResult = new GameCurrency.Common.ConvertGameProviderFundsResult(
 			ExchangeRate: 1,
 			Amount: query.Amount);
 		_ = fakeGameCurrencyClient.ConvertGameProviderFundsAsync(
@@ -407,7 +407,7 @@ public class FundTransferInGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(playerInfo);
 
-		var exchangeRateFundResult = new ConvertGameProviderFundsResult(
+		var exchangeRateFundResult = new GameCurrency.Common.ConvertGameProviderFundsResult(
 			ExchangeRate: 1,
 			Amount: query.Amount);
 		_ = fakeGameCurrencyClient.ConvertGameProviderFundsAsync(
@@ -479,7 +479,7 @@ public class FundTransferInGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(playerInfo);
 
-		var exchangeRateFundResult = new ConvertGameProviderFundsResult(
+		var exchangeRateFundResult = new GameCurrency.Common.ConvertGameProviderFundsResult(
 			ExchangeRate: 0.001m,
 			Amount: 1000m);
 		_ = fakeGameCurrencyClient.ConvertGameProviderFundsAsync(
@@ -616,7 +616,7 @@ public class FundTransferInGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(playerInfo);
 
-		var exchangeRateFundResult = new ConvertGameProviderFundsResult(
+		var exchangeRateFundResult = new GameCurrency.Common.ConvertGameProviderFundsResult(
 			ExchangeRate: 1000,
 			Amount: 1);
 		_ = fakeGameCurrencyClient.ConvertGameProviderFundsAsync(
@@ -753,7 +753,7 @@ public class FundTransferInGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(playerInfo);
 
-		var exchangeRateFundResult = new ConvertGameProviderFundsResult(
+		var exchangeRateFundResult = new GameCurrency.Common.ConvertGameProviderFundsResult(
 			ExchangeRate: 1000,
 			Amount: 0.001m);
 		_ = fakeGameCurrencyClient.ConvertGameProviderFundsAsync(
@@ -891,7 +891,7 @@ public class FundTransferInGetServiceUnitTest
 			cancellationToken: Arg.Any<CancellationToken>())
 			.Returns(playerInfo);
 
-		var exchangeRateFundResult = new ConvertGameProviderFundsResult(
+		var exchangeRateFundResult = new GameCurrency.Common.ConvertGameProviderFundsResult(
 			ExchangeRate: 1,
 			Amount: query.Amount);
 		_ = fakeGameCurrencyClient.ConvertGameProviderFundsAsync(

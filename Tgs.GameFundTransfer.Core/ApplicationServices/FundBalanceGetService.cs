@@ -36,7 +36,7 @@ internal class FundBalanceGetService(
 			},
 			cancellationToken: cancellationToken).ConfigureAwait(false);
 
-		ConvertPlatformBalanceResult balanceResult = new ConvertPlatformBalanceResult(
+		var balanceResult = new GameCurrency.Common.ConvertPlatformBalanceResult(
 			ExchangeRate: 1,
 			Balance: 0.0m,
 			FreeBalance: 0.0m,
