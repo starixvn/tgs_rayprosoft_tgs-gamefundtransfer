@@ -8,6 +8,7 @@ using NATS.Client.Core;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Tgs.GameFundTransfer;
 using Tgs.GameFundTransfer.Core;
 using Tgs.GameFundTransfer.DocumentFilters;
 using Tgs.GameFundTransfer.Messages;
@@ -54,39 +55,34 @@ builder.Services.AddSwaggerGen(c =>
 	c.DocumentFilter<HiddenDocumentFilter>();
 });
 
-builder.Services.AddGameFundTransfer(
-	(options, sp) =>
+builder.Services
+	.AddOptions<RedisOptions>()
+	.Configure((RedisOptions options, IServiceProvider sp) =>
 	{
 		var configuration = sp.GetRequiredService<IConfiguration>();
 		options.ConnectionString = configuration.GetConnectionString("Redis")!;
-	},
-	(sp, dbBuilder) =>
-	{
-		var config = sp.GetRequiredService<IConfiguration>();
-
-		_ = dbBuilder.UseNpgsql(
-			config.GetConnectionString("Tgs"));
-	},
-	(options, sp) =>
+	})
+	.Services
+	.AddOptions<FundsLockedOptions>()
+	.Configure((FundsLockedOptions options, IServiceProvider sp) =>
 	{
 		var configuration = sp.GetRequiredService<IConfiguration>();
 		configuration.GetSection("LockSeconds").Bind(options);
-	},
-	(options, sp) =>
-	{
-		var configuration = sp.GetRequiredService<IConfiguration>();
-		options.BaseUrl = configuration.GetValue<Uri>("GameTransferConnectionStrings:CashServiceClientBaseUrl")!;
-	},
-	(options, sp) =>
-	{
-		var configuration = sp.GetRequiredService<IConfiguration>();
-		options.BaseUrl = configuration.GetValue<Uri>("GameTransferConnectionStrings:GameInterfaceSabaClientBaseUrl")!;
 	})
+	.Services
 	.AddOptions<IPAddressOptions>()
 	.Configure((options) => options.IPAddress = builder.Configuration.GetSection("POD_IP").Value
 	?? Dns.GetHostEntry(Dns.GetHostName()).AddressList.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork).FirstOrDefault()?.ToString()
 	?? "127.0.0.1")
 	.Services
+	.AddMemoryCache()
+	.AddSingleton(TimeProvider.System)
+	.AddSingleton<RedisConnectionManager>()
+	.AddCashServiceClient((options, sp) =>
+	{
+		var configuration = sp.GetRequiredService<IConfiguration>();
+		options.BaseUrl = configuration.GetValue<Uri>("GameTransferConnectionStrings:CashServiceClientBaseUrl")!;
+	})
 	.AddGameProvidersClient((options, sp) =>
 	{
 		var configuration = sp.GetRequiredService<IConfiguration>();
@@ -111,7 +107,15 @@ builder.Services.AddGameFundTransfer(
 	{
 		var config = sp.GetRequiredService<IConfiguration>();
 		http.BaseAddress = config.GetValue<Uri>("GameTransferConnectionStrings:GameFundClientBaseUrl");
-	}));
+	}))
+	.AddGameTransferCore()
+	.AddGameTransferRepository(
+	efConfigure: (sp, dbBuilder) =>
+	{
+		var config = sp.GetRequiredService<IConfiguration>();
+		_ = dbBuilder.UseNpgsql(config.GetConnectionString("Tgs"));
+	},
+	redisDatabaseResolver: (sp) => sp.GetRequiredService<RedisConnectionManager>().Database);
 
 builder.Services
 	.AddKeyedSingleton("Nats", (sp, _) => new NatsConnection(NatsOpts.Default with
@@ -169,9 +173,7 @@ var app = builder.Build();
 _ = app.UseSwagger();
 _ = app.UseSwaggerUI();
 
-_ = app.UseAuthorization();
-
-_ = app.MapControllers();
+app.MapControllers();
 
 app.MapHealthChecks("/healthz");
 

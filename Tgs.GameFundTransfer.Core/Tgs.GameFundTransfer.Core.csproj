@@ -16,7 +16,6 @@
     <PackageReference Include="Tgs.GameCurrency.Client" Version="8.0.1" />
     <PackageReference Include="Tgs.GameFund.Client" Version="8.0.1" />
     <PackageReference Include="Tgs.GameFund.Tracker.Client" Version="8.0.1" />
-    <PackageReference Include="Tgs.GameInterface.SabaService.Client" Version="1.0.5" />
     <PackageReference Include="Tgs.GamePlayerOnline.Client" Version="8.0.1" />
     <PackageReference Include="TGS.GameProviders.Client" Version="8.0.1" />
     <PackageReference Include="Tgs.MessageQueue.Nats.Serializers" Version="0.0.2" />

@@ -1,9 +1,9 @@
-﻿using System.Net.Http;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Tgs.GameFundTransfer.Client;
+
 internal class GameFundTransferClient(HttpClient httpClient) : IGameFundTransferClient
 {
 	private static readonly JsonSerializerOptions? _SerializerOptions = new()
@@ -14,6 +14,7 @@ internal class GameFundTransferClient(HttpClient httpClient) : IGameFundTransfer
 			new JsonStringEnumConverter()
 		}
 	};
+
 	public async ValueTask<Common.ViewModels.FundTransferBalanceResultViewModel> FundTransferBalanceAsync(string playerCode, string gameProviderCode, CancellationToken cancellationToken = default)
 	{
 		var response = await httpClient.GetAsync(
