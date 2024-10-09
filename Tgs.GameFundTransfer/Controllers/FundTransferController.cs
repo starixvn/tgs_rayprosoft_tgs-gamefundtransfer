@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Tgs.GameFundTransfer.Common.ViewModels;
 using Tgs.GameFundTransfer.Core.ApplicationServices;
-using Tgs.GameFundTransfer.ViewModels;
-using Tgs.GameInterface.SabaService.Client;
-using Tgs.GameInterface.SabaService.Protos;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameFundTransfer.Controllers;
@@ -53,8 +50,8 @@ public class FundTransferController : ControllerBase
 	[HttpPost(template: "{playerCode}/{gameProviderCode}/in-one-click", Name = "FundTransfer_InOneClick")]
 	public async ValueTask<FundTransferResultViewModel> FundTransferInOneClickAsync(
 		[FromServices] IGetService<FundTransferInOneClickQuery, FundTransferResult> service,
-		string playerCode = "4ucmqplxb029",
-		string gameProviderCode = "CQ9")
+		string playerCode,
+		string gameProviderCode)
 	{
 		var result = await service.GetAsync(
 			query: new FundTransferInOneClickQuery(
@@ -112,8 +109,8 @@ public class FundTransferController : ControllerBase
 	[HttpGet(template: "{playerCode}/{gameProviderCode}/balance", Name = "FundTransfer_Balance")]
 	public async ValueTask<FundTransferBalanceResultViewModel> FundTransferBalanceAsync(
 		[FromServices] IGetService<FundBalanceQuery, FundBalanceResult> service,
-		string playerCode = "4ucmqplxb029",
-		string gameProviderCode = "CQ9")
+		string playerCode,
+		string gameProviderCode)
 	{
 		var result = await service.GetAsync(
 			query: new FundBalanceQuery(
@@ -127,37 +124,4 @@ public class FundTransferController : ControllerBase
 			result.FreeBalance,
 			result.OutstandingBalance);
 	}
-
-	/// <summary>
-	/// Funds the transfer saba status asynchronous.
-	/// </summary>
-	/// <param name="client">The client.</param>
-	/// <param name="source">The source.</param>
-	/// <returns></returns>
-	/// <remarks>
-	/// <b>Example</b><br />
-	///
-	///     我方訂單號:32fd88b0-8401-0000-0001-0000010a3742
-	///     遊戲廠商訂單號:tg_32fd88b08401000000010000010a3742
-	///     OrderId:32fd88b08401000000010000010a3742
-	///
-	///     Post
-	///
-	///         {
-	///             "apiUrl": "http://h0i2tsa.bw6688.com/",
-	///             "operatorId": "tg",
-	///             "vendorId": "um5vspnzkx",
-	///             "orderId": "32fd88b08401000000010000010a3742"
-	///         }
-	/// </remarks>
-	[HttpPost("saba/status", Name = "FundTransfer_Saba_Status")]
-	public ValueTask<FundStatusReply> FundTransferSabaStatusAsync(
-		[FromServices] IGameInterfaceSabaClient client,
-		FundTransferSabaStatusViewModel source)
-		=> client.FundStatusAsync(
-			apiUrl: source.ApiUrl,
-			operatorId: source.OperatorId,
-			vendorId: source.VendorId,
-			orderId: source.OrderId,
-			cancellationToken: HttpContext.RequestAborted);
 }
